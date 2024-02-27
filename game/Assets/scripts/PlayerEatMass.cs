@@ -7,8 +7,7 @@ public class PlayerEatMass : MonoBehaviour
 
     public GameObject[] Mass;
 
-    public void UpdateMass()
-    {
+    public void UpdateMass() {
         Mass = GameObject.FindGameObjectsWithTag("Mass");
     }
 
@@ -16,14 +15,16 @@ public class PlayerEatMass : MonoBehaviour
     {
         List<GameObject> MassList = new List<GameObject>();
 
-        for (int i = 0; i < Mass.Length; i++)
-        {
+        for (int i = 0; i < Mass.Length; i++) {
             MassList.Add(Mass[i]);
         }
+        
         MassList.Remove(MassObject);
 
         Mass = MassList.ToArray();
     }
+
+
     public void AddMass(GameObject MassObject)
     {
         List<GameObject> MassList = new List<GameObject>();
@@ -56,14 +57,12 @@ public class PlayerEatMass : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
-    {
+    void Start() {
         UpdateMass();
         InvokeRepeating("Check", 0, 0.1f);
     }
 
-    void PlayerEat()
-    {
+    void PlayerEat() {
         transform.localScale += new Vector3(0.05f, 0.05f, 0.05f);
     }
 
