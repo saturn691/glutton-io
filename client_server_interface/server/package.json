@@ -1,12 +1,15 @@
 {
     "devDependencies": {
-        "nodemon": "^2.0.7"
+        "@types/ws": "^8.5.10",
+        "nodemon": "^2.0.22"
     },
     "name": "server",
     "version": "1.0.0",
     "main": "index.js",
+    "type": "module",
     "scripts": {
-        "devStart": "nodemon server.js"
+        "devStart": "nodemon server.js",
+        "dev2": "nodemon server2.js"
     },
     "keywords": [],
     "author": "",
@@ -14,6 +17,8 @@
     "description": "",
     "dependencies": {
         "@socket.io/admin-ui": "^0.5.1",
+        "aws-sdk": "^2.1567.0",
+        "dotenv": "^16.4.5",
         "socket.io": "^4.7.4",
         "ws": "^8.16.0"
     }
