@@ -12,7 +12,7 @@ Run:
 
 ```sudo npm i socket.io```
 
-```sudo npm i $socket.io-ui```
+```sudo npm i @socket.io/admin-ui```
 
 ```npm run devStart```
 
