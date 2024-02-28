@@ -8,87 +8,66 @@ import json
 import math
 import matplotlib.pyplot as plt
 
+SAMPLING_RATE = 3200
 
-# Assume a sampling rate of 500 Hz for the descriptions of the FIR filters.
+# Assume a sampling rate of 3200 Hz for the descriptions of the FIR filters.
 
 # Frequency response characterised by the sinc(x) function, with a null at
-# 1/5, 2/5 of the sampling frequency (100Hz, 200Hz)
+# 1/32, 2/32 of the sampling frequency (100Hz, 200Hz)
 # Note that the rest has been omitted as digital frequencies do not exceed
-# the Nyquist frequency (250Hz). See Signals and Systems for more information.
-FIR1 = [0.2] * 5
+# the Nyquist frequency (1/2 Ts). See Signals and Systems for more information.
+FIR1 = [1/32] * 32
 
 # Specifications:
 #   FrequencyResponse: 'lowpass'
 #     ImpulseResponse: 'fir'
-#          SampleRate: 500
-#      PassbandRipple: 10
-# StopbandAttenuation: 65
+#          SampleRate: 3200
+#      PassbandRipple: 1
+# StopbandAttenuation: 30
 #   PassbandFrequency: 10
-#   StopbandFrequency: 15
-#        DesignMethod: 'equiripple'
+#   StopbandFrequency: 100
+#        DesignMethod: 'kaiserwin'
 FIR2 = [
-    0.0004, 0.0003, 0.0004, 0.0005, 0.0006, 0.0008,
-    0.0009, 0.0011, 0.0013, 0.0016, 0.0018, 0.0021,
-    0.0023, 0.0026, 0.0028, 0.0031, 0.0034, 0.0036,
-    0.0038, 0.0041, 0.0042, 0.0044, 0.0044, 0.0045,
-    0.0044, 0.0044, 0.0042, 0.0040, 0.0037, 0.0033,
-    0.0028, 0.0022, 0.0016, 0.0009, 0.0001, -0.0008,
-    -0.0017, -0.0026, -0.0036, -0.0047, -0.0057, -0.0068,
-    -0.0078, -0.0088, -0.0097, -0.0106, -0.0114, -0.0121,
-    -0.0126, -0.0130, -0.0133, -0.0133, -0.0132, -0.0129,
-    -0.0124, -0.0117, -0.0107, -0.0095, -0.0082, -0.0066,
-    -0.0048, -0.0028, -0.0006, 0.0017, 0.0042, 0.0068,
-    0.0095, 0.0123, 0.0151, 0.0179, 0.0207, 0.0234,
-    0.0261, 0.0287, 0.0311, 0.0333, 0.0354, 0.0372,
-    0.0388, 0.0401, 0.0412, 0.0419, 0.0424, 0.0425,
-    0.0424, 0.0419, 0.0412, 0.0401, 0.0388, 0.0372,
-    0.0354, 0.0333, 0.0311, 0.0287, 0.0261, 0.0234,
-    0.0207, 0.0179, 0.0151, 0.0123, 0.0095, 0.0068,
-    0.0042, 0.0017, -0.0006, -0.0028, -0.0048, -0.0066,
-    -0.0082, -0.0095, -0.0107, -0.0117, -0.0124, -0.0129,
-    -0.0132, -0.0133, -0.0133, -0.0130, -0.0126, -0.0121,
-    -0.0114, -0.0106, -0.0097, -0.0088, -0.0078, -0.0068,
-    -0.0057, -0.0047, -0.0036, -0.0026, -0.0017, -0.0008,
-    0.0001, 0.0009, 0.0016, 0.0022, 0.0028, 0.0033,
-    0.0037, 0.0040, 0.0042, 0.0044, 0.0044, 0.0045,
-    0.0044, 0.0044, 0.0042, 0.0041, 0.0038, 0.0036,
-    0.0034, 0.0031, 0.0028, 0.0026, 0.0023, 0.0021,
-    0.0018, 0.0016, 0.0013, 0.0011, 0.0009, 0.0008,
-    0.0006, 0.0005, 0.0004, 0.0003, 0.0004,
+    0.0005, 0.0011, 0.0018, 0.0027, 0.0036, 0.0046, 0.0058, 0.0071, 0.0085,
+    0.0099, 0.0115, 0.0131, 0.0147, 0.0164, 0.0181, 0.0198, 0.0215, 0.0231,
+    0.0247, 0.0262, 0.0276, 0.0289, 0.0301, 0.0310, 0.0319, 0.0325, 0.0330,
+    0.0333, 0.0334, 0.0333, 0.0330, 0.0325, 0.0319, 0.0310, 0.0301, 0.0289,
+    0.0276, 0.0262, 0.0247, 0.0231, 0.0215, 0.0198, 0.0181, 0.0164, 0.0147,
+    0.0131, 0.0115, 0.0099, 0.0085, 0.0071, 0.0058, 0.0046, 0.0036, 0.0027,
+    0.0018, 0.0011, 0.0005
 ]
 
 # Specifications:
 #   FrequencyResponse: 'lowpass'
 #     ImpulseResponse: 'fir'
-#          SampleRate: 500
-#      PassbandRipple: 10
-# StopbandAttenuation: 65
+#          SampleRate: 3200
+#      PassbandRipple: 1
+# StopbandAttenuation: 20
 #   PassbandFrequency: 10
-#   StopbandFrequency: 50
+#   StopbandFrequency: 70
 #        DesignMethod: 'kaiserwin'
-
 FIR3 = [
-    0.0000, 0.0006, 0.0020, 0.0032, 0.0019, -0.0043,
-    -0.0147, -0.0238, -0.0217, 0.0016, 0.0496, 0.1141,
-    0.1765, 0.2150,
-    0.2150, 0.1765, 0.1141, 0.0496, 0.0016, -0.0217, -0.0238,
-    -0.0147, -0.0043, 0.0019, 0.0032, 0.0020, 0.0006, 0.0000,
+    0.0041, 0.0048, 0.0054, 0.0062, 0.0069, 0.0077, 0.0085, 0.0093, 0.0102,
+    0.0110, 0.0119, 0.0127, 0.0136, 0.0145, 0.0153, 0.0161, 0.0169, 0.0177,
+    0.0185, 0.0192, 0.0199, 0.0205, 0.0211, 0.0217, 0.0222, 0.0226, 0.0230,
+    0.0233, 0.0236, 0.0238, 0.0239, 0.0240, 0.0240, 0.0239, 0.0238, 0.0236,
+    0.0233, 0.0230, 0.0226, 0.0222, 0.0217, 0.0211, 0.0205, 0.0199, 0.0192,
+    0.0185, 0.0177, 0.0169, 0.0161, 0.0153, 0.0145, 0.0136, 0.0127, 0.0119,
+    0.0110, 0.0102, 0.0093, 0.0085, 0.0077, 0.0069, 0.0062, 0.0054, 0.0048,
+    0.0041
 ]
 
 
 class FPGA():
-    def __init__(self) -> None:
+    def __init__(self, fir: list[float]) -> None:
         self.FIXED_POINT_MULTIPLIER = 1024
 
-        # Choose a FIR to test
-        coeffs_float = FIR3
-
-        self.inputs_x = [0] * len(coeffs_float)
-        self.inputs_y = [0] * len(coeffs_float)
+        self.inputs_x = [0] * len(fir)
+        self.inputs_y = [0] * len(fir)
 
         # Use the MATLAB coeffs to get fixed point values
         self.coeffs = [coeffs * self.FIXED_POINT_MULTIPLIER
-                       for coeffs in coeffs_float]
+                       for coeffs in fir]
 
     def __fir_filter(self, input: list[int]) -> int:
         """
@@ -188,7 +167,7 @@ class Controller():
         return (rng == 1)
 
 
-def plot(data, filtered_data, sampling_rate=500):
+def plot(data, sampling_rate, *filtered_data):
     # Adjust the x-axis to be in seconds
     time = [i / sampling_rate for i in range(len(data))]
 
@@ -196,8 +175,11 @@ def plot(data, filtered_data, sampling_rate=500):
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude")
     plt.plot(time, data, color="blue", label="raw data")
-    plt.plot(time, filtered_data, color="red", label="filtered data")
-    plt.xlim(0, max(time) + 0.1)  # Constrain x-axis to start from 0
+
+    for i, filtered in enumerate(filtered_data):
+        plt.plot(time, filtered, label=f"filtered data {i+1}")
+
+    plt.xlim(0, max(time) + 0.01)  # Constrain x-axis to start from 0
     plt.legend()
     plt.show()
 
@@ -205,16 +187,21 @@ def plot(data, filtered_data, sampling_rate=500):
 def main():
     # Ensure the random controller is deterministic
     random.seed(0)
-
     controller = Controller()
-    fpga = FPGA()
+    fpgas = []
+
+    # Add the FIR filters for each FPGA
+    fpgas.append(FPGA(FIR1))
+    fpgas.append(FPGA(FIR2))
+    fpgas.append(FPGA(FIR3))
 
     movement_x = []
-    filtered_x = []
     movement_y = []
-    filtered_y = []
 
-    for _ in range(1000):
+    filtered_data_x = [[] for _ in range(len(fpgas))]
+    filtered_data_y = [[] for _ in range(len(fpgas))]
+
+    for _ in range(SAMPLING_RATE // 2):
         movement = controller.make_random_movement()
 
         movement_x.append(movement[0])
@@ -223,14 +210,15 @@ def main():
         key0 = controller.get_key()
         key1 = controller.get_key()
 
-        output = fpga.output(movement, 0, key0, key1)
+        for i, fpga in enumerate(fpgas):
+            output = fpga.output(movement, 0, key0, key1)
+            output = json.loads(output)
 
-        output = json.loads(output)
-        filtered_x.append(output["accel_x"])
-        filtered_y.append(output["accel_y"])
+            filtered_data_x[i].append(output["accel_x"])
+            filtered_data_y[i].append(output["accel_y"])
 
-    plot(movement_x, filtered_x)
-    plot(movement_y, filtered_y)
+    plot(movement_x, SAMPLING_RATE, *filtered_data_x)
+    plot(movement_y, SAMPLING_RATE, *filtered_data_y)
 
 
 if __name__ == '__main__':

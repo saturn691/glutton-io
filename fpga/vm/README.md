@@ -102,7 +102,18 @@ $ python3 fir_data.py --analyse
 Natural movements stop from 10 Hz. Therefore we attentuate anything after that.
 
 MatLab was used to generate the coefficients. A sampling rate of 3.2 kHz was
-assumed.
+assumed. Any filters with more than 64-taps were not considered. 
 
 ### Testing the FIR filter coefficients
 
+3 FIR filters were considered for this. More information is found in the source
+code.
+
+![fir frequency response](../../images/fpga/fir3.jpg)
+
+The Python script [`fir_tester.py`](fir_tester.py) fetched the time response of the 
+FIR filter. 
+
+![fir time response](../../images/fpga/fir_time_response.png)
+
+As we can allow 10ms of delay, we chose the smoothest filter- FIR3.
