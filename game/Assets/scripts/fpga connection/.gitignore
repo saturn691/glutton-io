@@ -1,0 +1,12 @@
+# For the VM folder
+graphs
+__pycache__/
+
+
+# For the software folder
+bsp/
+obj/
+Makefile
+*.elf
+*.map
+*.objdump
