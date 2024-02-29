@@ -599,3 +599,11 @@ Received Import Request.
 Start importing Assets/scripts/server connection.prefab using Guid(f96c70927e590244488b589f6d5a0f8c) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '6e5b20e90fd03a6c52728674e32444b9') in 0.084018 seconds
 Number of updated asset objects reloaded before import = 0
 Number of asset objects unloaded after import = 7
+========================================================================
+Received Import Request.
+  Time since last request: 452.973103 seconds.
+  path: Assets/Scenes/SampleScene.unity
+  artifactKey: Guid(2cda990e2423bbf4892e6590ba056729) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scenes/SampleScene.unity using Guid(2cda990e2423bbf4892e6590ba056729) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'fe2fa9fc670b6d09edefb38c45af5fec') in 0.001728 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
