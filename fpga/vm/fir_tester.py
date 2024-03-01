@@ -4,7 +4,6 @@ Tester for FIR filters - outputs graphs of the raw and filtered data over time.
 """
 
 import random
-import json
 import math
 import matplotlib.pyplot as plt
 
@@ -59,7 +58,7 @@ FIR3 = [
 
 
 class FPGA():
-    def __init__(self, fir: list[float]) -> None:
+    def __init__(self, fir: list[float] = FIR1) -> None:
         self.FIXED_POINT_MULTIPLIER = 1024
 
         self.inputs_x = [0] * len(fir)
@@ -79,7 +78,10 @@ class FPGA():
 
         return int(total / self.FIXED_POINT_MULTIPLIER)
 
-    def get_reading(self, input: tuple[int, int]) -> tuple[int, int]:
+    def __get_reading(self, input: tuple[int, int]) -> tuple[int, int]:
+        """
+        Simulates the FPGA reading the accelerometer and filtering the data.
+        """
         # Expand the input
         input_x = input[0]
         input_y = input[1]
@@ -98,19 +100,43 @@ class FPGA():
 
         return (reading_x, reading_y)
 
-    def output(
-        self,
-        accel: tuple[int, int],
-        switch: int,
-        key0: bool,
-        key1: bool
-    ) -> str:
-        reading = self.get_reading(accel)
+    def __uart_encode(self, accel_x, accel_y, switch, key0, key1) -> str:
+        """
+        Encodes the data into a hex string to be sent over UART.
 
-        reading_x = reading[0]
-        reading_y = reading[1]
+        10 bits for accel_x, accel_y, switch
+        1 bit for key0, key1
+        Total = 32 bits
+        """
 
-        data = {
+        encoded = (
+            (accel_x & 0x3FF) << 22) | (
+            (accel_y & 0x3FF) << 12) | (
+            (switch & 0x3FF) << 2) | (
+            (key0 & 0x1) << 1) | (key1 & 0x1)
+
+        return hex(encoded)[2:]
+
+    @staticmethod
+    def uart_decode(data: int) -> dict:
+        """
+        Decodes the data from the UART into a JSON-compatible dictionary.
+        """
+        data_in = int(data, 16)
+
+        reading_x = (data_in >> 22) & 0x3FF
+        if reading_x & 0x200:
+            reading_x = -((~reading_x & 0x3FF) + 1)
+
+        reading_y = (data_in >> 12) & 0x3FF
+        if reading_y & 0x200:
+            reading_y = -((~reading_y & 0x3FF) + 1)
+
+        switch = (data_in >> 2) & 0x3FF
+        key0 = (data_in >> 1) & 0x1
+        key1 = data_in & 0x1
+
+        data_object = {
             "accel_x": reading_x,
             "accel_y": reading_y,
             "switch": switch,
@@ -118,9 +144,26 @@ class FPGA():
             "key1": key1
         }
 
-        json_data = json.dumps(data)
+        return data_object
 
-        return json_data
+    def output(
+        self,
+        accel: tuple[int, int],
+        switch: int,
+        key0: bool,
+        key1: bool
+    ) -> str:
+        """
+        The data must be decoded on the other other end to be used.
+        """
+        reading = self.__get_reading(accel)
+
+        reading_x = reading[0]
+        reading_y = reading[1]
+
+        data = self.__uart_encode(reading_x, reading_y, switch, key0, key1)
+
+        return data
 
 
 class Controller():
@@ -135,10 +178,16 @@ class Controller():
         self.sample_count = 0
 
     def make_random_movement(self):
-        MAX_TILT = 25
+        # Introduces clipping in simulation but the accelerometer cannot go
+        # above this value
+        MAX_AMPLITUDE = 500
+        MAX_TILT = 15
 
         self.tilt_x += random.randint(-MAX_TILT, MAX_TILT)
         self.tilt_y += random.randint(-MAX_TILT, MAX_TILT)
+
+        self.tilt_x = max(min(self.tilt_x, MAX_AMPLITUDE), -MAX_AMPLITUDE)
+        self.tilt_y = max(min(self.tilt_y, MAX_AMPLITUDE), -MAX_AMPLITUDE)
 
         return (self.tilt_x, self.tilt_y)
 
@@ -211,8 +260,9 @@ def main():
         key1 = controller.get_key()
 
         for i, fpga in enumerate(fpgas):
-            output = fpga.output(movement, 0, key0, key1)
-            output = json.loads(output)
+            output = FPGA.uart_decode(
+                fpga.output(movement, 0, key0, key1)
+            )
 
             filtered_data_x[i].append(output["accel_x"])
             filtered_data_y[i].append(output["accel_y"])

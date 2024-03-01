@@ -21,6 +21,7 @@ import argparse
 import subprocess
 import time
 from pathlib import Path
+from fir_tester import FPGA
 
 SCRIPT_LOCATION = Path(__file__).resolve().parent
 DATA_LOCATION = SCRIPT_LOCATION / "data"
@@ -98,7 +99,7 @@ def analyse_data(runtime=10):
     sampling_rate = len(data) / runtime
 
     # Convert the data from strings to numbers
-    data = [float(d) for d in data]
+    data = [float(FPGA.uart_decode(d)["accel_x"]) for d in data]
 
     # Take the FFT of the data
     fft = abs(np.fft.fft(data))

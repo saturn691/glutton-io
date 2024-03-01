@@ -13,9 +13,6 @@ from a real FPGA.
 [`fir_tester.py`](fir_tester.py) tests the FIR coefficients with simulated
 data. 
 
-[`latency_data.py`](latency_data.py) collects and analyses the latency from
-UART.
-
 ## Report
 
 ### Finding the sample rate 
