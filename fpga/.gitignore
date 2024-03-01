@@ -1,0 +1,9 @@
+graphs
+__pycache__/
+
+bsp/
+obj/
+Makefile
+*.elf
+*.map
+*.objdump
