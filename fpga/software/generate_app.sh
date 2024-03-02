@@ -25,7 +25,7 @@ cd app
         --bsp-dir ../bsp/ \
         --elf-name main.elf \
         --src-dir .
-make
+    make
 cd ..
 
 
@@ -35,7 +35,7 @@ cd latency_app
         --bsp-dir ../bsp/ \
         --elf-name main.elf \
         --src-dir .
-make
+    make
 cd ..
 
 echo ">> Now run 'nios2-download -g app/main.elf' to flash the FPGA"

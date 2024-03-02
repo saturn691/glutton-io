@@ -106,11 +106,11 @@ assumed. Any filters with more than 64-taps were not considered.
 3 FIR filters were considered for this. More information is found in the source
 code.
 
-![fir frequency response](../../images/fpga/fir3.jpg)
+![fir frequency response](../../images/fpga/fir3.png)
 
 The Python script [`fir_tester.py`](fir_tester.py) fetched the time response of the 
 FIR filter. 
 
-![fir time response](../../images/fpga/fir_time_response.png)
+![fir time response](../../images/fpga/fir_time_response.jpg)
 
 As we can allow 10ms of delay, we chose the smoothest filter- FIR3.

@@ -99,12 +99,13 @@ def analyse_data(runtime=10):
     sampling_rate = len(data) / runtime
 
     # Convert the data from strings to numbers
-    data = [float(FPGA.uart_decode(d)["accel_x"]) for d in data]
+    data_x = [float(FPGA.uart_decode(d)["accel_x"]) for d in data]
+    data_y = [float(FPGA.uart_decode(d)["accel_y"]) for d in data]
 
     # Take the FFT of the data
-    fft = abs(np.fft.fft(data))
+    fft = abs(np.fft.fft(data_x))
 
-    n = len(data)
+    n = len(data_x)
 
     sample_points = np.arange(n)
     frequencies = sample_points * sampling_rate / n
@@ -112,7 +113,9 @@ def analyse_data(runtime=10):
 
     # Plot the data in the time domain
     plt.figure(1)
-    plt.plot(times, data)
+    plt.plot(times, data_x)
+    # Uncomment to plot the y data (to compare raw/filtered readings)
+    # plt.plot(times, data_y)
     plt.title("Time Domain")
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude")
