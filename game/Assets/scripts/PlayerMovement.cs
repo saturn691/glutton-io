@@ -2,33 +2,41 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Extra packages
-// using System.ArraySegment;
-using System;
-using System.Net.WebSockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-
 public class PlayerMovements : MonoBehaviour
 {
 
+    Actions actions;
+
+    public bool LockActions = false;
     public float Speed = 5f;
-    // websocket  connection
-
-    
-
     // Start is called before the first frame update
-    void Start() {
+    void Start()
+    {
+        actions = GetComponent<Actions>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Debug.Log("Updating player movement");
         float Speed_ = Speed / transform.localScale.x;
         Vector2 Direction = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
+
+
+        if (LockActions)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            actions.ThrowMass();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // jump
+            actions.Split();
+        }
     }
 }

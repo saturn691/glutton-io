@@ -1,0 +1,4 @@
+PlayerMovement
+MassForce - rotate the player to mouse poisiton whem shooting (ThrowMass())
+Actions - randomize force and rotation - for moer eye-pleasing anumation animation (Start(): can be deleted entirely
+SplitForce -rotate player to mouse pisition when splitting (SplitForce_method())
