@@ -1,4 +1,5 @@
-import { Entity } from './Entity.js';
+import { Entity } from './entity.js';
+
 
 // Blob class extends Entity, with x and y as center coordinates and size as radius
 export class Virus extends Entity {
@@ -25,12 +26,6 @@ export class Virus extends Entity {
         } else {
             console.log("Blob is too small to split");
         }
-    }
-
-
-    collidesWith(blob) {
-        const distance = Math.sqrt((this.x - blob.x) ** 2 + (this.y - blob.y) ** 2);
-        return distance < this.size || distance < blob.size;
     }
 
     render(context) {

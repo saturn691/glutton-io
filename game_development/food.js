@@ -1,4 +1,4 @@
-import { Entity } from './Entity.js';
+import { Entity } from './entity.js';
 
 // Blob class extends Entity, with x and y as center coordinates and size as radius
 export class Food extends Entity {
@@ -14,6 +14,6 @@ export class Food extends Entity {
 
     render(context) {
         if (!this.isAlive) return;  // Do not render if the blob is not alive
-        super.isAlive(context);      // Call the render method of the base class
+        super.render(context);      // Call the render method of the base class
     }
 }

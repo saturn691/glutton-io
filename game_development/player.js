@@ -1,4 +1,5 @@
-import { Blob } from './entities/Blob.js';
+import { Blob } from './blob.js';
+import { Entity } from './entity.js';
 
 export class Player {
 

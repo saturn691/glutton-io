@@ -1,4 +1,4 @@
-import { Entity } from './Entity.js';
+import { Entity } from './entity.js';
 
 // Blob class extends Entity, with x and y as center coordinates and size as radius
 export class Blob extends Entity {
@@ -8,7 +8,7 @@ export class Blob extends Entity {
         this.isAlive = true; // Indicates whether the blob is alive
     }
 
-    move(xCoordinate, yCoordinate) {
+    update(xCoordinate, yCoordinate) {
         if (!this.isAlive) return;
         this.x = xCoordinate;
         this.y = yCoordinate;
@@ -21,7 +21,7 @@ export class Blob extends Entity {
         if (!this.isAlive || !target.isAlive) return;
 
         const sizeDifferenceThreshold = 1.1; // TODO: modify threshold 
-        const canEat = this.size > target.size && (this.size / target.size) > sizeDifferenceThreshold && this.collidesWith(target);
+        const canEat = (this.size / target.size) > sizeDifferenceThreshold;
 
         if (canEat) {
             this.size += target.size; // Simulate the blob growing in size
@@ -33,11 +33,6 @@ export class Blob extends Entity {
 
     isEaten() {
         this.isAlive = false;
-    }
-
-    collidesWith(otherEntity) {
-        const distance = Math.sqrt((this.x - otherEntity.x) ** 2 + (this.y - otherEntity.y) ** 2);
-        return distance < this.size || distance < otherEntity.size;
     }
 
     render(context) {
