@@ -24,7 +24,8 @@ public class MassSpawner : MonoBehaviour
     public List<GameObject> CreatedMasses = new List<GameObject>();
     public int MaxMass = 50;
     public float Time_To_Instantiate = 0.5f;
-    public Vector2 pos;
+    
+    Map map;
 
     //should be renamed to MaxSplits
     public int MaxPlayers = 10;
@@ -32,7 +33,9 @@ public class MassSpawner : MonoBehaviour
 
     private void Start()
     {
+        map = Map.ins;
         StartCoroutine(CreateMass());
+    
     }
 
     public IEnumerator CreateMass()
@@ -42,7 +45,7 @@ public class MassSpawner : MonoBehaviour
 
         if(CreatedMasses.Count <= MaxMass)
         {
-            Vector2 Position = new Vector2(Random.Range(-pos.x, pos.x), Random.Range(-pos.y, pos.y));
+            Vector2 Position = new Vector2(Random.Range(-map.MapLimits.x, map.MapLimits.x), Random.Range(-map.MapLimits.y, map.MapLimits.y));
             Position /= 2;
 
             GameObject m =  Instantiate(Mass, Position, Quaternion.identity);
@@ -101,10 +104,4 @@ public class MassSpawner : MonoBehaviour
         }
     }
 
-
-    public void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.white;
-        Gizmos.DrawWireCube(transform.position, pos);
-    }
 }
