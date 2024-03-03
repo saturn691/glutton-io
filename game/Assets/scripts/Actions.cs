@@ -39,11 +39,14 @@ public class Actions : MonoBehaviour
     public void Split()
     {
         // jump action is here
-        if(transform.localScale.x < 2)
+        if(transform.localScale.x <= 2)
         {
             // return if the player size was low
             return;
         }
+
+        //lose mass
+        transform.localScale /= 2;
 
         GameObject b = Instantiate(gameObject, transform.position, Quaternion.identity);
 

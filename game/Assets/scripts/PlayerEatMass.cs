@@ -6,6 +6,7 @@ public class PlayerEatMass : MonoBehaviour
 {
 
     public GameObject[] Mass;
+    MassSpawner ms;
 
 
 
@@ -68,15 +69,13 @@ public class PlayerEatMass : MonoBehaviour
         }
     }
 
-    MassSpawner ms;
+    
     // Start is called before the first frame update
     void Start()
     {
         UpdateMass();
         InvokeRepeating("Check", 0, 0.1f);
         ms = MassSpawner.ins;
-
-        ms.Players.Add(gameObject);
     }
 
     void PlayerEat()

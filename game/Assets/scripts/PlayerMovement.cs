@@ -35,8 +35,28 @@ public class PlayerMovements : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // jump
+            // split
+            if(MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
+            {
+                return;
+            }
             actions.Split();
         }
     }
+
+    public void OnEnable()
+    {
+        if(MassSpawner.ins.Players.Count > MassSpawner.ins.MaxPlayers)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        MassSpawner.ins.AddPlayer(gameObject);
+    }
+
+    public void OnDisable()
+    {
+        MassSpawner.ins.RemovePlayer(gameObject);
+    }
 }
+

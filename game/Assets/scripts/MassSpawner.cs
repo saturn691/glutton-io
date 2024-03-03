@@ -18,11 +18,16 @@ public class MassSpawner : MonoBehaviour
     #endregion
 
     public GameObject Mass;
+
+    //should be renamed to Splits
     public List<GameObject> Players = new List<GameObject>();
     public List<GameObject> CreatedMasses = new List<GameObject>();
     public int MaxMass = 50;
     public float Time_To_Instantiate = 0.5f;
     public Vector2 pos;
+
+    //should be renamed to MaxSplits
+    public int MaxPlayers = 10;
 
 
     private void Start()
@@ -77,6 +82,22 @@ public class MassSpawner : MonoBehaviour
                 PlayerEatMass pp = Players[i].GetComponent<PlayerEatMass>();
                 pp.RemoveMass(m);
             }
+        }
+    }
+
+    public void AddPlayer(GameObject b)
+    {
+        if(Players.Contains(b) == false)
+        {
+            Players.Add(b);
+        }
+    }
+
+    public void RemovePlayer(GameObject b)
+    {
+         if(Players.Contains(b) == false)
+        {
+            Players.Remove(b);
         }
     }
 
