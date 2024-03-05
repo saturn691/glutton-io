@@ -36,7 +36,7 @@ public class SplitForce : MonoBehaviour
         }
 
         transform.Translate(Vector2.up * Speed * Time.deltaTime);
-        Speed -= loseSpeed * Time.deltaTime;
+        Speed -= loseSpeed * Time.deltaTime/1.5f;
 
         if (Speed <= 0)
         {
