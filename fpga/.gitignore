@@ -7,3 +7,5 @@ Makefile
 *.elf
 *.map
 *.objdump
+obj_dir/
+*.vcd
