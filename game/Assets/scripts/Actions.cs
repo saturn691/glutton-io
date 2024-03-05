@@ -12,7 +12,7 @@ public class Actions : MonoBehaviour
 
     public void ThrowMass()
     {
-        if(transform.localScale .x < 1)
+        if(transform.localScale.x < 1f)
         {
             return;
         }
@@ -33,7 +33,7 @@ public class Actions : MonoBehaviour
 
 
         // lose mass
-        transform.localScale -= new Vector3(0.05f, 0.05f, 0.05f);
+        transform.localScale -= new Vector3(0.1f, 0.1f, 0.1f);
     }
 
     public void Split()

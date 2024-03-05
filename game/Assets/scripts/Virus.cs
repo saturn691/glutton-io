@@ -7,7 +7,10 @@ public class Virus : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
+
             GameObject Player = collision.gameObject;
+            Player.transform.localScale += new Vector3(5f, 5f, 5f);
+
             int BurstNumber = (int)Player.transform.localScale.x;
 
             Player.transform.localScale /= Player.transform.localScale.x;
