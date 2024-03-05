@@ -9,3 +9,4 @@ Makefile
 *.objdump
 obj_dir/
 *.vcd
+logs/
