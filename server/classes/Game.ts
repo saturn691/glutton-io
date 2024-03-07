@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 
 export class GameState {
   id: number;
+
   players: { [socketId: string]: Player };
   ws: WebSocketServer;
   numPlayers: number;

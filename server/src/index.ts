@@ -47,12 +47,11 @@ const simulate = (socket: WebSocket, game: GameState) => {
 // Initialize DB connection
 const main = async () => {
   config();
-  // await connectToDB();
 
   const ws = new WebSocketServer({ port: 8080 });
   const game = new GameState(1, ws);
 
-  //   simulate(null, game);
+  simulate(null, game);
 
   ws.on("listening", () => {
     console.log("listening to ws connections on port 8080");
@@ -60,7 +59,6 @@ const main = async () => {
 
   ws.on("connection", async (socket) => {
     const socketId = uuid.v4();
-
     game.InitPlayerJoined(socket, socketId);
 
     socket.on("message", (msg) => handleWsMessage(game, socket, socketId, msg));
