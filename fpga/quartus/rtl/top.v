@@ -71,6 +71,9 @@ module DE10_LITE_Golden_Top(
 	wire [31:0] accel_x_filter, accel_y_filter;
 	wire clk_3200;
 	
+	wire debounced_key1;
+	wire debounced_key0;
+	
 	
 //=======================================================
 //  Structural coding
@@ -97,6 +100,19 @@ module DE10_LITE_Golden_Top(
 		.out(accel_y_filter)
 	);
 	
+	debounce debounce_key1(
+		.clk(MAX10_CLK1_50),
+		.in(KEY[1]),
+		.out(debounced_key1)
+	);
+	
+	
+	debounce debounce_key0(
+		.clk(MAX10_CLK1_50),
+		.in(KEY[0]),
+		.out(debounced_key0)
+	);
+	
 	
 	nios_accelerometer u0(
 		.clk_clk(MAX10_CLK1_50),
@@ -106,7 +122,7 @@ module DE10_LITE_Golden_Top(
 		.accelerometer_spi_0_external_interface_I2C_SCLK(GSENSOR_SCLK),
 		.accelerometer_spi_0_external_interface_G_SENSOR_CS_N (GSENSOR_CS_N),
 		.accelerometer_spi_0_external_interface_G_SENSOR_INT(GSENSOR_INT[1]),
-		.button_external_connection_export(KEY[1:0]),
+		.button_external_connection_export({debounced_key1, debounced_key0}),
 		.switch_external_connection_export(SW[9:0]),
 		.filter_x_external_connection_export(accel_x_filter),                 
 		.filter_y_external_connection_export(accel_y_filter),
