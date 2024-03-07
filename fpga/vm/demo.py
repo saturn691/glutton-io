@@ -9,7 +9,9 @@ import pygame
 import sys
 import subprocess
 import select
-from fir_data import FPGA, NIOS_TERMINAL
+import intel_jtag_uart
+import time
+from fir_data import FPGA
 
 WIDTH = 800                 # px
 HEIGHT = 600                # px
@@ -92,26 +94,41 @@ class Ball:
         return
 
 
-def get_data(process):
+def get_data(ju):
     global previous_data
     line = ''
-    while select.select([process.stdout], [], [], 0.0)[0]:
-        try:
-            line = process.stdout.readline().decode('utf-8').strip()
-        except subprocess.TimeoutExpired:
-            process.terminate()
+    counter = 0
+    lines = ju.read().decode("utf-8").splitlines()
+
+    if len(lines) > 2:
+        line = lines[-2]
 
     if line:
         previous_data = line
 
     if previous_data:
+        print(counter)
         return FPGA.uart_decode(previous_data)
 
 
 def main():
-    process = subprocess.Popen([NIOS_TERMINAL],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.DEVNULL)
+    try:
+        ju = intel_jtag_uart.intel_jtag_uart()
+    except Exception as e:
+        print(e)
+        sys.exit(0)
+
+    # Set up JTAG
+    start = time.time()
+    while (not (ju.is_setup_done())):
+        pass
+    end = time.time()
+
+    # Statistics
+    print("setup time      :  %.4fs" % (end-start))
+    print("cable warning   : ", ju.cable_warning())
+    print("info            : ", ju.get_info())
+    print("setup done      : ", ju.is_setup_done())
 
     # Initialize the game engine
     pygame.init()
@@ -123,9 +140,6 @@ def main():
 
     # Ball
     ball = Ball(WIDTH // 2, HEIGHT // 2, 50, 50, BALL_COLOR)
-    # Skip first 100 lines (e.g. "nios2-terminal: connected to hardware target")
-    for _ in range(100):
-        process.stdout.readline()
 
     # Game loop
     while True:
@@ -154,7 +168,7 @@ def main():
                     ball.velocity_x = 0
 
         # Handle UART input
-        data = get_data(process)
+        data = get_data(ju)
         vx = 0
         vy = 0
         key0 = 0
