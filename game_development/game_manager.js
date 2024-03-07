@@ -32,7 +32,7 @@ class GameStateManager {
         // Assuming entities have a method to update their positions
         this.players.forEach(player => {
             player.blobs.forEach(blob => {
-                blob.update();
+                // blob.update();
                 if (blob.isAlive) {
                     this.spatialGrid.insert(blob);
                 }
@@ -118,7 +118,7 @@ const gameStateManager = new GameStateManager(gridWidth, gridHeight, cellSize);
 // Example setup
 const player = new Player('player1', '#00F'); // Example player
 gameStateManager.addPlayer(player);
-player.addBlob('blob1', 400, 300, 10); // Add a blob to the player
+player.addBlob('blob1', 400, 300, 70); // Add a blob to the player
 
 // Add some food and viruses
 gameStateManager.addFood(new Food('food1', 100, 100, 5, '#0F0'));
