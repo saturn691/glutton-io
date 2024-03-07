@@ -20,8 +20,11 @@ public class MassSpawner : MonoBehaviour
     public GameObject Mass;
 
     //should be renamed to Splits
+    
     public List<GameObject> Players = new List<GameObject>();
     public List<GameObject> CreatedMasses = new List<GameObject>();
+
+
     public int MaxMass = 50;
     public float Time_To_Instantiate = 0.5f;
     
