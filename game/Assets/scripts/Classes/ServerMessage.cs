@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 
 [Serializable]
-public class ClientMessage
+public class ServerMessage
 {
-    public ClientMsgType type;
+    public ServerMsgType type;
     public object data;
 
-    public ClientMessage(ClientMsgType type, object data)
+    public ServerMessage(ServerMsgType type, object data)
     {
         this.type = type;
         this.data = data;
