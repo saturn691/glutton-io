@@ -13,10 +13,9 @@ public class ServerUtils
 {
     public static void HandlePlayerJoined(PlayersManager pmInst, object msgData) {
         Debug.Log("Player joined!");
-        // pmInst.AddPlayer(
-        //     (string)msgData.socketId, 
-        //     new Position(msgData.position.x, msgData.position.y)
-        // );
+        var player = JsonConvert.DeserializeObject<Player>(msgData.ToString());
+
+        pmInst.AddPlayer(player.socketId, new Position(player.position.x, player.position.y));
     }
 
     public static void HandleUpdatePlayersPosition(PlayersManager pmInst, object msgData)

@@ -17,8 +17,6 @@ public class ServerConnect : MonoBehaviour
     public static ServerConnect instance { get; private set; } // Singleton instance
     private ClientWebSocket client; // Keep the client accessible
     public PlayersManager playersManager;
-
-    public string ClientSocketId;
     
     public async Task SendWsMessage(ClientMessage msg)
     {
