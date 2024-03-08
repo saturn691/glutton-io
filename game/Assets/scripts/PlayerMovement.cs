@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
     Actions actions;
 
     public bool LockActions = false;
-    public float Speed = 5f;
+    public float Speed = 10f;
 
     Map map;
     
@@ -51,12 +51,29 @@ public class PlayerMovement : MonoBehaviour
 
         Debug.Log("Input " + accel_x + " " + accel_y + " " + switches + " " + throwMass + " " + split);
     
-        float Speed_ = Speed / transform.localScale.x;
-        Vector2 Direction = new Vector2(accel_x * 10, accel_y * 10);
+        Vector3 Direction = new Vector3(accel_x, accel_y, 0);
 
-        Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
-        Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
-        transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
+        // The magnitude of the direction vector does not affect the speed in
+        // the MoveTowards function, so we have to calculate the speed manually
+        float Speed_ = Speed * Direction.magnitude / transform.localScale.x;
+
+        // Update the position of the player
+        transform.position += Direction * Speed_ * Time.deltaTime;
+
+        // Clamp the player position to the map limits
+        transform.position = new Vector3(
+            Mathf.Clamp(
+                transform.position.x, 
+                map.MapLimits.x * -1 / 2, 
+                map.MapLimits.x / 2
+            ),
+            Mathf.Clamp(
+                transform.position.y, 
+                map.MapLimits.y * -1 / 2, 
+                map.MapLimits.y / 2
+            ),
+            transform.position.z
+        );
 
         // Send message to the server
         if (msgCount % 2000 == 0)
