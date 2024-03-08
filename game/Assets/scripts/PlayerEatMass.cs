@@ -91,6 +91,7 @@ public void RemoveMass(GameObject MassObject)
 
         transform.localScale += new Vector3(0.08f, 0.08f, 0.08f);
         MergePlayers.canMerge = true;
+        GetComponent<Collider2D>().isTrigger = true;
     }
 
 }

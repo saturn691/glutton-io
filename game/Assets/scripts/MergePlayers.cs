@@ -3,36 +3,37 @@ using System.Collections;
 
 public class MergePlayers : MonoBehaviour
 {
-    public int playerId; // Unique ID for each player
+    public string playerName; // Unique ID for each player
     public static bool canMerge = true; // Flag to indicate if merging is allowed
 
     private void Start()
     {
-        // Initialize playerId for each player object
-        playerId = GetHashCode(); // Using GetHashCode() to generate a unique ID
+        // Initialize playerName for each player object
+        playerName = "name"; // Using GetHashCode() to generate a unique ID
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D remaining)
     {
         // Check if the colliding GameObject has the "Player" tag
-        if (other.CompareTag("Player"))
+        if (remaining.CompareTag("Player"))
         {
-            MergePlayers otherMergePlayers = other.GetComponent<MergePlayers>();
+            MergePlayers remainingMergePlayers = remaining.GetComponent<MergePlayers>();
 
             // Merge players only if they have different IDs and merging is allowed
-            if (otherMergePlayers.playerId != playerId && MergePlayers.canMerge)
+            if (remainingMergePlayers.playerName == playerName && MergePlayers.canMerge && canMerge)
             {
                 // Merge the players
-                Merge(gameObject, other.gameObject);
+                Merge(gameObject, remaining.gameObject);
 
                 // Set both players' canMerge to false
                 canMerge = false;
+                remaining.GetComponent<Collider2D>().isTrigger = false;
                 MergePlayers.canMerge = false;
 
                 // // Start the merge cooldown timer for both players
                 // StartCoroutine(MergeCooldown());
                 // Debug.Log("2nd coroutine");
-                // StartCoroutine(otherMergePlayers.MergeCooldown());
+                // StartCoroutine(remainingMergePlayers.MergeCooldown());
                 // Debug.Log("Merged");
             }
         }
@@ -42,14 +43,14 @@ public class MergePlayers : MonoBehaviour
     {
         // Calculate the new scale for the merged player
         float newScale = player1.transform.localScale.x + player2.transform.localScale.x;
-
+        newScale = newScale / 1.1f;
         // Set the new scale for the merged player
         player1.transform.localScale = new Vector3(newScale, newScale, newScale);
 
         Camera.main.GetComponent<CamerFollow>().RemovePlayerFromTrack(transform);
         MassSpawner.ins.GetComponent<MassSpawner>().RemovePlayer(player2);
 
-        // Destroy the other player
+        // Destroy the remaining player
         Destroy(player2);
     }
 
