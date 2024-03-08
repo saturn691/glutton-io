@@ -1,1 +1,0 @@
-{'accel_x': 12, 'accel_y': -12, 'switch': 0, 'key0': 0, 'key1': 0}

@@ -33,7 +33,7 @@ public class Virus : MonoBehaviour
                 b.transform.rotation = Quaternion.Euler(0, 0, rotation * CurrentRotation);
 
                 b.GetComponent<CircleCollider2D>().enabled = false;
-                b.GetComponent<PlayerMovements>().LockActions = true;
+                b.GetComponent<PlayerMovement>().LockActions = true;
 
                 b.GetComponent<SplitForce>().Speed = b.GetComponent<SplitForce>().DifaultSpeed;
                 b.GetComponent<SplitForce>().ApplyForce = true;

@@ -14,7 +14,7 @@ public class SplitForce : MonoBehaviour
     public void SplitForceMethod()
     {
         GetComponent<CircleCollider2D>().enabled = false; 
-        GetComponent<PlayerMovements>().LockActions = true;
+        GetComponent<PlayerMovement>().LockActions = true;
 
 
         Vector2 Dir = transform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -41,7 +41,7 @@ public class SplitForce : MonoBehaviour
         if (Speed <= 0)
         {
             GetComponent<CircleCollider2D>().enabled = true;
-            GetComponent<PlayerMovements>().LockActions = false;
+            GetComponent<PlayerMovement>().LockActions = false;
 
             enabled = false;
         }

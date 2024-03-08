@@ -1,13 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 // using ServerConnect;
-using System;
-using System.Text;
-using System.IO;
-using System.Linq;
 
-public class PlayerMovements : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     //StreamReader sr;
     //string rawInput;    
@@ -18,14 +13,21 @@ public class PlayerMovements : MonoBehaviour
     public float Speed = 5f;
 
     Map map;
-
+    
     ServerConnect server;
+
+    private FpgaController fpgaController;
 
     int msgCount = 0;
 
     MassSpawner massSpawner;
 
     PlayersManager playersManager;
+
+    void Awake()
+    {
+        fpgaController = new FpgaController();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -34,43 +36,29 @@ public class PlayerMovements : MonoBehaviour
         server = ServerConnect.instance;
         actions = GetComponent<Actions>();
         massSpawner = MassSpawner.ins;
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        var fs = new FileStream(@"C:\Users\kr1pt0\glutton-io\game\Assets\scripts\input.txt", FileMode.Open, FileAccess.Read, FileShare.ReadWrite); 
+        fpgaController.UpdateData();
 
-        using (var sr = new StreamReader(fs))
-        {
+        float accel_x = fpgaController.GetReadingX();
+        float accel_y = fpgaController.GetReadingY();
+        int switches = fpgaController.GetSwitchValue();
+        int throwMass = fpgaController.GetKey0();
+        int split = fpgaController.GetKey1();
 
-            //sr = new StreamReader(@"C:\Users\kr1pt0\glutton-io\game\Assets\scripts\input.txt");
-            var rawInput = sr.ReadLine();
-      
-            Debug.Log("Input " + rawInput);
-            Dictionary<string, string> input = rawInput.Trim().Substring(1, rawInput.Length - 2).Split(new[] {", "}, StringSplitOptions.RemoveEmptyEntries)
-                                                .Select(part => part.Split(": "))
-                                                .ToDictionary(split => split[0], split => split[1]);
-            int accel_x = Int32.Parse(input["'accel_x'"]);
-            int accel_y = Int32.Parse(input["\'accel_y\'"]);
-            int switches = Int32.Parse(input["'switch'"]);
-            int throwMass = Int32.Parse(input["'key0'"]);
-            int split = Int32.Parse(input["'key1'"]);
-            
+        Debug.Log("Input " + accel_x + " " + accel_y + " " + switches + " " + throwMass + " " + split);
+    
+        float Speed_ = Speed / transform.localScale.x;
+        Vector2 Direction = new Vector2(accel_x * 10, accel_y * 10);
 
-            float Speed_ = Speed / transform.localScale.x;
-            Vector2 Direction = new Vector2(accel_x / 10, accel_y/10);
+        Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
+        Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
+        transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
 
-            Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
-            Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
-            transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
-        }
-        
-
-        // Send message
-
-
+        // Send message to the server
         if (msgCount % 2000 == 0)
         {
             Dictionary<string, object> updatePlayerPosMsg = new Dictionary<string, object> {
@@ -103,12 +91,11 @@ public class PlayerMovements : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.W) || split == 1)
         {
             actions.ThrowMass();
         }
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) || throwMass == 1)
         {
             // split
             if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
