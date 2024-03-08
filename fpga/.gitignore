@@ -1,0 +1,12 @@
+graphs
+__pycache__/
+
+bsp/
+obj/
+Makefile
+*.elf
+*.map
+*.objdump
+obj_dir/
+*.vcd
+logs/
