@@ -2,10 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 // using ServerConnect;
+using System;
+using System.Text;
+using System.IO;
+using System.Linq;
 
 public class PlayerMovements : MonoBehaviour
 {
-
+     StreamReader sr = new StreamReader(@"C:\Users\kr1pt0\glutton-io\game\Assets\scripts\input.txt");
+    
 
     Actions actions;
 
@@ -35,14 +40,30 @@ public class PlayerMovements : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //var fs = new FileStream(@"C:\Users\kr1pt0\glutton-io\game\Assets\scripts\input.txt", FileMode.Open, FileAccess.Read, FileShare.ReadWrite); 
 
+        //using (var sr = new StreamReader(fs))
+        //{
+            var rawInput = sr.ReadLine();
+            Debug.Log("Input " + sr.ReadLine());
+            Dictionary<string, string> input = rawInput.Trim().Substring(1, rawInput.Length - 2).Split(new[] {", "}, StringSplitOptions.RemoveEmptyEntries)
+                                                .Select(part => part.Split(": "))
+                                                .ToDictionary(split => split[0], split => split[1]);
+            int accel_x = Int32.Parse(input["'accel_x'"]);
+            int accel_y = Int32.Parse(input["\'accel_y\'"]);
+            int switches = Int32.Parse(input["'switch'"]);
+            int throwMass = Int32.Parse(input["'key0'"]);
+            int split = Int32.Parse(input["'key1'"]);
+            
 
-        float Speed_ = Speed / transform.localScale.x;
-        Vector2 Direction = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            float Speed_ = Speed / transform.localScale.x;
+            Vector2 Direction = new Vector2(accel_x / 10, accel_y/10);
 
-        Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
-        Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
-        transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
+            Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
+            Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
+            transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
+        //}
+        
 
         // Send message
 
