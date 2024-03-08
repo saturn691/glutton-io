@@ -1,19 +1,29 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class MergePlayers : MonoBehaviour
 {
     public string playerName; // Unique ID for each player
+    public string blobID;
     public static bool canMerge = true; // Flag to indicate if merging is allowed
+    // private Transform textTransform; // Reference to the Text GameObject's Transform
+
+    // public Text textComponent; // Reference to the Text component
+
 
     private void Start()
     {
         // Initialize playerName for each player object
-        playerName = "name"; // Using GetHashCode() to generate a unique ID
+        playerName = "name"; //
+        blobID = System.Guid.NewGuid().ToString(); //unique id for each blob per player
+        // textComponent = textTransform.GetComponent<Text>();
+        // textComponent.text = playerName;
     }
 
     private void OnTriggerEnter2D(Collider2D remaining)
     {
+        Debug.Log("Triggered");
         // Check if the colliding GameObject has the "Player" tag
         if (remaining.CompareTag("Player"))
         {

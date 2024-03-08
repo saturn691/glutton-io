@@ -28,7 +28,6 @@ public void RemoveMass(GameObject MassObject)
 
     public void AddMass(GameObject MassObject)
     {
-        Debug.Log("mass object added");
         List<GameObject> MassList = new List<GameObject>();
 
         for (int i = 0; i < Mass.Length; i++)
@@ -51,7 +50,6 @@ public void RemoveMass(GameObject MassObject)
 
             if(Mass[i] == null)
             {
-                Debug.Log("mass object is null");
                 ms.RemoveMass(m.gameObject);
                 Destroy(m.gameObject);
                 UpdateMass();
@@ -87,7 +85,7 @@ public void RemoveMass(GameObject MassObject)
 
     void PlayerEat()
     {
-                Debug.Log("mass EATED added");
+                //Debug.Log("mass EATED added");
 
         transform.localScale += new Vector3(0.08f, 0.08f, 0.08f);
         MergePlayers.canMerge = true;

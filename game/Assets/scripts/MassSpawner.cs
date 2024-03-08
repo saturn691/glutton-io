@@ -112,15 +112,6 @@ public void AddMass(GameObject m)
         Debug.Log("RemovePlayer" + b.name);
 
            bool removed = Players.Remove(b);
-    if (removed)
-    {
-        Debug.Log("Object removed successfully.");
-    }
-    else
-    {
-        Debug.Log("Object not found in the list.");
-    }
-        
     }
 
 }
