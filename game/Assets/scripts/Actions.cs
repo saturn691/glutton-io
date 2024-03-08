@@ -49,8 +49,8 @@ public class Actions : MonoBehaviour
         transform.localScale /= 2;
 
         GameObject b = Instantiate(gameObject, transform.position, Quaternion.identity);
-
         // apply force
+        b.GetComponent<Collider2D>().isTrigger = false;
 
         b.GetComponent<SplitForce>().enabled = true;
         b.GetComponent<SplitForce>().SplitForceMethod();
