@@ -28,7 +28,7 @@ public class MassSpawner : MonoBehaviour
     Map map;
 
     //should be renamed to MaxSplits
-    public int MaxPlayers = 10;
+    public int MaxPlayers = 16;
 
 
     private void Start()
@@ -59,20 +59,31 @@ public class MassSpawner : MonoBehaviour
 
     }
 
-    public void AddMass(GameObject m)
+public void AddMass(GameObject m)
+{
+    if (m != null && !m.Equals(null))
     {
-        if(CreatedMasses.Contains(m) == false)
+        if (!CreatedMasses.Contains(m))
         {
             CreatedMasses.Add(m);
 
-
             for (int i = 0; i < Players.Count; i++)
             {
-                PlayerEatMass pp = Players[i].GetComponent<PlayerEatMass>();
-                pp.AddMass(m);
+                PlayerEatMass pp = Players[i]?.GetComponent<PlayerEatMass>();
+                if (pp != null)
+                {
+                    pp.AddMass(m);
+                }
             }
         }
     }
+    else
+    {
+        Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
+    }
+}
+
+
     public void RemoveMass(GameObject m)
     {
         if(CreatedMasses.Contains(m) == true)
@@ -98,10 +109,18 @@ public class MassSpawner : MonoBehaviour
 
     public void RemovePlayer(GameObject b)
     {
-         if(Players.Contains(b) == false)
-        {
-            Players.Remove(b);
-        }
+        Debug.Log("RemovePlayer" + b.name);
+
+           bool removed = Players.Remove(b);
+    if (removed)
+    {
+        Debug.Log("Object removed successfully.");
+    }
+    else
+    {
+        Debug.Log("Object not found in the list.");
+    }
+        
     }
 
 }
