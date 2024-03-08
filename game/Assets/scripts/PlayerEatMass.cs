@@ -15,18 +15,17 @@ public class PlayerEatMass : MonoBehaviour
         Mass = GameObject.FindGameObjectsWithTag("Mass");
     }
 
-    public void RemoveMass(GameObject MassObject)
-    {
-        List<GameObject> MassList = new List<GameObject>();
+public void RemoveMass(GameObject MassObject)
+{
+    List<GameObject> MassList = new List<GameObject>(Mass);
 
-        for (int i = 0; i < Mass.Length; i++)
-        {
-            MassList.Add(Mass[i]);
-        }
-        MassList.Remove(MassObject);
+    // Remove the MassObject from the list
+    MassList.Remove(MassObject);
 
-        Mass = MassList.ToArray();
-    }
+    // Update the Mass array
+    Mass = MassList.ToArray();
+}
+
     public void AddMass(GameObject MassObject)
     {
         List<GameObject> MassList = new List<GameObject>();
@@ -47,24 +46,30 @@ public class PlayerEatMass : MonoBehaviour
 
         for (int i = 0; i < Mass.Length; i++)
         {
+            Transform m = Mass[i].transform;
+
             if(Mass[i] == null)
             {
+                ms.RemoveMass(m.gameObject);
+                Destroy(m.gameObject);
                 UpdateMass();
                 return;
             }
 
 
-            Transform m = Mass[i].transform;
 
             if (Vector2.Distance(transform.position, m.position) <= transform.localScale.x / 2)
             {
                 RemoveMass(m.gameObject);
+                Debug.Log("mass object removed");
                 // eat 
                 PlayerEat();
+                if (m != null && m.gameObject != null){
 
                 // destroy
                 ms.RemoveMass(m.gameObject);
                 Destroy(m.gameObject);
+                }
             }
         }
     }
@@ -80,7 +85,11 @@ public class PlayerEatMass : MonoBehaviour
 
     void PlayerEat()
     {
-        transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
+                //Debug.Log("mass EATED added");
+
+        transform.localScale += new Vector3(0.08f, 0.08f, 0.08f);
+        MergePlayers.canMerge = true;
+        GetComponent<Collider2D>().isTrigger = true;
     }
 
 }

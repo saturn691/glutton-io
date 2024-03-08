@@ -109,5 +109,10 @@ public class PlayerMovements : MonoBehaviour
     {
         MassSpawner.ins.RemovePlayer(gameObject);
     }
+
+    void OnDestroy()
+    {
+        Camera.main.GetComponent<CamerFollow>().RemovePlayerFromTrack(transform);
+    }
 }
 

@@ -4,69 +4,78 @@ using UnityEngine;
 
 public class CamerFollow : MonoBehaviour
 {
-    //cam issue
     Camera cam;
     public Vector3 Offset;
     public Vector3 Change;
     public float Speed = 0.4f;
-    //zoming variables
     public float MaxZoom = 100f;
     public float MinZoom = 5f;
     public float ZoomSpeed = 1f;
-    //debugging tool
     public float ZoomController = 1f;
 
-    
-    
-    private void Start()
+    List<Transform> trackedPlayers = new List<Transform>();
+
+    void Start()
     {
         cam = Camera.main;
+        AddPlayersToTrack();
     }
 
-    // Update is called once per frame
     void Update()
     {
         Move();
         Zoom();
     }
 
-    public void Zoom()
+    void Zoom()
     {
         cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, GetZoom(), ZoomSpeed);
-
         cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, MinZoom, MaxZoom);
     }
 
-    public float GetZoom()
+    float GetZoom()
     {
-        MassSpawner ms = MassSpawner.ins;
-
-        Bounds bounds = new Bounds(ms.Players[0].transform.position, Vector3.zero);
-        for (int i = 0; i < ms.Players.Count; i++)
+        Bounds bounds = new Bounds(trackedPlayers[0].position, Vector3.zero);
+        foreach (var player in trackedPlayers)
         {
-            bounds.Encapsulate(ms.Players[i].transform.position);
+            bounds.Encapsulate(player.position);
         }
-
         return (bounds.size.x + bounds.size.y) / ZoomController;
     }
 
-    public void Move()
+    void Move()
     {
         Vector3 position = GetCenter() + Offset;
-
         transform.position = Vector3.SmoothDamp(transform.position, position, ref Change, Speed);
     }
 
     Vector3 GetCenter()
     {
-        MassSpawner ms = MassSpawner.ins;
-
-        Bounds bounds = new Bounds(ms.Players[0].transform.position, Vector3.zero);
-        for (int i = 0; i < ms.Players.Count; i++)
+        Bounds bounds = new Bounds(trackedPlayers[0].position, Vector3.zero);
+        foreach (var player in trackedPlayers)
         {
-            bounds.Encapsulate(ms.Players[i].transform.position);
+            bounds.Encapsulate(player.position);
         }
-
         return bounds.center;
+    }
+
+    void AddPlayersToTrack()
+    {
+        MassSpawner ms = MassSpawner.ins;
+        foreach (var player in ms.Players)
+        {
+            if (player != null)
+                trackedPlayers.Add(player.transform);
+        }
+    }
+
+    public void RemovePlayerFromTrack(Transform playerTransform)
+    {
+    
+        if (trackedPlayers.Contains(playerTransform))
+        {
+            Debug.Log("RemovePlayerFromTrack" + playerTransform.name);
+            trackedPlayers.Remove(playerTransform);
+        }
     }
 }

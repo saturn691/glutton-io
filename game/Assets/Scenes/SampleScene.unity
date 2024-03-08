@@ -350,6 +350,7 @@ GameObject:
   - component: {fileID: 834052396}
   - component: {fileID: 834052397}
   - component: {fileID: 834052399}
+  - component: {fileID: 834052400}
   - component: {fileID: 834052398}
   m_Layer: 0
   m_Name: player
@@ -546,6 +547,19 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
+--- !u!114 &834052400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 834052391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0432642aea4cbbd4093e132318da692c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerName: 
 --- !u!1 &1551912230
 GameObject:
   m_ObjectHideFlags: 0
@@ -691,6 +705,14 @@ PrefabInstance:
     - target: {fileID: 6782344387224570815, guid: 42ad976ce5e839542953dfcfd36c9892, type: 3}
       propertyPath: m_Name
       value: Virus
+      objectReference: {fileID: 0}
+    - target: {fileID: 6782344387224570815, guid: 42ad976ce5e839542953dfcfd36c9892, type: 3}
+      propertyPath: m_TagString
+      value: Virus
+      objectReference: {fileID: 0}
+    - target: {fileID: 7882935473254039567, guid: 42ad976ce5e839542953dfcfd36c9892, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8027552856871164358, guid: 42ad976ce5e839542953dfcfd36c9892, type: 3}
       propertyPath: m_LocalPosition.x
