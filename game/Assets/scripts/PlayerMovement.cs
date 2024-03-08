@@ -9,8 +9,8 @@ using System.Linq;
 
 public class PlayerMovements : MonoBehaviour
 {
-     StreamReader sr = new StreamReader(@"C:\Users\kr1pt0\glutton-io\game\Assets\scripts\input.txt");
-    
+    //StreamReader sr;
+    //string rawInput;    
 
     Actions actions;
 
@@ -40,12 +40,15 @@ public class PlayerMovements : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //var fs = new FileStream(@"C:\Users\kr1pt0\glutton-io\game\Assets\scripts\input.txt", FileMode.Open, FileAccess.Read, FileShare.ReadWrite); 
+        var fs = new FileStream(@"C:\Users\kr1pt0\glutton-io\game\Assets\scripts\input.txt", FileMode.Open, FileAccess.Read, FileShare.ReadWrite); 
 
-        //using (var sr = new StreamReader(fs))
-        //{
+        using (var sr = new StreamReader(fs))
+        {
+
+            //sr = new StreamReader(@"C:\Users\kr1pt0\glutton-io\game\Assets\scripts\input.txt");
             var rawInput = sr.ReadLine();
-            Debug.Log("Input " + sr.ReadLine());
+      
+            Debug.Log("Input " + rawInput);
             Dictionary<string, string> input = rawInput.Trim().Substring(1, rawInput.Length - 2).Split(new[] {", "}, StringSplitOptions.RemoveEmptyEntries)
                                                 .Select(part => part.Split(": "))
                                                 .ToDictionary(split => split[0], split => split[1]);
@@ -62,7 +65,7 @@ public class PlayerMovements : MonoBehaviour
             Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
             Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
             transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
-        //}
+        }
         
 
         // Send message

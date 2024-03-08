@@ -14,11 +14,12 @@ SAMPLING_RATE = 1000
 
 def simulate(sample_rate):
 
-    f = open("assets/scripts/input.txt", "a")
+    
     # The sampling rate of the FPGA accelerometer
 
     fpga = FPGA()
     controller = Controller()
+    #f = open("assets/scripts/input.txt", "a")
 
     while True:
         output = fpga.output(
@@ -27,8 +28,12 @@ def simulate(sample_rate):
             controller.get_key(),
             controller.get_key()
         )
-        print(FPGA.uart_decode(output))
+        f = open("assets/scripts/input.txt", "w")
+        
         f.write(str(FPGA.uart_decode(output)) + "\n")
+        f.close()
+        time.sleep(0.1)
+        print(FPGA.uart_decode(output))
         time.sleep(1.0 / sample_rate)
 
 
