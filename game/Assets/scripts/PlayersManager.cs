@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 
 public class PlayersManager : MonoBehaviour
 {
-
     #region instance 
     public static PlayersManager instance;
     private void Awake()
