@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class PlayerMovements : MonoBehaviour
 {
-
-
     Actions actions;
 
     public bool LockActions = false;
@@ -35,8 +33,6 @@ public class PlayerMovements : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-
         float Speed_ = Speed / transform.localScale.x;
         Vector2 Direction = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
