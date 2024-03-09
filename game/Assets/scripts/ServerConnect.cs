@@ -17,7 +17,7 @@ public class ServerConnect : MonoBehaviour
     public static ServerConnect instance { get; private set; } // Singleton instance
     private ClientWebSocket client; // Keep the client accessible
     public PlayersManager playersManager;
-    
+
     public async Task SendWsMessage(ClientMessage msg)
     {
         // Debug.Log("Sending new ws message!");
@@ -57,7 +57,7 @@ public class ServerConnect : MonoBehaviour
 
                 // Create JSON formatted data
                 await SendWsMessage(new ClientMessage(
-                    ClientMsgType.Join, new JoinMsgData("player1")
+                    ClientMsgType.Join, new JoinMsgData("player1") // TODO: Change to unique blobId
                 ));
 
                 await ReceiveMessages();
@@ -71,7 +71,7 @@ public class ServerConnect : MonoBehaviour
 
     async Task HandleServerMessage(ServerMessage msg)
     {
-        
+
         switch (msg.type)
         {
             case ServerMsgType.InitSocketId:
@@ -83,6 +83,7 @@ public class ServerConnect : MonoBehaviour
                 break;
             case ServerMsgType.PlayerLeft:
                 // Debug.Log("Player left: " + (string)msg.data);
+                // TODO: Add logic
                 break;
             case ServerMsgType.UpdatePlayersPosition:
                 ServerUtils.HandleUpdatePlayersPosition(playersManager, msg.data);
@@ -144,7 +145,8 @@ public class ServerConnect : MonoBehaviour
     {
         if (client != null && (client.State == WebSocketState.Open || client.State == WebSocketState.Connecting))
         {
-            try {
+            try
+            {
                 await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
             }
             catch (Exception e)

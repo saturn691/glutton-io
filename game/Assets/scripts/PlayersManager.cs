@@ -9,7 +9,8 @@ public class PlayersManager : MonoBehaviour
     public static PlayersManager instance;
     private void Awake()
     {
-        if( instance == null) {
+        if (instance == null)
+        {
             instance = this;
         }
     }
@@ -24,36 +25,42 @@ public class PlayersManager : MonoBehaviour
 
     public string selfSocketId;
 
-    private void Start() {
+    private void Start()
+    {
     }
 
-    public void Init(object msgData) {
+    public void Init(object msgData)
+    {
 
         var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
-        
-        selfSocketId = (string)data["socketId"];
+
+        selfSocketId = (string)data["socketId"];    // handle self-identification
 
         var players = JsonConvert.DeserializeObject<Dictionary<string, object>>(data["players"].ToString());
-        
-        foreach (KeyValuePair<string, object> kvp in players) {
+
+        foreach (KeyValuePair<string, object> kvp in players)
+        {
             Player player = JsonConvert.DeserializeObject<Player>(kvp.Value.ToString());
             AddPlayer(player.socketId, player.position);
         }
     }
 
-    public void AddPlayer(string socketId, Position position) {
-        
+    public void AddPlayer(string socketId, Position position)
+    {
+
         Vector2 Position = new Vector2(position.x, position.y);
-        GameObject p =  Instantiate(PlayerMass, Position, Quaternion.identity);
+        GameObject p = Instantiate(PlayerMass, Position, Quaternion.identity);
         PlayersDict.Add(socketId, new Player(socketId, position, p));
     }
 
-    public void UpdatePlayerPosition(string socketId, float x, float y) {
+    public void UpdatePlayerPosition(string socketId, float x, float y)
+    {
         var playerObj = PlayersDict[socketId].gameObject;
         playerObj.transform.position = new Vector2(x, y);
     }
 
-    public void Update() {
+    public void Update()
+    {
         // Get old position
         // oldPosition = PlayersDict["player1"].transform.position;
         // // Update the position

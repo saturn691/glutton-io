@@ -1,4 +1,5 @@
-import { Player, PlayerColor, Position } from "./Player.js";
+import { Position } from "./Blob.js";
+import { Player, PlayerColor } from "./Player.js";
 import { JoinMessageData, ServerMsgType } from "./MessageType.js";
 import { WebSocketServer, WebSocket } from "ws";
 
@@ -37,11 +38,13 @@ export class GameState {
     let playerId = msgData.playerId;
 
     this.players[socketId] = new Player(
-      playerId,
+      // playerId,
       PlayerColor.Red,
       socket,
       socketId,
-      { x: 0, y: 0 } // TODO: Initialize from game
+      { x: 0, y: 0 }, // TODO: Initialize from game
+      50,             // TODO: Initialize from game
+      playerId        // TODO: Change to BlobId
     );
 
     this.numPlayers++;
@@ -86,18 +89,6 @@ export class GameState {
       data: updateList,
     });
     this.updatedPositions = new Map<string, Position>();
-
-    // if (this.updatedPositions.size == this.numPlayers) {
-    //   let updateList = [];
-    //   for (const [key, value] of this.updatedPositions) {
-    //     updateList.push({ socketId: key, position: value });
-    //   }
-    //   this.broadcast({
-    //     type: ServerMsgType.UpdatePlayersPosition,
-    //     data: updateList,
-    //   });
-    //   this.updatedPositions = new Map<string, Position>();
-    // }
   }
 
   broadcast(message: any, excludePlayerId?: string) {

@@ -10,7 +10,7 @@ public class MassSpawner : MonoBehaviour
 
     private void Awake()
     {
-        if( ins == null)
+        if (ins == null)
         {
             ins = this;
         }
@@ -20,17 +20,17 @@ public class MassSpawner : MonoBehaviour
     public GameObject Mass;
 
     //should be renamed to Splits
-    
+
     public List<GameObject> Players = new List<GameObject>();
     public List<GameObject> CreatedMasses = new List<GameObject>();
 
 
     public int MaxMass = 50;
     public float Time_To_Instantiate = 0.5f;
-    
+
     Map map;
 
-    //should be renamed to MaxSplits
+    // TODO: rename to MaxSplits
     public int MaxPlayers = 16;
 
 
@@ -38,7 +38,7 @@ public class MassSpawner : MonoBehaviour
     {
         map = Map.ins;
         StartCoroutine(CreateMass());
-    
+
     }
 
     public IEnumerator CreateMass()
@@ -46,12 +46,12 @@ public class MassSpawner : MonoBehaviour
         // wait for seconds
         yield return new WaitForSecondsRealtime(Time_To_Instantiate);
 
-        if(CreatedMasses.Count <= MaxMass)
+        if (CreatedMasses.Count <= MaxMass)
         {
             Vector2 Position = new Vector2(Random.Range(-map.MapLimits.x, map.MapLimits.x), Random.Range(-map.MapLimits.y, map.MapLimits.y));
             Position /= 2;
 
-            GameObject m =  Instantiate(Mass, Position, Quaternion.identity);
+            GameObject m = Instantiate(Mass, Position, Quaternion.identity);
 
             AddMass(m);
 
@@ -62,34 +62,34 @@ public class MassSpawner : MonoBehaviour
 
     }
 
-public void AddMass(GameObject m)
-{
-    if (m != null && !m.Equals(null))
+    public void AddMass(GameObject m)
     {
-        if (!CreatedMasses.Contains(m))
+        if (m != null && !m.Equals(null))
         {
-            CreatedMasses.Add(m);
-
-            for (int i = 0; i < Players.Count; i++)
+            if (!CreatedMasses.Contains(m))
             {
-                PlayerEatMass pp = Players[i]?.GetComponent<PlayerEatMass>();
-                if (pp != null)
+                CreatedMasses.Add(m);
+
+                for (int i = 0; i < Players.Count; i++)
                 {
-                    pp.AddMass(m);
+                    PlayerEatMass pp = Players[i]?.GetComponent<PlayerEatMass>();
+                    if (pp != null)
+                    {
+                        pp.AddMass(m);
+                    }
                 }
             }
         }
+        else
+        {
+            Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
+        }
     }
-    else
-    {
-        Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
-    }
-}
 
 
     public void RemoveMass(GameObject m)
     {
-        if(CreatedMasses.Contains(m) == true)
+        if (CreatedMasses.Contains(m) == true)
         {
             CreatedMasses.Remove(m);
 
@@ -104,7 +104,7 @@ public void AddMass(GameObject m)
 
     public void AddPlayer(GameObject b)
     {
-        if(Players.Contains(b) == false)
+        if (Players.Contains(b) == false)
         {
             Players.Add(b);
         }
@@ -114,7 +114,7 @@ public void AddMass(GameObject m)
     {
         Debug.Log("RemovePlayer" + b.name);
 
-           bool removed = Players.Remove(b);
+        bool removed = Players.Remove(b);
     }
 
 }

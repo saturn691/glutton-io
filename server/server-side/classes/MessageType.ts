@@ -8,6 +8,8 @@ export enum ServerMsgType {
   PlayerJoined,
   PlayerLeft,
   UpdatePlayersPosition,
+  BlobEats,
+  BlobIsEaten,
 }
 
 export type JoinMessageData = {
