@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-<<<<<<< HEAD
-    //StreamReader sr;
-    //string rawInput;    
-
-=======
->>>>>>> main
     Actions actions;
 
     public bool LockActions = false;
@@ -44,7 +38,6 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-<<<<<<< HEAD
         fpgaController.UpdateData();
 
         float accel_x = fpgaController.GetReadingX();
@@ -56,10 +49,6 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log("Input " + accel_x + " " + accel_y + " " + switches + " " + throwMass + " " + split);
     
         Vector3 Direction = new Vector3(accel_x, accel_y, 0);
-=======
-        float Speed_ = Speed / transform.localScale.x;
-        Vector2 Direction = Camera.main.ScreenToWorldPoint(Input.mousePosition);
->>>>>>> main
 
         // The magnitude of the direction vector does not affect the speed in
         // the MoveTowards function, so we have to calculate the speed manually
