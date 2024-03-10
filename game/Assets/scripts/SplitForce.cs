@@ -20,7 +20,7 @@ public class SplitForce : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, rot);
 
 
-        Speed = DifaultSpeed;
+        Speed = DefaultSpeed;
         Debug.Log("Default Speed: " + DefaultSpeed); // Debug log for DefaultSpeed
         ApplyForce = true;
     }
