@@ -5,6 +5,7 @@ import { GameState } from "../classes/Game.js";
 import { ClientMsgType, ServerMsgType } from "../classes/MessageType.js";
 import * as uuid from "uuid";
 
+
 const handleWsMessage = (
   game: GameState,
   socket: WebSocket,
@@ -29,32 +30,26 @@ const handleWsMessage = (
   }
 };
 
-const simulate = (socket: WebSocket, game: GameState) => {
-  let socketId = uuid.v4();
-  game.AddPlayer(socket, socketId, { playerId: "test_opponent" });
 
+const simulate = (game: GameState, interval: number) => {
   setInterval(() => {
-    // Move player position 0.001 units to the right
-    let prevPosition = game.players[socketId].position;
+    game.AddBot();
+  }, interval);
+}
 
-    game.UpdatePlayerPosition(socketId, {
-      x: prevPosition.x + 0.1,
-      y: prevPosition.y,
-    });
-  }, 100);
-};
 
 // Initialize DB connection
 const main = async () => {
+  const PORT = 8080;
   config();
 
-  const ws = new WebSocketServer({ port: 8080 });
+  const ws = new WebSocketServer({ port: PORT });
   const game = new GameState(1, ws);
 
-  simulate(null, game);
+  simulate(game, 5000);
 
   ws.on("listening", () => {
-    console.log("listening to ws connections on port 8080");
+    console.log(`listening to ws connections on port ${PORT}`);
   });
 
   ws.on("connection", async (socket) => {
@@ -72,5 +67,6 @@ const main = async () => {
     });
   });
 };
+
 
 main();

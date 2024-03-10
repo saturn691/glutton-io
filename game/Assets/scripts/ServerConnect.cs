@@ -29,7 +29,12 @@ public class ServerConnect : MonoBehaviour
             var bytesToSend = new ArraySegment<byte>(Encoding.UTF8.GetBytes(jsonData));
 
             // Send the message to the server
-            await client.SendAsync(bytesToSend, WebSocketMessageType.Text, true, CancellationToken.None);
+            await client.SendAsync(
+                bytesToSend, 
+                WebSocketMessageType.Text, 
+                true, 
+                CancellationToken.None
+            );
         }
     }
 
@@ -71,21 +76,26 @@ public class ServerConnect : MonoBehaviour
 
     async Task HandleServerMessage(ServerMessage msg)
     {
-
         switch (msg.type)
         {
             case ServerMsgType.InitSocketId:
+                Debug.Log("Init socket id: " + msg.data);
+                if (playersManager == null)
+                {
+                    playersManager = PlayersManager.instance;
+                    Debug.Log("Players manager is null");
+                }
                 playersManager.Init(msg.data); // Here
                 break;
             case ServerMsgType.PlayerJoined:
+                Debug.Log("Player joined: " + msg.data);
                 ServerUtils.HandlePlayerJoined(playersManager, msg.data);
-                // Debug.Log("Player joined: " + (string)msg.data);
                 break;
             case ServerMsgType.PlayerLeft:
-                // Debug.Log("Player left: " + (string)msg.data);
-                // TODO: Add logic
+                Debug.Log("Player left: " + msg.data);
                 break;
             case ServerMsgType.UpdatePlayersPosition:
+                Debug.Log("Update players position: " + msg.data);
                 ServerUtils.HandleUpdatePlayersPosition(playersManager, msg.data);
                 break;
             default:
@@ -97,48 +107,58 @@ public class ServerConnect : MonoBehaviour
     async Task ReceiveMessages()
     {
         var buffer = new byte[1024 * 4];
-        try
+        
+        while (client.State == WebSocketState.Open)
         {
-            while (client.State == WebSocketState.Open)
+            var result = await client.ReceiveAsync(
+                new ArraySegment<byte>(buffer), 
+                CancellationToken.None
+            );
+
+            if (client.State == WebSocketState.CloseReceived)
             {
-                var result = await client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                // If the server has initiated a close, respond with a close as well
+                await client.CloseAsync(
+                    WebSocketCloseStatus.NormalClosure, 
+                    string.Empty, 
+                    CancellationToken.None
+                );
+            }
+            else if (result != null && 
+                    result.MessageType == WebSocketMessageType.Close
+            ) {
+                // If a close message is received, initiate the close 
+                // handshake if it hasn't been done yet
+                await client.CloseAsync(
+                    WebSocketCloseStatus.NormalClosure, 
+                    string.Empty, 
+                    CancellationToken.None
+                );
+            }
 
-                // if (client.State == WebSocketState.CloseReceived)
-                // {
-                //     // If the server has initiated a close, respond with a close as well
-                //     await client.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-                // }
-                // else if (result.MessageType == WebSocketMessageType.Close)
-                // {
-                //     // If a close message is received, initiate the close handshake if it hasn't been done yet
-                //     await client.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-                // }
-
-                var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                ServerMessage msg = JsonConvert.DeserializeObject<ServerMessage>(message);
-                // Debug.Log("Received: " + data);
+            var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            ServerMessage msg = JsonConvert.DeserializeObject<ServerMessage>(message);
+            Debug.Log("Received: " + message);
+            if (msg != null)
+            {
+                Debug.Log("Handling message...");
                 await HandleServerMessage(msg);
             }
         }
-        catch (Exception e)
-        {
-            Debug.LogError("Error receiving: " + e.Message);
-        }
     }
 
+
     // Start is called before the first frame update
-    async void Start()
+    public async void Start()
     {
         playersManager = PlayersManager.instance;
 
-        InitWsConnection();
-        // ReceiveMessages();
+        await InitWsConnection();
     }
 
     // Update is called once per frame
     void Update()
     {
-
     }
 
     private async Task CloseWebSocketAsync()

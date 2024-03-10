@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
+using System;
 
 public class PlayersManager : MonoBehaviour
 {
@@ -29,9 +30,16 @@ public class PlayersManager : MonoBehaviour
     {
     }
 
+
+    /// <summary>
+    /// Initialize the players manager with the players data
+    /// The schema must match EXACTLY the server's schema or an exception will
+    /// be thrown
+    /// </summary>
+    /// <param name="msgData">The JSON data from the server</param>
     public void Init(object msgData)
     {
-
+        Debug.Log("Initializing players manager!");
         var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
 
         selfSocketId = (string)data["socketId"];    // handle self-identification
@@ -41,20 +49,51 @@ public class PlayersManager : MonoBehaviour
         foreach (KeyValuePair<string, object> kvp in players)
         {
             Player player = JsonConvert.DeserializeObject<Player>(kvp.Value.ToString());
-            AddPlayer(player.socketId, player.position);
+            AddPlayer(player);
         }
+
+        Debug.Log($"Player {selfSocketId} initialized!");
+
+        return;
     }
 
-    public void AddPlayer(string socketId, Position position)
+    public void AddPlayer(Player player)
     {
+        Vector2 Position = new Vector2(
+            player.blob.position.x, 
+            player.blob.position.y
+        );
 
-        Vector2 Position = new Vector2(position.x, position.y);
+        // TODO change from PlayerMass to an ACTUAL player (in the inspector)
         GameObject p = Instantiate(PlayerMass, Position, Quaternion.identity);
-        PlayersDict.Add(socketId, new Player(socketId, position, p));
+        
+        // Set the color of the player
+        SpriteRenderer sr = p.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            float hue = player.color / 255f;
+            sr.color = Color.HSVToRGB(hue, 1, 1);
+        }
+
+        // Add the player to the dictionary
+        PlayersDict.Add(
+            player.socketId, 
+            new Player(
+                player.socketId, 
+                player.color, 
+                false, 
+                new Blob(player.socketId, player.blob.position, player.blob.size), 
+                p
+            )
+        );
     }
 
     public void UpdatePlayerPosition(string socketId, float x, float y)
     {
+        // TODO | At the moment the player is a mass, so this will throw an 
+        // TODO | exception when it is eaten. The collision must be done 
+        // TODO | server side.
+         
         var playerObj = PlayersDict[socketId].gameObject;
         playerObj.transform.position = new Vector2(x, y);
     }

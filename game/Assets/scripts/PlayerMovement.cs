@@ -5,20 +5,26 @@ using UnityEngine;
 
 public class PlayerMovements : MonoBehaviour
 {
-    Actions actions;
+    //==========================================================================
+    // Fields
+    //==========================================================================
+    
+    const int MsgInterval = 20;
+    
+    private Actions actions;
+    private Map map;
+    private ServerConnect server;
+    private MassSpawner massSpawner;
+    private PlayersManager playersManager;
+    private int msgCount = 0;
 
     public bool LockActions = false;
     public float Speed = 5f;
 
-    Map map;
 
-    ServerConnect server;
-
-    int msgCount = 0;
-
-    MassSpawner massSpawner;
-
-    PlayersManager playersManager;
+    //==========================================================================
+    // Methods
+    //==========================================================================
 
     // Start is called before the first frame update
     void Start()
@@ -27,7 +33,6 @@ public class PlayerMovements : MonoBehaviour
         server = ServerConnect.instance;
         actions = GetComponent<Actions>();
         massSpawner = MassSpawner.ins;
-
     }
 
     // Update is called once per frame
@@ -40,17 +45,19 @@ public class PlayerMovements : MonoBehaviour
         Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
         transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
 
-        // Send message
-
-
-        if (msgCount % 2000 == 0)
+        // Send message to server
+        if (msgCount % MsgInterval == 0)
         {
             Dictionary<string, object> updatePlayerPosMsg = new Dictionary<string, object> {
                 {"x", transform.position.x},
                 {"y", transform.position.y}
             };
 
-            var UpdatePosMsg = new ClientMessage(ClientMsgType.UpdatePosition, updatePlayerPosMsg);
+            var UpdatePosMsg = new ClientMessage(
+                ClientMsgType.UpdatePosition, 
+                updatePlayerPosMsg
+            );
+
             server.SendWsMessage(UpdatePosMsg).ContinueWith(task =>
             {
                 if (task.Exception != null)
@@ -59,6 +66,7 @@ public class PlayerMovements : MonoBehaviour
                 }
             });
         }
+        
         msgCount++;
 
         // serverconnec
