@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
 
     public bool LockActions = false;
     public float Speed = 10f;
+    public Vector3 Direction;
 
     Map map;
     
@@ -48,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
 
         Debug.Log("Input " + accel_x + " " + accel_y + " " + switches + " " + throwMass + " " + split);
     
-        Vector3 Direction = new Vector3(accel_x, accel_y, 0);
+        Direction = new Vector3(accel_x, accel_y, 0);
 
         // The magnitude of the direction vector does not affect the speed in
         // the MoveTowards function, so we have to calculate the speed manually
@@ -71,6 +72,7 @@ public class PlayerMovement : MonoBehaviour
             ),
             transform.position.z
         );
+
 
         // Send message to the server
         if (msgCount % 2000 == 0)
@@ -107,7 +109,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.W) || split == 1)
         {
-            actions.ThrowMass();
+            actions.ThrowMass(Direction);
         }
         if (Input.GetKeyDown(KeyCode.Space) || throwMass == 1)
         {
@@ -116,7 +118,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 return;
             }
-            actions.Split();
+            actions.Split(Direction);
         }
     }
 

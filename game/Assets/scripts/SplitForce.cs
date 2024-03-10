@@ -11,13 +11,13 @@ public class SplitForce : MonoBehaviour
     public bool ApplyForce = false;
 
 
-    public void SplitForceMethod()
+    public void SplitForceMethod(Vector3 direction)
     {
         GetComponent<CircleCollider2D>().enabled = false; 
         GetComponent<PlayerMovement>().LockActions = true;
 
 
-        Vector2 Dir = transform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 Dir = direction;
         float rot = Mathf.Atan2(Dir.y, Dir.x) * Mathf.Rad2Deg + 90f;
         transform.rotation = Quaternion.Euler(0, 0, rot);
 

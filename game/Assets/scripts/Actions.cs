@@ -10,14 +10,14 @@ public class Actions : MonoBehaviour
     public float Percentage = 0.01f;
 
 
-    public void ThrowMass()
+    public void ThrowMass(Vector3 direction)
     {
         if(transform.localScale.x < 1f)
         {
             return;
         }
         // rotate 
-        Vector2 Direction = transform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 Direction = direction;
         float Z_Rotation = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg + 90f;
         transform.rotation = Quaternion.Euler(0, 0, Z_Rotation);
 
@@ -26,6 +26,7 @@ public class Actions : MonoBehaviour
 
         // apply force
         b.GetComponent<MassForce>().ApplyForce = true;
+        b.GetComponent<MassForce>().Direction = -direction;
 
 
         // add mass to the player
@@ -36,7 +37,7 @@ public class Actions : MonoBehaviour
         transform.localScale -= new Vector3(0.1f, 0.1f, 0.1f);
     }
 
-    public void Split()
+    public void Split(Vector3 direction)
     {
         // jump action is here
         if(transform.localScale.x <= 2)
@@ -53,7 +54,7 @@ public class Actions : MonoBehaviour
         b.GetComponent<Collider2D>().isTrigger = false;
 
         b.GetComponent<SplitForce>().enabled = true;
-        b.GetComponent<SplitForce>().SplitForceMethod();
+        b.GetComponent<SplitForce>().SplitForceMethod(direction);
     }
 
 
