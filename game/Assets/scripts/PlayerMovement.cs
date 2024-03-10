@@ -46,7 +46,7 @@ public class PlayerMovement : MonoBehaviour
         int throwMass = fpgaController.GetKey0();
         int split = fpgaController.GetKey1();
 
-        Debug.Log("Input " + accel_x + " " + accel_y + " " + switches + " " + throwMass + " " + split);
+       // Debug.Log("Input " + accel_x + " " + accel_y + " " + switches + " " + throwMass + " " + split);
     
         Vector3 Direction = new Vector3(accel_x, accel_y, 0);
 

@@ -9,6 +9,30 @@ public class Actions : MonoBehaviour
 
     public float Percentage = 0.01f;
 
+    private FpgaController fpgaController;
+
+
+    // Start is called before the first frame update
+
+    PlayerEatMass mass_script;
+    MassSpawner ms;
+    void Start()
+    {
+        mass_script = GetComponent<PlayerEatMass>();
+        ms = MassSpawner.ins;
+        fpgaController = GetComponent<FpgaController>();
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if(transform.localScale.x < 1)
+        {
+            return;
+        }
+        transform.localScale -= new Vector3(Percentage, Percentage, Percentage) * Time.deltaTime;
+    }
 
     public void ThrowMass()
     {
@@ -36,45 +60,35 @@ public class Actions : MonoBehaviour
         transform.localScale -= new Vector3(0.1f, 0.1f, 0.1f);
     }
 
-    public void Split()
+public void Split()
     {
-        // jump action is here
         if(transform.localScale.x <= 2)
         {
-            // return if the player size was low
+            // Return if the player size is low
             return;
         }
 
-        //lose mass
-        transform.localScale /= 2;
+        // Lose mass
+        transform.localScale /= 4;
+        Vector3 newMass = 3*transform.localScale;
+        gameObject.GetComponent<Collider2D>().isTrigger = false;
 
-        GameObject b = Instantiate(gameObject, transform.position, Quaternion.identity);
-        // apply force
-        b.GetComponent<Collider2D>().isTrigger = false;
+        // Instantiate a new player object using the assigned prefab
+        GameObject newPlayer = Instantiate(gameObject, transform.position, Quaternion.identity);
+        transform.localScale = newMass;
 
-        b.GetComponent<SplitForce>().enabled = true;
-        b.GetComponent<SplitForce>().SplitForceMethod();
+        // Retrieve the FPGA controller associated with the original player object
+        FpgaController originalFpgaController = GetComponent<FpgaController>();
+
+        // Apply any additional setup for the new player object
+        newPlayer.GetComponent<Collider2D>().isTrigger = false;
+        newPlayer.GetComponent<SplitForce>().enabled = true;
+        newPlayer.GetComponent<SplitForce>().SplitForceMethod();
+
+        // Copy the FPGA controller reference from the original player object to the new player object
+        FpgaController newPlayerFpgaController = newPlayer.GetComponent<FpgaController>();
+        newPlayerFpgaController = originalFpgaController;
     }
 
 
-
-    // Start is called before the first frame update
-
-    PlayerEatMass mass_script;
-    MassSpawner ms;
-    void Start()
-    {
-        mass_script = GetComponent<PlayerEatMass>();
-        ms = MassSpawner.ins;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if(transform.localScale.x < 1)
-        {
-            return;
-        }
-        transform.localScale -= new Vector3(Percentage, Percentage, Percentage) * Time.deltaTime;
-    }
 }
