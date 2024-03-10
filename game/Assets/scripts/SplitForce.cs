@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SplitForce : MonoBehaviour
 {
     public float Speed;
-    public float loseSpeed;
-    public float DifaultSpeed;
+    public float loseSpeed = 0f; // Adjust this value for slower decay
+    public float DefaultSpeed = 50; // Adjust this value for initial speed
 
     public bool ApplyForce = false;
 
@@ -23,27 +21,29 @@ public class SplitForce : MonoBehaviour
 
 
         Speed = DifaultSpeed;
+        Debug.Log("Default Speed: " + DefaultSpeed); // Debug log for DefaultSpeed
         ApplyForce = true;
     }
 
-
     private void Update()
     {
-        if(ApplyForce == false)
+        if (ApplyForce == false)
         {
             enabled = false;
             return;
         }
 
-        transform.Translate(Vector2.up * Speed * Time.deltaTime);
-        Speed -= loseSpeed * Time.deltaTime/1.5f;
+    transform.Translate(Vector2.up * Speed * Time.deltaTime);
+    Speed -= loseSpeed * Time.deltaTime;
 
-        if (Speed <= 0)
-        {
-            GetComponent<CircleCollider2D>().enabled = true;
-            GetComponent<PlayerMovement>().LockActions = false;
+    Debug.Log("Speed: " + Speed); // Debug log for Speed
+    Debug.Log("Lose Speed: " + loseSpeed); // Debug log for loseSpeed
 
-            enabled = false;
-        }
+    if (Speed <= 0)
+    {
+        GetComponent<CircleCollider2D>().enabled = true;
+        GetComponent<PlayerMovement>().LockActions = false;
+        enabled = false;
     }
+    }   
 }

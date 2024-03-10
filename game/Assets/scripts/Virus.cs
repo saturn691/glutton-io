@@ -32,7 +32,7 @@ public class Virus : MonoBehaviour
                 b.GetComponent<Collider2D>().isTrigger = false;
                 b.GetComponent<CircleCollider2D>().enabled = false;
                 b.GetComponent<PlayerMovement>().LockActions = true;
-                b.GetComponent<SplitForce>().Speed = b.GetComponent<SplitForce>().DifaultSpeed;
+                b.GetComponent<SplitForce>().Speed = b.GetComponent<SplitForce>().DefaultSpeed;
                 b.GetComponent<SplitForce>().ApplyForce = true;
                 b.GetComponent<SplitForce>().enabled = true;
             }
