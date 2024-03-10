@@ -1,6 +1,7 @@
 export enum ClientMsgType {
   Join,
   UpdatePosition,
+  PlayerEatenFood,
 }
 
 export enum ServerMsgType {
@@ -8,8 +9,9 @@ export enum ServerMsgType {
   PlayerJoined,
   PlayerLeft,
   UpdatePlayersPosition,
-  BlobEats,
-  BlobEaten,
+  FoodAdded,
+  PlayerAteFood,
+  // BlobEaten,
 }
 
 export type JoinMessageData = {

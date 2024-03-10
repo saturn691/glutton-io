@@ -1,58 +1,59 @@
-import { Position, Blob } from './Blob.js';
+import { Position, Blob } from "./Blob.js";
 import * as uuid from "uuid";
-
 
 /**
  * The mass of the food does follow the same rules as the mass of the blobs
- * of the players. 
+ * of the players.
  */
 export class Food extends Blob {
-    color: number;
+  color: number;
 
-    constructor(
-        position: Position, 
-        size: number
-    ) {
-        super(
-            uuid.v4(), 
-            position, 
-            size + Math.floor(Math.random() * 2)
-        );
-        this.color = Math.floor(Math.random() * 0xFFFFFF);
-    }   
+  constructor(position: Position, size: number) {
+    super(uuid.v4(), position, size + Math.floor(Math.random() * 2));
+    this.color = Math.floor(Math.random() * 0xffffff);
+  }
 }
 
-
 export class FoodManager {
-    food: Food[];
-    defaultMassSize: number;
-    mapSize: Position;
-    maxFood: number;
+  foodBlobs: Map<string, Blob>;
+  defaultMassSize: number;
+  mapSize: Position;
+  maxFood: number;
 
-    constructor(
-        defaultMassSize: number,
-        maxFood: number,
-        mapSize: Position,
-    ) {
-        this.food = [];
-        this.defaultMassSize = defaultMassSize;
-        this.maxFood = maxFood;
-        this.mapSize = mapSize;
-    }
+  constructor(defaultMassSize: number, maxFood: number, mapSize: Position) {
+    this.foodBlobs = new Map<string, Blob>();
+    this.defaultMassSize = defaultMassSize;
+    this.maxFood = maxFood;
+    this.mapSize = mapSize;
+  }
 
+  /**
+   * Gets food blob from foodBlobs dict by id
+   */
+  GetFoodBlobById(id: string) {
+    return this.foodBlobs.get(id);
+  }
 
-    AddFood() {
-        if (this.food.length >= this.maxFood) return;
+  /**
+   * Spawns a new food blob and adds it to the foodBlobs dict
+   */
+  AddFoodBlob() {
+    if (this.foodBlobs.size >= this.maxFood) return;
 
-        // Uniform distribution of food across the map
-        let x = Math.floor(Math.random() * this.mapSize.x);
-        let y = Math.floor(Math.random() * this.mapSize.y);
+    // Uniform distribution of food across the map
+    let x = Math.floor(Math.random() * this.mapSize.x);
+    let y = Math.floor(Math.random() * this.mapSize.y);
 
-        this.food.push(new Food({ x, y }, this.defaultMassSize));
-    }
+    let newFoodBlob = new Blob(uuid.v4(), { x, y }, this.defaultMassSize);
+    this.foodBlobs.set(newFoodBlob.id, newFoodBlob);
 
+    return newFoodBlob;
+  }
 
-    RemoveFood(id: string) {
-        this.food = this.food.filter((food) => food.id !== id);
-    }
+  /**
+   * Removes food blob from the foodBlobs dict by blob id
+   */
+  RemoveFoodBlobById(id: string) {
+    this.foodBlobs.delete(id);
+  }
 }

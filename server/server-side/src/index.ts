@@ -3,8 +3,10 @@ import { config } from "dotenv";
 import { WebSocketServer, WebSocket, RawData } from "ws";
 import { GameState } from "../classes/Game.js";
 import { ClientMsgType, ServerMsgType } from "../classes/MessageType.js";
+
 import * as uuid from "uuid";
 
+import { PlayerUtils } from "../utils/PlayerUtils.js";
 
 const handleWsMessage = (
   game: GameState,
@@ -18,9 +20,15 @@ const handleWsMessage = (
       case ClientMsgType.Join:
         game.AddPlayer(socket, socketId, msgJson.data);
         break;
+
       case ClientMsgType.UpdatePosition:
         game.UpdatePlayerPosition(socketId, msgJson.data);
         break;
+
+      case ClientMsgType.PlayerEatenFood:
+        PlayerUtils.HandlePlayerEatenFood(game, socketId, msgJson.data);
+        break;
+
       default:
         console.log("Unknown message type:", msgJson.type);
         break;
@@ -30,16 +38,14 @@ const handleWsMessage = (
   }
 };
 
-
 const simulate = (game: GameState, interval: number) => {
   // Add bots every interval
-  setInterval(() => {
-    game.AddBot();
-  }, interval);
-  
-  game.Init();
-}
+  game.AddBot();
+  // setInterval(() => {
+  // }, interval);
 
+  game.Init();
+};
 
 // Initialize DB connection
 const main = async () => {
@@ -70,6 +76,5 @@ const main = async () => {
     });
   });
 };
-
 
 main();
