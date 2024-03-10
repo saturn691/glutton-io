@@ -34,4 +34,9 @@ public class ServerUtils
             );
         }
     }
+
+    public static void HandleBlobEats(PlayersManager pmInst, object msgData)
+    {
+        Debug.Log("Blob eats!");
+    }
 }

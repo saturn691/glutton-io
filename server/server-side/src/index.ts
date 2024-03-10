@@ -32,9 +32,12 @@ const handleWsMessage = (
 
 
 const simulate = (game: GameState, interval: number) => {
+  // Add bots every interval
   setInterval(() => {
     game.AddBot();
   }, interval);
+  
+  game.Init();
 }
 
 

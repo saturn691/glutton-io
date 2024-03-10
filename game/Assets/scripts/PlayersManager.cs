@@ -71,8 +71,12 @@ public class PlayersManager : MonoBehaviour
         SpriteRenderer sr = p.GetComponent<SpriteRenderer>();
         if (sr != null)
         {
-            float hue = player.color / 255f;
-            sr.color = Color.HSVToRGB(hue, 1, 1);
+            // Color is a 24-bit integer
+            sr.color = new Color(
+                (player.color >> 16) & 0xFF, 
+                (player.color >> 8) & 0xFF, 
+                player.color & 0xFF
+            );
         }
 
         // Add the player to the dictionary
@@ -93,7 +97,7 @@ public class PlayersManager : MonoBehaviour
         // TODO | At the moment the player is a mass, so this will throw an 
         // TODO | exception when it is eaten. The collision must be done 
         // TODO | server side.
-         
+
         var playerObj = PlayersDict[socketId].gameObject;
         playerObj.transform.position = new Vector2(x, y);
     }

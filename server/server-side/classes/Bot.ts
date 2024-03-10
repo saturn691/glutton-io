@@ -1,4 +1,4 @@
-import { Player, PlayerColor } from './Player.js';
+import { Player } from './Player.js';
 import { Position } from './Blob.js';
 import { WebSocket } from 'ws';
 
@@ -8,7 +8,7 @@ import { WebSocket } from 'ws';
  */
 export class Bot extends Player {
   constructor(
-    color: PlayerColor,
+    color: number,
     socket: WebSocket,
     socketId: string,
     position: Position,

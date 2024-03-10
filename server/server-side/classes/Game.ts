@@ -1,9 +1,12 @@
 import { Position } from "./Blob.js";
-import { Player, PlayerColor } from "./Player.js";
+import { Player } from "./Player.js";
+import { Blob } from "./Blob.js";
 import { Bot } from "./Bot.js";
+import { Food, FoodManager } from "./Food.js";
 import { JoinMessageData, ServerMsgType } from "./MessageType.js";
 import { WebSocketServer, WebSocket } from "ws";
 import * as uuid from "uuid";
+import { set } from "firebase/database";
 
 
 export class GameState {
@@ -12,6 +15,12 @@ export class GameState {
   players: { [socketId: string]: Player };
   ws: WebSocketServer;
   numPlayers: number;
+  
+  // The size of the map. x and y are the maximum values for the map
+  // e.g. if x = 100, then the map starts from (-50 ... 50)
+  mapSize: Position;
+
+  foodManager: FoodManager;
 
   updatedPositions: Map<string, Position>;
 
@@ -19,6 +28,8 @@ export class GameState {
   constructor(id: number, websocketConn: WebSocketServer) {
     this.id = id;
     this.players = {};
+    this.mapSize = { x: 30, y: 30} ;
+    this.foodManager = new FoodManager(10, 100, this.mapSize);
     this.ws = websocketConn;
     this.numPlayers = 0;
     this.updatedPositions = new Map<string, Position>();
@@ -58,7 +69,7 @@ export class GameState {
     let playerId = msgData.playerId;
 
     this.players[socketId] = new Player(
-      PlayerColor.Red,
+      parseInt("FF0000", 16),
       socket,
       socketId,
       { x: 0, y: 0 }, // TODO: Initialize from game
@@ -115,7 +126,7 @@ export class GameState {
 
     // A null socket allows the game to not send messages to the bot
     let bot = new Bot(
-      PlayerColor.Red,
+      parseInt("00FF00", 16),
       null,
       socketId,
       { x: 5, y: 0 }, // TODO: Initialize from game
@@ -173,6 +184,93 @@ export class GameState {
     });
     this.updatedPositions = new Map<string, Position>();
   }
+
+
+  /**
+   * Starts the asynchronous functions
+   */
+  Init() {
+    // Starts food generation
+    setInterval(() => {
+      this.foodManager.AddFood();
+    }, 1000);
+    setInterval(() => {
+      this.Update();
+    }, 60);
+  }
+
+
+  /**
+   * Main game loop. Must be called every frame to update the game state. 
+   * Detects collisions and updates foods, viruses.
+   */
+  private Update() {
+    // TODO - Add food (random in time and position)
+    this.CheckFoodEaten();
+    // TODO - Add viruses (random in time and position)
+    this.CheckCollision();
+    return;
+  }
+
+  private CheckFoodEaten() {
+    for (const socketId in this.players) {
+      if (this.players[socketId] != null) {
+        let player = this.players[socketId];
+        // TODO change once there are more blobs
+        let playerBlob : Blob = player.blob;
+
+        for (let i = 0; i < this.foodManager.food.length; i++) {
+          let food : Food = this.foodManager.food[i];
+          let response = Blob.WhoAteWho(playerBlob, food);
+          if (response != 0)
+          {
+            console.log("Player ate food");
+            playerBlob.EatEnemy(food.size);
+            this.foodManager.RemoveFood(food.id);
+          
+            player.socket.send(
+              JSON.stringify({
+                type: ServerMsgType.BlobEats,
+                data: playerBlob.size
+              })
+            )
+          }
+        }
+      }
+    }
+  }
+
+
+  // TODO very inefficient
+  private CheckCollision() {
+    for (const socketId in this.players) {
+      if (this.players[socketId] != null) {
+        let player = this.players[socketId];
+        let playerBlob : Blob = player.blob;
+
+        for (const enemySocketId in this.players) {
+          if (this.players[enemySocketId] != null && enemySocketId != socketId) {
+            let enemy = this.players[enemySocketId];
+            let enemyBlob : Blob = enemy.blob;
+            let response = Blob.WhoAteWho(playerBlob, enemyBlob);
+            if (response == 1)
+            {
+              console.log(`${socketId} ate ${enemySocketId}`);
+              playerBlob.EatEnemy(enemyBlob.size);
+              this.RemovePlayer(enemySocketId);
+            }
+            else if (response == 2)
+            {
+              console.log(`${enemySocketId} ate ${socketId}`);
+              enemyBlob.EatEnemy(playerBlob.size);
+              this.RemovePlayer(socketId);
+            }
+          }
+        }
+      }
+    }
+  }
+
 
   /**
    * Helper function to send a message to all players in game. Allows for 

@@ -98,6 +98,10 @@ public class ServerConnect : MonoBehaviour
                 Debug.Log("Update players position: " + msg.data);
                 ServerUtils.HandleUpdatePlayersPosition(playersManager, msg.data);
                 break;
+            case ServerMsgType.BlobEats:
+                Debug.Log("Blob eats: " + msg.data);
+                ServerUtils.HandleBlobEats(playersManager, msg.data);
+                break;
             default:
                 Debug.LogWarning("Unknown message type received: " + msg.type);
                 break;
@@ -136,13 +140,20 @@ public class ServerConnect : MonoBehaviour
                 );
             }
 
-            var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-            ServerMessage msg = JsonConvert.DeserializeObject<ServerMessage>(message);
-            Debug.Log("Received: " + message);
-            if (msg != null)
+            try 
             {
-                Debug.Log("Handling message...");
-                await HandleServerMessage(msg);
+                var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                ServerMessage msg = JsonConvert.DeserializeObject<ServerMessage>(message);
+                Debug.Log("Received: " + message);
+                if (msg != null)
+                {
+                    Debug.Log("Handling message...");
+                    await HandleServerMessage(msg);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error receiving message: " + e.Message);
             }
         }
     }

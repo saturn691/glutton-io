@@ -10,11 +10,15 @@ public class PlayerMovements : MonoBehaviour
     //==========================================================================
     
     const int MsgInterval = 20;
-    
+    const int StartingSize = 30;
+
+    private Blob blob;
     private Actions actions;
     private Map map;
     private ServerConnect server;
     private MassSpawner massSpawner;
+    private GameObject[] Mass;
+
     private PlayersManager playersManager;
     private int msgCount = 0;
 
@@ -29,6 +33,7 @@ public class PlayerMovements : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        blob = new Blob("0", new Position(0, 0), StartingSize);
         map = Map.ins;
         server = ServerConnect.instance;
         actions = GetComponent<Actions>();
@@ -38,7 +43,7 @@ public class PlayerMovements : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float Speed_ = Speed / transform.localScale.x;
+        float Speed_ = (float) blob.GetSpeed();
         Vector2 Direction = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
@@ -66,7 +71,7 @@ public class PlayerMovements : MonoBehaviour
                 }
             });
         }
-        
+
         msgCount++;
 
         // serverconnec

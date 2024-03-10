@@ -1,3 +1,7 @@
+/// <summary>
+/// Must agree with the server's schema.
+/// </summary>
+
 public enum ClientMsgType
 {
     Join,
@@ -9,7 +13,9 @@ public enum ServerMsgType {
     InitSocketId,
     PlayerJoined,
     PlayerLeft,
-    UpdatePlayersPosition
+    UpdatePlayersPosition,
+    BlobEats,
+    BlobEaten
 }
 
 // Join message data

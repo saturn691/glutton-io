@@ -3,19 +3,16 @@
 import { WebSocket } from "ws";
 import { Blob, Position } from "./Blob.js";
 
-export enum PlayerColor {
-  Red,
-}
 
 export class Player {
-  color: PlayerColor;
+  color: number;    // 24-bit number representing the color of the player
   gameOver: boolean;
   socket: WebSocket;
   socketId: string; // SocketID uniquely identifies a player
   blob: Blob;       // TODO: Define Player as group of Blobs (maybe through Dictionary?)
 
   constructor(
-    color: PlayerColor,
+    color: number,
     socket: WebSocket,
     socketId: string,
     position: Position,
@@ -30,9 +27,11 @@ export class Player {
     this.blob = new Blob(blobId, position, size);
   }
 
+
   UpdatePosition(position: Position) { // TODO: potentially change to UpdateState, and take size as parameter
     this.blob.position = position;
   }
+
 
   BlobEatsEnemy(appendedSize: number) {
     this.blob.EatEnemy(appendedSize);
