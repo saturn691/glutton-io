@@ -1,9 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 // using ServerConnect;
 
-public class PlayerMovements : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     //==========================================================================
     // Fields
@@ -35,12 +34,25 @@ public class PlayerMovements : MonoBehaviour
     private int msgCount = 0;
 
     public bool LockActions = false;
-    public float Speed = 5f;
+    public float Speed = 10f;
+    public Vector3 Direction;
 
+    Map map;
+    
+    ServerConnect server;
 
-    //==========================================================================
-    // Methods
-    //==========================================================================
+    private FpgaController fpgaController;
+
+    int msgCount = 0;
+
+    MassSpawner massSpawner;
+
+    PlayersManager playersManager;
+
+    void Awake()
+    {
+        fpgaController = new FpgaController();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -58,21 +70,43 @@ public class PlayerMovements : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float Speed_ = (float) blob.GetSpeed();
-        Vector2 Direction = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        fpgaController.UpdateData();
 
-        Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
-        Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
+        float accel_x = fpgaController.GetReadingX();
+        float accel_y = fpgaController.GetReadingY();
+        int switches = fpgaController.GetSwitchValue();
+        int throwMass = fpgaController.GetKey0();
+        int split = fpgaController.GetKey1();
+
+       // Debug.Log("Input " + accel_x + " " + accel_y + " " + switches + " " + throwMass + " " + split);
+    
+        Direction = new Vector3(accel_x, accel_y, 0);
+
+        // The magnitude of the direction vector does not affect the speed in
+        // the MoveTowards function, so we have to calculate the speed manually
+        float Speed_ = Speed * Direction.magnitude / transform.localScale.x;
+
+        // Update the position of the player
+        transform.position += Direction * Speed_ * Time.deltaTime;
+
+        // Clamp the player position to the map limits
+        transform.position = new Vector3(
+            Mathf.Clamp(
+                transform.position.x, 
+                map.MapLimits.x * -1 / 2, 
+                map.MapLimits.x / 2
+            ),
+            Mathf.Clamp(
+                transform.position.y, 
+                map.MapLimits.y * -1 / 2, 
+                map.MapLimits.y / 2
+            ),
+            transform.position.z
+        );
 
 
-        // Update blob's position
-        transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
-        blob.position.x = transform.position.x;
-        blob.position.y = transform.position.y;
-        
-
-        // Send message to server
-        if (msgCount % MsgInterval == 0)
+        // Send message to the server
+        if (msgCount % 2000 == 0)
         {
             Dictionary<string, object> updatePlayerPosMsg = new Dictionary<string, object> {
                 {"x", transform.position.x},
@@ -109,19 +143,18 @@ public class PlayerMovements : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.W) || split == 1)
         {
-            actions.ThrowMass();
+            actions.ThrowMass(Direction);
         }
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) || throwMass == 1)
         {
             // split
             if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
             {
                 return;
             }
-            actions.Split();
+            actions.Split(Direction);
         }
     }
 
