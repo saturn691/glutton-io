@@ -12,22 +12,15 @@ public class PlayerEatMass : MonoBehaviour
     //=========================================================================
 
     public GameObject[] Mass;
-    MassSpawner ms;
+    MassSpawner massSpawner;
+    ServerConnect server;
+
+    PlayerMovements playerMovements;
 
     //=========================================================================
     // Public methods
     //=========================================================================
 
-    public void RemoveMass(GameObject MassObject)
-    {
-        List<GameObject> MassList = new List<GameObject>(Mass);
-
-        // Remove the MassObject from the list
-        MassList.Remove(MassObject);
-
-        // Update the Mass array
-        Mass = MassList.ToArray();
-    }
 
 
     public void AddMass(GameObject MassObject)
@@ -41,6 +34,8 @@ public class PlayerEatMass : MonoBehaviour
         MassList.Add(MassObject);
 
         Mass = MassList.ToArray();
+
+        
     }
 
     //=========================================================================
@@ -53,13 +48,17 @@ public class PlayerEatMass : MonoBehaviour
     }
 
 
-    private void PlayerEat()
+    // TO UPDATE: Player's size updates based on mass it eats
+    private void PlayerEatFood()
     {
-        //Debug.Log("mass EATED added");
 
-        transform.localScale += new Vector3(0.08f, 0.08f, 0.08f);
-        MergePlayers.canMerge = true;
-        GetComponent<Collider2D>().isTrigger = true;
+        // Calculate new radius of the player.
+        playerMovements.blob.size += Blob.DefaultFoodSize;
+        float newRadius = Blob.GetRadius(playerMovements.blob.size);
+        transform.localScale = new Vector3(newRadius, newRadius, newRadius);
+
+        // MergePlayers.canMerge = true;
+        // GetComponent<Collider2D>().isTrigger = true;
     }
 
 
@@ -69,38 +68,42 @@ public class PlayerEatMass : MonoBehaviour
     /// </summary>
     private void Check()
     {
-        // Update the mass array
-        UpdateMass();
 
-        // Check if the player has collided with any mass object
-        for (int i = 0; i < Mass.Length; i++)
+        var foodDictCopy = new Dictionary<string, Blob>(massSpawner.FoodDict);
+        foreach (KeyValuePair<string, Blob> kvp in foodDictCopy)
         {
-            Transform m = Mass[i].transform;
+            string blobId = kvp.Key;
+            Blob foodBlob = kvp.Value;
 
-            if (Vector2.Distance(transform.position, m.position) 
+            GameObject foodGameObject = foodBlob.gameObject;
+
+            if (Vector2.Distance(transform.position, foodGameObject.transform.position) 
                 <= transform.localScale.x / 2
             ) {
-                RemoveMass(m.gameObject);
-                Debug.Log("mass object removed");
-                PlayerEat();
 
-                if (m != null && m.gameObject != null)
-                {
-                    ms.RemoveMass(m.gameObject);
-                    Destroy(m.gameObject);
-                }
+                massSpawner.RemoveFoodBlobById(foodBlob.id);
+
+                // Pre render here, but if not verified by server, then render again
+                // Maybe set timeout of 10s for server to verify
+                PlayerEatFood();
+
+                // Send server PlayerEatenFoodMsg
+                server.SendWsMessage(new ClientMessage(ClientMsgType.PlayerEatenFood, foodBlob.id));
             }
         }
+    
 
         return;
     }
 
 
     // Start is called before the first frame update
-    private void Start()
+    void Start()
     {
-        UpdateMass();
+        playerMovements = PlayerMovements.instance;
+        server = ServerConnect.instance;
+        massSpawner = MassSpawner.ins;
         InvokeRepeating("Check", 0, 0.1f);
-        ms = MassSpawner.ins;
+        
     }
 }

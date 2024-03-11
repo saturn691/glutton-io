@@ -1,64 +1,45 @@
 // import { Blob } from './blob.js';
 // import { Entity } from './entity.js';
 import { WebSocket } from "ws";
-
-export enum PlayerColor {
-  Red,
-}
-
-export type Position = {
-  x: number;
-  y: number;
-};
+import { Blob, Position } from "./Blob.js";
 
 export class Player {
-  id: string;
-  color: PlayerColor;
+  color: number; // 24-bit number representing the color of the player
   gameOver: boolean;
   socket: WebSocket;
-  socketId: string;
-  position: Position;
+  socketId: string; // SocketID uniquely identifies a player
+  blob: Blob; // TODO: Define Player as group of Blobs (maybe through Dictionary?)
 
   constructor(
-    id: string,
-    color: PlayerColor,
+    color: number,
     socket: WebSocket,
     socketId: string,
-    position: Position
+    position: Position,
+    size: number,
+    blobId: string
   ) {
-    this.id = id;
+    //this.id = id;
     this.color = color;
     this.gameOver = false;
     this.socket = socket;
     this.socketId = socketId;
-    this.position = position;
+    this.blob = new Blob(blobId, position, size);
+  }
+
+  ToJson() {
+    return {
+      color: this.color,
+      socketId: this.socketId,
+      blob: this.blob.ToJson()
+    }
   }
 
   UpdatePosition(position: Position) {
-    this.position = position;
+    // TODO: potentially change to UpdateState, and take size as parameter
+    this.blob.position = position;
   }
-  // addBlob(blobID, x, y, size) {
-  //     const blob = new Blob(blobID, x, y, size, this.color);
-  //     this.blobs.push(blob);
-  // }
 
-  // // Remove blobs that are not alive
-  // removeDeadBlobs() {
-  //     this.blobs = this.blobs.filter(blob => blob.isAlive);
-  // }
-
-  // checkGameOver() {
-  //     if (this.blobs.length === 0 || this.blobs.every(blob => !blob.isAlive)) {
-  //         this.gameOver = true;
-  //     }
-  // }
-
-  // // Render all blobs associated with the player
-  // renderBlobs(context) {
-  //     this.blobs.forEach(blob => {
-  //         if (blob.isAlive) { // Only render if the blob is alive
-  //             blob.render(context);
-  //         }
-  //     });
-  // }
+  BlobEatsEnemy(appendedSize: number) {
+    this.blob.EatEnemy(appendedSize);
+  }
 }

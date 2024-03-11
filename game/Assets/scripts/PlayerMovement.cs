@@ -4,7 +4,34 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    Actions actions;
+    //==========================================================================
+    // Fields
+    //==========================================================================
+    
+    #region Instance
+    public static PlayerMovements instance { get; private set; } // Singleton instance
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+    }
+
+    #endregion
+    const int MsgInterval = 20;
+    const int StartingSize = 30;
+
+    public Blob blob;
+    private Actions actions;
+    private Map map;
+    private ServerConnect server;
+    private MassSpawner massSpawner;
+    private GameObject[] Mass;
+
+    private PlayersManager playersManager;
+    private int msgCount = 0;
 
     public bool LockActions = false;
     public float Speed = 10f;
@@ -30,6 +57,11 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        blob = new Blob("0", StartingSize, new Position(0, 0), null);
+        float r = Blob.GetRadius(StartingSize);
+        transform.localScale = new Vector3(r, r, r);
+
+
         map = Map.ins;
         server = ServerConnect.instance;
         actions = GetComponent<Actions>();
@@ -82,7 +114,11 @@ public class PlayerMovement : MonoBehaviour
                 {"y", transform.position.y}
             };
 
-            var UpdatePosMsg = new ClientMessage(ClientMsgType.UpdatePosition, updatePlayerPosMsg);
+            var UpdatePosMsg = new ClientMessage(
+                ClientMsgType.UpdatePosition, 
+                updatePlayerPosMsg
+            );
+
             server.SendWsMessage(UpdatePosMsg).ContinueWith(task =>
             {
                 if (task.Exception != null)
@@ -91,6 +127,7 @@ public class PlayerMovement : MonoBehaviour
                 }
             });
         }
+
         msgCount++;
 
         // serverconnec

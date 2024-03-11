@@ -12,10 +12,10 @@ using System.Threading.Tasks;
 public class ServerUtils
 {
     public static void HandlePlayerJoined(PlayersManager pmInst, object msgData) {
-        Debug.Log("Player joined!");
+        Debug.Log("Handling player joined: " + msgData);
         var player = JsonConvert.DeserializeObject<Player>(msgData.ToString());
 
-        pmInst.AddPlayer(player.socketId, new Position(player.position.x, player.position.y));
+        pmInst.AddPlayer(player);
     }
 
     public static void HandleUpdatePlayersPosition(PlayersManager pmInst, object msgData)
@@ -25,7 +25,7 @@ public class ServerUtils
         {
             if ((string)player["socketId"] == pmInst.selfSocketId) continue;
             
-            // Debug.Log("Updating player position: " + player["socketId"] + " " + player["position"].ToString());
+            
             Position pos = JsonConvert.DeserializeObject<Position>(player["position"].ToString());
             pmInst.UpdatePlayerPosition(
                 (string)player["socketId"],
@@ -33,5 +33,31 @@ public class ServerUtils
                 pos.y
             );
         }
+    }
+
+    public static void HandleFoodAdded(MassSpawner msInst, object msgData)
+    {        
+        var data = JsonConvert.DeserializeObject<Blob>(msgData.ToString());
+        msInst.AddFood(data);
+    }
+
+
+    public static void HandlePlayerAteFood(PlayersManager pmInst, MassSpawner msInst, object msgData)
+    {        
+        var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(msgData.ToString());
+        
+        string foodBlobId = (string)data["foodId"];
+        string playerId = (string)data["playerId"];
+        
+
+        if (pmInst.selfSocketId != playerId)
+        {
+            // Update other player's size
+            int newSize = pmInst.PlayersDict[playerId].blob.size + Blob.DefaultFoodSize;
+            pmInst.UpdatePlayerSize(playerId, newSize);
+            msInst.RemoveFoodBlobById(foodBlobId);
+            Debug.Log("Other player ate food");
+        }
+
     }
 }
