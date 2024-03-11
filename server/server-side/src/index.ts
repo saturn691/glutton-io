@@ -3,7 +3,10 @@ import { config } from "dotenv";
 import { WebSocketServer, WebSocket, RawData } from "ws";
 import { GameState } from "../classes/Game.js";
 import { ClientMsgType, ServerMsgType } from "../classes/MessageType.js";
+
 import * as uuid from "uuid";
+
+import { PlayerUtils } from "../utils/PlayerUtils.js";
 
 const handleWsMessage = (
   game: GameState,
@@ -17,9 +20,15 @@ const handleWsMessage = (
       case ClientMsgType.Join:
         game.AddPlayer(socket, socketId, msgJson.data);
         break;
+
       case ClientMsgType.UpdatePosition:
         game.UpdatePlayerPosition(socketId, msgJson.data);
         break;
+
+      case ClientMsgType.PlayerEatenFood:
+        PlayerUtils.HandlePlayerEatenFood(game, socketId, msgJson.data);
+        break;
+
       default:
         console.log("Unknown message type:", msgJson.type);
         break;
@@ -29,32 +38,27 @@ const handleWsMessage = (
   }
 };
 
-const simulate = (socket: WebSocket, game: GameState) => {
-  let socketId = uuid.v4();
-  game.AddPlayer(socket, socketId, { playerId: "test_opponent" });
+const simulate = (game: GameState, interval: number) => {
+  // Add bots every interval
+  // game.AddBot();
+  // setInterval(() => {
+  // }, interval);
 
-  setInterval(() => {
-    // Move player position 0.001 units to the right
-    let prevPosition = game.players[socketId].position;
-
-    game.UpdatePlayerPosition(socketId, {
-      x: prevPosition.x + 0.1,
-      y: prevPosition.y,
-    });
-  }, 100);
+  game.Init();
 };
 
 // Initialize DB connection
 const main = async () => {
+  const PORT = 8080;
   config();
 
-  const ws = new WebSocketServer({ port: 8080 });
+  const ws = new WebSocketServer({ port: PORT });
   const game = new GameState(1, ws);
 
-  simulate(null, game);
+  simulate(game, 5000);
 
   ws.on("listening", () => {
-    console.log("listening to ws connections on port 8080");
+    console.log(`listening to ws connections on port ${PORT}`);
   });
 
   ws.on("connection", async (socket) => {

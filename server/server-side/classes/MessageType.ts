@@ -1,6 +1,9 @@
+import { Position } from "./Blob.js";
+
 export enum ClientMsgType {
   Join,
   UpdatePosition,
+  PlayerEatenFood,
 }
 
 export enum ServerMsgType {
@@ -8,8 +11,13 @@ export enum ServerMsgType {
   PlayerJoined,
   PlayerLeft,
   UpdatePlayersPosition,
+  FoodAdded,
+  PlayerAteFood,
+  // BlobEaten,
 }
 
 export type JoinMessageData = {
-  playerId: string;
+  playerId: string,
+  position: Position,
+  size: number
 };

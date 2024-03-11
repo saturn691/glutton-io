@@ -15,7 +15,7 @@ public class ServerUtils
         Debug.Log("Player joined!");
         var player = JsonConvert.DeserializeObject<Player>(msgData.ToString());
 
-        pmInst.AddPlayer(player.socketId, new Position(player.position.x, player.position.y));
+        pmInst.AddPlayer(player);
     }
 
     public static void HandleUpdatePlayersPosition(PlayersManager pmInst, object msgData)
@@ -33,5 +33,10 @@ public class ServerUtils
                 pos.y
             );
         }
+    }
+
+    public static void HandleBlobEats(PlayersManager pmInst, object msgData)
+    {
+        Debug.Log("Blob eats!");
     }
 }
