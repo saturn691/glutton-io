@@ -15,6 +15,8 @@ public class PlayerEatMass : MonoBehaviour
     MassSpawner massSpawner;
     ServerConnect server;
 
+    PlayerMovements playerMovements;
+
     //=========================================================================
     // Public methods
     //=========================================================================
@@ -32,6 +34,8 @@ public class PlayerEatMass : MonoBehaviour
         MassList.Add(MassObject);
 
         Mass = MassList.ToArray();
+
+        
     }
 
     //=========================================================================
@@ -49,10 +53,12 @@ public class PlayerEatMass : MonoBehaviour
     {
 
         // Calculate new radius of the player.
+        playerMovements.blob.size += Blob.DefaultFoodSize;
+        float newRadius = Blob.GetRadius(playerMovements.blob.size);
+        transform.localScale = new Vector3(newRadius, newRadius, newRadius);
 
-        transform.localScale += new Vector3(0.08f, 0.08f, 0.08f);
-        MergePlayers.canMerge = true;
-        GetComponent<Collider2D>().isTrigger = true;
+        // MergePlayers.canMerge = true;
+        // GetComponent<Collider2D>().isTrigger = true;
     }
 
 
@@ -94,7 +100,7 @@ public class PlayerEatMass : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        playerMovements = PlayerMovements.instance;
         server = ServerConnect.instance;
         massSpawner = MassSpawner.ins;
         InvokeRepeating("Check", 0, 0.1f);

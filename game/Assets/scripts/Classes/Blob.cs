@@ -18,6 +18,8 @@ public class Blob
     public int size;
     public GameObject gameObject;
 
+    public static int DefaultFoodSize = 1;
+
     
     //==========================================================================
     // Methods

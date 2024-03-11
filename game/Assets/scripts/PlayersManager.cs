@@ -114,6 +114,16 @@ public class PlayersManager : MonoBehaviour
         playerObj.transform.position = new Vector2(x, y);
     }
 
+    /// <summary>
+    /// TODO_COMMENT
+    /// </summary>
+    public void UpdatePlayerSize(string socketId, int newSize)
+    {
+        PlayersDict[socketId].blob.size = newSize;
+        float r = Blob.GetRadius(newSize);
+        PlayersDict[socketId].blob.gameObject.transform.localScale = new Vector3(r, r, r);
+    }
+
     public void Update()
     {
         // Get old position

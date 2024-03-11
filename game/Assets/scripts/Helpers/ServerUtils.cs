@@ -52,6 +52,9 @@ public class ServerUtils
 
         if (pmInst.selfSocketId != playerId)
         {
+            // Update other player's size
+            int newSize = pmInst.PlayersDict[playerId].blob.size + Blob.DefaultFoodSize;
+            pmInst.UpdatePlayerSize(playerId, newSize);
             msInst.RemoveFoodBlobById(foodBlobId);
             Debug.Log("Other player ate food");
         }
