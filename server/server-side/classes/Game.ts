@@ -22,12 +22,14 @@ export class GameState {
 
   updatedPositions: Map<string, Position>;
 
+  playerStartingSize: number = 30;
+
   // Player Position Update
   constructor(id: number, websocketConn: WebSocketServer) {
     this.id = id;
     this.players = {};
     this.mapSize = { x: 7.5, y: 7.5 };
-    this.foodManager = new FoodManager(10, 100, this.mapSize);
+    this.foodManager = new FoodManager(1, 100, this.mapSize); // Default mass size
     this.ws = websocketConn;
     this.numPlayers = 0;
     this.updatedPositions = new Map<string, Position>();
@@ -42,13 +44,20 @@ export class GameState {
    */
 
   InitPlayerJoined(socket: WebSocket, socketId: string) {
+    console.log("Adding player with socket id: ", socketId);
+    let playersWithoutSocket = {}
+    for (const socketId in this.players) {
+      playersWithoutSocket[socketId] = this.players[socketId].ToJson()
+    }
+
+
     socket.send(
       JSON.stringify({
         type: ServerMsgType.InitSocketId,
         data: {
           socketId: socketId,
-          players: this.players,
-          foodBlobs: Object.fromEntries(this.foodManager.foodBlobs),
+          players: playersWithoutSocket,
+          // foodBlobs: Object.fromEntries(this.foodManager.foodBlobs),
         },
       })
     );
@@ -63,24 +72,29 @@ export class GameState {
    * @param msgData contains the playerId of the player used for display
    */
   AddPlayer(socket: WebSocket, socketId: string, msgData: JoinMessageData) {
-    console.log("Adding player with socket id: ", socketId);
-    let playerId = msgData.playerId;
+    console.log("Adding player with blob: ", msgData);
+    let playerId = "dummy_player_id"; // To change to input from user
 
-    this.players[socketId] = new Player(
+    let newPlayer = new Player(
       parseInt("FF0000", 16),
       socket,
       socketId,
-      { x: 0, y: 0 }, // TODO: Initialize from game
-      50, // TODO: Initialize from game
+
+      msgData.position, // TODO: assign position in connect
+      msgData.size, // TODO: size - Initialize from game
+
       playerId // TODO: Change to BlobId
     );
 
-    this.numPlayers++;
+    console.log("New player: ", newPlayer.ToJson())
 
+    this.players[socketId] = newPlayer
+    this.numPlayers++;
+    
     this.Broadcast(
       {
         type: ServerMsgType.PlayerJoined,
-        data: this.players[socketId],
+        data: newPlayer.ToJson(),
       },
       socketId
     );
@@ -211,34 +225,6 @@ export class GameState {
     return;
   }
 
-  // OLD FUNCTION
-  private CheckFoodEaten() {
-    for (const socketId in this.players) {
-      if (this.players[socketId] != null) {
-        let player = this.players[socketId];
-        // TODO change once there are more blobs
-        let playerBlob: Blob = player.blob;
-
-        // for (let i = 0; i < this.foodManager.food.length; i++) {
-        //   let food: Food = this.foodManager.food[i];
-        //   let response = Blob.WhoAteWho(playerBlob, food);
-        //   if (response != 0) {
-        //     console.log("Player ate food");
-        //     playerBlob.EatEnemy(food.size);
-        //     // this.foodManager.RemoveFood(food.id);
-
-        //     player.socket.send(
-        //       JSON.stringify({
-        //         type: ServerMsgType.BlobEats,
-        //         data: playerBlob.size,
-        //       })
-        //     );
-        //   }
-        // }
-      }
-    }
-  }
-
   // TODO very inefficient
   private CheckCollision() {
     for (const socketId in this.players) {
@@ -279,11 +265,12 @@ export class GameState {
    * @param excludePlayerId the player to exclude from the broadcast
    */
   public Broadcast(message: any, excludePlayerId?: string) {
-    let jsonMsg = JSON.stringify(message);
 
+    let jsonMsg = JSON.stringify(message);
+    
     for (const socketId in this.players) {
       if (socketId != excludePlayerId && this.players[socketId] != null) {
-        if (this.players[socketId].socket === null) continue;
+        // if (this.players[socketId].socket === null) continue;
         this.players[socketId].socket.send(jsonMsg);
       }
     }

@@ -16,6 +16,17 @@ export class Blob {
     this.size = size;
   }
 
+  ToJson() {
+    return {
+      id: this.id,
+      position: {
+        x: this.position.x,
+        y: this.position.y
+      },
+      size: this.size
+    }
+  }
+
   EatEnemy(appendedSize: number) {
     this.size += appendedSize;
   }

@@ -1,3 +1,5 @@
+import { Position } from "./Blob.js";
+
 export enum ClientMsgType {
   Join,
   UpdatePosition,
@@ -15,5 +17,7 @@ export enum ServerMsgType {
 }
 
 export type JoinMessageData = {
-  playerId: string;
+  playerId: string,
+  position: Position,
+  size: number
 };

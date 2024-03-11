@@ -26,6 +26,14 @@ export class Player {
     this.blob = new Blob(blobId, position, size);
   }
 
+  ToJson() {
+    return {
+      color: this.color,
+      socketId: this.socketId,
+      blob: this.blob.ToJson()
+    }
+  }
+
   UpdatePosition(position: Position) {
     // TODO: potentially change to UpdateState, and take size as parameter
     this.blob.position = position;

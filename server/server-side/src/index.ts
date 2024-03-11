@@ -40,7 +40,7 @@ const handleWsMessage = (
 
 const simulate = (game: GameState, interval: number) => {
   // Add bots every interval
-  game.AddBot();
+  // game.AddBot();
   // setInterval(() => {
   // }, interval);
 
