@@ -132,7 +132,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 266248830}
-  - component: {fileID: 266248829}
+  - component: {fileID: 266248831}
   m_Layer: 0
   m_Name: PlayersManager
   m_TagString: Untagged
@@ -140,24 +140,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &266248829
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 266248828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d495992726508414191085a7245bdfe6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Mass: {fileID: 3393830436785336489, guid: 905fe24bc76fe51489613f2fb5232bbb, type: 3}
-  Players: []
-  CreatedMasses: []
-  MaxMass: 50
-  Time_To_Instantiate: 0.5
-  MaxPlayers: 10
 --- !u!4 &266248830
 Transform:
   m_ObjectHideFlags: 0
@@ -173,6 +155,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &266248831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266248828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1f4585bbf5d64e718783a340a0d465c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PlayerMass: {fileID: 0}
+  selfSocketId: 
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -345,7 +341,6 @@ GameObject:
   m_Component:
   - component: {fileID: 834052394}
   - component: {fileID: 834052392}
-  - component: {fileID: 834052401}
   - component: {fileID: 834052393}
   - component: {fileID: 834052395}
   - component: {fileID: 834052396}
@@ -453,6 +448,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b03a3cb074effe34aa87743b0247b75d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blob:
+    id: 
+    position:
+      x: 0
+      y: 0
+    size: 0
+    gameObject: {fileID: 0}
   LockActions: 0
   Speed: 5
   Direction: {x: 0, y: 0, z: 0}
@@ -485,7 +487,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Speed: 20
   loseSpeed: 30
-  DifaultSpeed: 20
+  DefaultSpeed: 50
   ApplyForce: 0
 --- !u!50 &834052398
 Rigidbody2D:
@@ -563,18 +565,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: 
   blobID: 
---- !u!114 &834052401
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 834052391}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 28ae6a1cc6463a24ba3188332ea84059, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1551912230
 GameObject:
   m_ObjectHideFlags: 0
@@ -785,4 +775,3 @@ SceneRoots:
   - {fileID: 266248830}
   - {fileID: 1551912232}
   - {fileID: 9090301158167996415}
-  - {fileID: 1144608665}

@@ -19,7 +19,7 @@ public class ServerConnect : MonoBehaviour
     public PlayersManager playersManager;
     public MassSpawner massSpawner;
 
-    public PlayerMovements playerMovements;
+    public PlayerMovement playerMovement;
     
     public async Task SendWsMessage(ClientMessage msg)
     {
@@ -66,7 +66,7 @@ public class ServerConnect : MonoBehaviour
                 Debug.Log("Connected!");
 
                 // Create JSON formatted data
-                Blob playerBlob = playerMovements.blob;
+                Blob playerBlob = playerMovement.blob;
                 Blob blobWithoutGameObject = new Blob(playerBlob.id, playerBlob.size, playerBlob.position, null);
                 await SendWsMessage(new ClientMessage(
                     ClientMsgType.Join,
@@ -169,7 +169,7 @@ public class ServerConnect : MonoBehaviour
     {
         playersManager = PlayersManager.instance;
         massSpawner = MassSpawner.ins;
-        playerMovements = PlayerMovements.instance;
+        playerMovement = PlayerMovement.instance;
         InitWsConnection();
         // ReceiveMessages();
     }

@@ -154,4 +154,15 @@ public class JtagUart
 
         return buf;
     }
+
+
+    /// <summary>
+    /// Closes the JTAG Atlantic connection. This should be called when the
+    /// program is finished with the JTAG UART, otherwise the connection will
+    /// be left hanging.
+    /// </summary>
+    public void Close()
+    {
+        jtagatlantic_close(atlantic);
+    }
 }

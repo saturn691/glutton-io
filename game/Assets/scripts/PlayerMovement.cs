@@ -8,18 +8,6 @@ public class PlayerMovement : MonoBehaviour
     // Fields
     //==========================================================================
     
-    #region Instance
-    public static PlayerMovements instance { get; private set; } // Singleton instance
-
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-    }
-
-    #endregion
     const int MsgInterval = 20;
     const int StartingSize = 30;
 
@@ -29,7 +17,7 @@ public class PlayerMovement : MonoBehaviour
     private ServerConnect server;
     private MassSpawner massSpawner;
     private GameObject[] Mass;
-
+    private FpgaController fpgaController;
     private PlayersManager playersManager;
     private int msgCount = 0;
 
@@ -37,22 +25,24 @@ public class PlayerMovement : MonoBehaviour
     public float Speed = 10f;
     public Vector3 Direction;
 
-    Map map;
-    
-    ServerConnect server;
+    #region Instance
+    public static PlayerMovement instance { get; private set; } // Singleton instance
 
-    private FpgaController fpgaController;
 
-    int msgCount = 0;
-
-    MassSpawner massSpawner;
-
-    PlayersManager playersManager;
+    //==========================================================================
+    // Methods
+    //==========================================================================
 
     void Awake()
     {
         fpgaController = new FpgaController();
+        if (instance == null)
+        {
+            instance = this;
+        }
     }
+
+    #endregion
 
     // Start is called before the first frame update
     void Start()
@@ -106,7 +96,7 @@ public class PlayerMovement : MonoBehaviour
 
 
         // Send message to the server
-        if (msgCount % 2000 == 0)
+        if (msgCount % MsgInterval == 0)
         {
             Dictionary<string, object> updatePlayerPosMsg = new Dictionary<string, object> {
                 {"x", transform.position.x},
