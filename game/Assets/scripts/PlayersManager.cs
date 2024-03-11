@@ -30,11 +30,6 @@ public class PlayersManager : MonoBehaviour
     {
     }
 
-<<<<<<< HEAD
-=======
-    public void Init(object msgData) {
-        // Debug.Log("Init player string: " );
->>>>>>> abbd2da (added food eating functionality)
 
     /// <summary>
     /// Initialize the players manager with the players data
@@ -50,13 +45,6 @@ public class PlayersManager : MonoBehaviour
         selfSocketId = (string)data["socketId"];    // handle self-identification
 
         var players = JsonConvert.DeserializeObject<Dictionary<string, object>>(data["players"].ToString());
-<<<<<<< HEAD
-
-        foreach (KeyValuePair<string, object> kvp in players)
-        {
-            Player player = JsonConvert.DeserializeObject<Player>(kvp.Value.ToString());
-            AddPlayer(player);
-=======
         
         foreach (KeyValuePair<string, object> kvp in players) {
 
@@ -64,8 +52,7 @@ public class PlayersManager : MonoBehaviour
             
             Player player = JsonConvert.DeserializeObject<Player>(kvp.Value.ToString());
             Debug.Log("Existing player: " + player.socketId + " Position: " + player.blob.position.x + " " + player.blob.position.y);
-            AddPlayer(player.socketId, player);
->>>>>>> abbd2da (added food eating functionality)
+            AddPlayer(player);  
         }
 
         Debug.Log($"Player {selfSocketId} initialized!");

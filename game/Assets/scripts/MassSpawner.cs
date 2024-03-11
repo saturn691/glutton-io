@@ -51,13 +51,8 @@ public class MassSpawner : MonoBehaviour
     private void Start()
     {
         map = Map.ins;
-<<<<<<< HEAD
-        StartCoroutine(CreateMass());
-
-=======
         // StartCoroutine(CreateMass());
     
->>>>>>> abbd2da (added food eating functionality)
     }
 
     public void AddFood(Blob foodBlob) {
@@ -119,7 +114,6 @@ public class MassSpawner : MonoBehaviour
             }
         }
         else
-<<<<<<< HEAD
         {
             Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
         }
@@ -129,8 +123,6 @@ public class MassSpawner : MonoBehaviour
     public void RemoveMass(GameObject m)
     {
         if (CreatedMasses.Contains(m) == true)
-=======
->>>>>>> abbd2da (added food eating functionality)
         {
             Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
         }

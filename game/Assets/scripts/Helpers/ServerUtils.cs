@@ -14,12 +14,8 @@ public class ServerUtils
     public static void HandlePlayerJoined(PlayersManager pmInst, object msgData) {
         Debug.Log("Handling player joined: " + msgData);
         var player = JsonConvert.DeserializeObject<Player>(msgData.ToString());
-<<<<<<< HEAD
 
         pmInst.AddPlayer(player);
-=======
-        pmInst.AddPlayer(player.socketId, player);
->>>>>>> 4a40e04 (saving before rebasing server-game)
     }
 
     public static void HandleUpdatePlayersPosition(PlayersManager pmInst, object msgData)
@@ -39,11 +35,6 @@ public class ServerUtils
         }
     }
 
-<<<<<<< HEAD
-    public static void HandleBlobEats(PlayersManager pmInst, object msgData)
-    {
-        Debug.Log("Blob eats!");
-=======
     public static void HandleFoodAdded(MassSpawner msInst, object msgData)
     {        
         var data = JsonConvert.DeserializeObject<Blob>(msgData.ToString());
@@ -65,6 +56,5 @@ public class ServerUtils
             Debug.Log("Other player ate food");
         }
 
->>>>>>> abbd2da (added food eating functionality)
     }
 }

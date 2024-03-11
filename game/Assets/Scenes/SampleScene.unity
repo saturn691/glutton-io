@@ -133,7 +133,6 @@ GameObject:
   m_Component:
   - component: {fileID: 266248830}
   - component: {fileID: 266248829}
-  - component: {fileID: 266248831}
   m_Layer: 0
   m_Name: PlayersManager
   m_TagString: Untagged
@@ -148,7 +147,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 266248828}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d495992726508414191085a7245bdfe6, type: 3}
   m_Name: 
@@ -174,21 +173,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &266248831
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 266248828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1f4585bbf5d64e718783a340a0d465c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PlayerMass: {fileID: 3393830436785336489, guid: 905fe24bc76fe51489613f2fb5232bbb, type: 3}
-  MaxPlayers: 10
-  selfSocketId: 
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -360,9 +344,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 834052394}
+  - component: {fileID: 834052392}
   - component: {fileID: 834052393}
   - component: {fileID: 834052395}
-  - component: {fileID: 834052392}
   - component: {fileID: 834052396}
   - component: {fileID: 834052397}
   - component: {fileID: 834052399}
@@ -577,7 +561,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: 
   blobID: 
-<<<<<<< HEAD
 --- !u!1 &1144608663
 GameObject:
   m_ObjectHideFlags: 0
@@ -625,8 +608,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-=======
->>>>>>> abbd2da (added food eating functionality)
 --- !u!1 &1551912230
 GameObject:
   m_ObjectHideFlags: 0

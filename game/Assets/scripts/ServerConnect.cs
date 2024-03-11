@@ -17,12 +17,8 @@ public class ServerConnect : MonoBehaviour
     public static ServerConnect instance { get; private set; } // Singleton instance
     private ClientWebSocket client; // Keep the client accessible
     public PlayersManager playersManager;
-<<<<<<< HEAD
-
-=======
     public MassSpawner massSpawner;
     
->>>>>>> abbd2da (added food eating functionality)
     public async Task SendWsMessage(ClientMessage msg)
     {
         // Debug.Log("Sending new ws message!");
@@ -86,24 +82,23 @@ public class ServerConnect : MonoBehaviour
         switch (msg.type)
         {
             case ServerMsgType.InitSocketId:
-                Debug.Log("Init socket id: " + msg.data);
                 if (playersManager == null)
                 {
                     playersManager = PlayersManager.instance;
                     Debug.Log("Players manager is null");
                 }
-                playersManager.Init(msg.data); // Here
-                // massSpawner.Init(msg.data);
+                playersManager.Init(msg.data);
+                // Init blobs too
                 break;
             case ServerMsgType.PlayerJoined:
-                Debug.Log("Player joined: " + (string)msg.data);
+                // Debug.Log("Player joined: " + (string)msg.data);
                 ServerUtils.HandlePlayerJoined(playersManager, msg.data);
                 break;
             case ServerMsgType.PlayerLeft:
-                Debug.Log("Player left: " + msg.data);
+                // Debug.Log("Player left: " + msg.data);
                 break;
             case ServerMsgType.UpdatePlayersPosition:
-                Debug.Log("Update players position: " + msg.data);
+                // Debug.Log("Update players position: " + msg.data);
                 ServerUtils.HandleUpdatePlayersPosition(playersManager, msg.data);
                 break;
             case ServerMsgType.FoodAdded:
@@ -154,10 +149,10 @@ public class ServerConnect : MonoBehaviour
             {
                 var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 ServerMessage msg = JsonConvert.DeserializeObject<ServerMessage>(message);
-                Debug.Log("Received: " + message);
+                // Debug.Log("Received: " + message);
                 if (msg != null)
                 {
-                    Debug.Log("Handling message...");
+                    // Debug.Log("Handling message...");
                     await HandleServerMessage(msg);
                 }
             }
