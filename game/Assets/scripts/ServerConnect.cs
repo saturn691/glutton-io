@@ -17,7 +17,10 @@ public class ServerConnect : MonoBehaviour
     public static ServerConnect instance { get; private set; } // Singleton instance
     private ClientWebSocket client; // Keep the client accessible
     public PlayersManager playersManager;
+    public MassSpawner massSpawner;
 
+    public PlayerMovements playerMovements;
+    
     public async Task SendWsMessage(ClientMessage msg)
     {
         // Debug.Log("Sending new ws message!");
@@ -49,8 +52,10 @@ public class ServerConnect : MonoBehaviour
     #endregion
 
     async Task InitWsConnection()
-    {
-        var serverUri = new Uri("ws://localhost:8080");
+    {  
+        string url = "ws://3.10.169.198:8080";
+        // string url = "ws://localhost:8080";
+        var serverUri = new Uri(url);
         Debug.Log("Connecting to " + serverUri + "...");
         using (client = new ClientWebSocket())
         {
@@ -62,8 +67,10 @@ public class ServerConnect : MonoBehaviour
 
                 // Create JSON formatted data
                 await SendWsMessage(new ClientMessage(
-                    ClientMsgType.Join, new JoinMsgData("player1") // TODO: Change to unique blobId
+                    ClientMsgType.Join, playerMovements.blob
                 ));
+
+                // new JoinMsgData("player1") // TODO: Change to unique blobId
 
                 await ReceiveMessages();
             }
@@ -79,28 +86,30 @@ public class ServerConnect : MonoBehaviour
         switch (msg.type)
         {
             case ServerMsgType.InitSocketId:
-                Debug.Log("Init socket id: " + msg.data);
                 if (playersManager == null)
                 {
                     playersManager = PlayersManager.instance;
                     Debug.Log("Players manager is null");
                 }
-                playersManager.Init(msg.data); // Here
+                playersManager.Init(msg.data);
+                // Init blobs too
                 break;
             case ServerMsgType.PlayerJoined:
-                Debug.Log("Player joined: " + msg.data);
+                Debug.Log("Received player joined msg");
                 ServerUtils.HandlePlayerJoined(playersManager, msg.data);
                 break;
             case ServerMsgType.PlayerLeft:
-                Debug.Log("Player left: " + msg.data);
+                // Debug.Log("Player left: " + msg.data);
                 break;
             case ServerMsgType.UpdatePlayersPosition:
-                Debug.Log("Update players position: " + msg.data);
+                // Debug.Log("Update players position: " + msg.data);
                 ServerUtils.HandleUpdatePlayersPosition(playersManager, msg.data);
                 break;
-            case ServerMsgType.BlobEats:
-                Debug.Log("Blob eats: " + msg.data);
-                ServerUtils.HandleBlobEats(playersManager, msg.data);
+            case ServerMsgType.FoodAdded:
+                ServerUtils.HandleFoodAdded(massSpawner, msg.data);
+                break;
+            case ServerMsgType.PlayerAteFood:
+                ServerUtils.HandlePlayerAteFood(playersManager, massSpawner, msg.data);
                 break;
             default:
                 Debug.LogWarning("Unknown message type received: " + msg.type);
@@ -144,10 +153,10 @@ public class ServerConnect : MonoBehaviour
             {
                 var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 ServerMessage msg = JsonConvert.DeserializeObject<ServerMessage>(message);
-                Debug.Log("Received: " + message);
+                // Debug.Log("Received: " + message);
                 if (msg != null)
                 {
-                    Debug.Log("Handling message...");
+                    // Debug.Log("Handling message...");
                     await HandleServerMessage(msg);
                 }
             }
@@ -163,8 +172,10 @@ public class ServerConnect : MonoBehaviour
     public async void Start()
     {
         playersManager = PlayersManager.instance;
-
-        await InitWsConnection();
+        massSpawner = MassSpawner.ins;
+        playerMovements = PlayerMovements.instance;
+        InitWsConnection();
+        // ReceiveMessages();
     }
 
     // Update is called once per frame

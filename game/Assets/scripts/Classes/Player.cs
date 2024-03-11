@@ -26,72 +26,21 @@ public class Position
 }
 
 
-[Serializable]
-public class Blob
-{
-    //==========================================================================
-    // Fields
-    //==========================================================================
-    
-    private const float BaseSpeed = 5f;
-    public string id;
-    public Position position;
-    public int size;
-    
-    //==========================================================================
-    // Methods
-    //==========================================================================
-
-
-    public Blob(string id, Position position, int size)
-    {
-        this.id = id;
-        this.position = position;
-        this.size = size;
-    }
-
-    /// <summary
-    /// Must agree with the server's speed calculation.
-    /// Otherwise, the movement of the bots will be incorrect.
-    /// </summary>
-    public double GetSpeed()
-    {
-        return BaseSpeed / Math.Log(size);
-    }
-
-    /// <summary>
-    ///  Must agree with the server's mass object radius.
-    ///  Otherwise, the rendering of the mass object will be incorrect.
-    /// </summary>
-    public static double GetRadius(int size)
-    {
-        return Math.Sqrt(size / Math.PI);
-    }
-}
 
 
 [Serializable]
 public class Player
 {
     public string socketId;
-    public int color;
-    public bool gameOver;
+    public Position position;
     public Blob blob;
+    public int color;
 
-    public GameObject gameObject;
-
-
-    public Player(
-        string socketId,
-        int color,
-        bool gameOver, 
-        Blob blob,
-        GameObject gameObject
-    ) {
+    // public GameObject gameObject;
+    public Player(string socketId, Position position, Blob blob)
+    {
         this.socketId = socketId;
-        this.color = color;
-        this.gameOver = gameOver;
+        this.position = position;
         this.blob = blob;
-        this.gameObject = gameObject;
     }
 }

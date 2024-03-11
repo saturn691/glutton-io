@@ -9,10 +9,22 @@ public class PlayerMovements : MonoBehaviour
     // Fields
     //==========================================================================
     
+    #region Instance
+    public static PlayerMovements instance { get; private set; } // Singleton instance
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+    }
+
+    #endregion
     const int MsgInterval = 20;
     const int StartingSize = 30;
 
-    private Blob blob;
+    public Blob blob;
     private Actions actions;
     private Map map;
     private ServerConnect server;
@@ -33,7 +45,11 @@ public class PlayerMovements : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        blob = new Blob("0", new Position(0, 0), StartingSize);
+        blob = new Blob("0", StartingSize, new Position(0, 0), null);
+        float r = Blob.GetRadius(StartingSize);
+        transform.localScale = new Vector3(r, r, r);
+
+
         map = Map.ins;
         server = ServerConnect.instance;
         actions = GetComponent<Actions>();
