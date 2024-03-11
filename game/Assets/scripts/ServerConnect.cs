@@ -17,7 +17,12 @@ public class ServerConnect : MonoBehaviour
     public static ServerConnect instance { get; private set; } // Singleton instance
     private ClientWebSocket client; // Keep the client accessible
     public PlayersManager playersManager;
+<<<<<<< HEAD
 
+=======
+    public MassSpawner massSpawner;
+    
+>>>>>>> abbd2da (added food eating functionality)
     public async Task SendWsMessage(ClientMessage msg)
     {
         // Debug.Log("Sending new ws message!");
@@ -49,8 +54,10 @@ public class ServerConnect : MonoBehaviour
     #endregion
 
     async Task InitWsConnection()
-    {
-        var serverUri = new Uri("ws://localhost:8080");
+    {  
+        string url = "ws://3.10.169.198:8080";
+        // string url = "ws://localhost:8080";
+        var serverUri = new Uri(url);
         Debug.Log("Connecting to " + serverUri + "...");
         using (client = new ClientWebSocket())
         {
@@ -86,9 +93,10 @@ public class ServerConnect : MonoBehaviour
                     Debug.Log("Players manager is null");
                 }
                 playersManager.Init(msg.data); // Here
+                // massSpawner.Init(msg.data);
                 break;
             case ServerMsgType.PlayerJoined:
-                Debug.Log("Player joined: " + msg.data);
+                Debug.Log("Player joined: " + (string)msg.data);
                 ServerUtils.HandlePlayerJoined(playersManager, msg.data);
                 break;
             case ServerMsgType.PlayerLeft:
@@ -98,9 +106,13 @@ public class ServerConnect : MonoBehaviour
                 Debug.Log("Update players position: " + msg.data);
                 ServerUtils.HandleUpdatePlayersPosition(playersManager, msg.data);
                 break;
-            case ServerMsgType.BlobEats:
-                Debug.Log("Blob eats: " + msg.data);
-                ServerUtils.HandleBlobEats(playersManager, msg.data);
+
+            // NEW
+            case ServerMsgType.FoodAdded:
+                ServerUtils.HandleFoodAdded(massSpawner, msg.data);
+                break;
+            case ServerMsgType.PlayerAteFood:
+                ServerUtils.HandlePlayerAteFood(playersManager, massSpawner, msg.data);
                 break;
             default:
                 Debug.LogWarning("Unknown message type received: " + msg.type);
@@ -144,6 +156,7 @@ public class ServerConnect : MonoBehaviour
             {
                 var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 ServerMessage msg = JsonConvert.DeserializeObject<ServerMessage>(message);
+<<<<<<< HEAD
                 Debug.Log("Received: " + message);
                 if (msg != null)
                 {
@@ -155,6 +168,15 @@ public class ServerConnect : MonoBehaviour
             {
                 Debug.LogError("Error receiving message: " + e.Message);
             }
+=======
+                // Debug.Log("Received msg:" + msg.type);
+                await HandleServerMessage(msg);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error receiving server msg: " + e.Message);
+>>>>>>> abbd2da (added food eating functionality)
         }
     }
 
@@ -163,8 +185,14 @@ public class ServerConnect : MonoBehaviour
     public async void Start()
     {
         playersManager = PlayersManager.instance;
+<<<<<<< HEAD
 
         await InitWsConnection();
+=======
+        massSpawner = MassSpawner.ins;
+        InitWsConnection();
+        // ReceiveMessages();
+>>>>>>> abbd2da (added food eating functionality)
     }
 
     // Update is called once per frame

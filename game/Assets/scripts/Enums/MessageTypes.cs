@@ -5,7 +5,8 @@
 public enum ClientMsgType
 {
     Join,
-    UpdatePosition
+    UpdatePosition,
+    PlayerEatenFood
     
 }
 
@@ -14,8 +15,8 @@ public enum ServerMsgType {
     PlayerJoined,
     PlayerLeft,
     UpdatePlayersPosition,
-    BlobEats,
-    BlobEaten
+    FoodAdded,
+    PlayerAteFood
 }
 
 // Join message data

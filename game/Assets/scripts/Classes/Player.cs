@@ -26,6 +26,7 @@ public class Position
 }
 
 
+
 [Serializable]
 public class Blob
 {
@@ -74,6 +75,7 @@ public class Blob
 public class Player
 {
     public string socketId;
+<<<<<<< HEAD
     public int color;
     public bool gameOver;
     public Blob blob;
@@ -93,5 +95,16 @@ public class Player
         this.gameOver = gameOver;
         this.blob = blob;
         this.gameObject = gameObject;
+=======
+    public Position position;
+    public Blob blob;
+
+    // public GameObject gameObject;
+    public Player(string socketId, Position position, Blob blob)
+    {
+        this.socketId = socketId;
+        this.position = position;
+        this.blob = blob;
+>>>>>>> abbd2da (added food eating functionality)
     }
 }

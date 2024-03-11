@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 public class MassSpawner : MonoBehaviour
 {
@@ -25,6 +26,9 @@ public class MassSpawner : MonoBehaviour
     public List<GameObject> CreatedMasses = new List<GameObject>();
 
 
+    // public List<Blob> FoodBlobs = new List<Blob>();
+    public Dictionary<string, Blob> FoodDict = new Dictionary<string, Blob>();
+
     public int MaxMass = 50;
     public float Time_To_Instantiate = 0.5f;
 
@@ -33,14 +37,48 @@ public class MassSpawner : MonoBehaviour
     // TODO: rename to MaxSplits
     public int MaxPlayers = 16;
 
+    public void Init(object msgData) {
+        Dictionary <string, object> msgDataDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
+        // Debug.Log("Init mass spawner: " + msgDataDict["foodBlobs"]);
+        Dictionary <string, Blob> foodBlobs = JsonConvert.DeserializeObject<Dictionary<string, Blob>>(msgDataDict["foodBlobs"].ToString());
+
+        foreach (KeyValuePair<string, Blob> foodBlob in foodBlobs) {
+            AddFood(foodBlob.Value);
+        }
+    }
+
 
     private void Start()
     {
         map = Map.ins;
+<<<<<<< HEAD
         StartCoroutine(CreateMass());
 
+=======
+        // StartCoroutine(CreateMass());
+    
+>>>>>>> abbd2da (added food eating functionality)
     }
 
+    public void AddFood(Blob foodBlob) {
+        foodBlob.gameObject = Instantiate(
+            Mass, 
+            new Vector2(foodBlob.position.x, foodBlob.position.y), 
+            Quaternion.identity
+        );
+        // FoodBlobs.Add(foodBlob);
+        FoodDict.Add(foodBlob.id, foodBlob);
+    }
+
+    public void RemoveFoodBlobById(string foodBlobId) {
+        if (FoodDict.ContainsKey(foodBlobId)) {
+            Destroy(FoodDict[foodBlobId].gameObject);
+            FoodDict.Remove(foodBlobId);
+        }
+    }
+
+
+    // PREVIOUS STUFF______________________________________________________________
     public IEnumerator CreateMass()
     {
         // wait for seconds
@@ -81,6 +119,7 @@ public class MassSpawner : MonoBehaviour
             }
         }
         else
+<<<<<<< HEAD
         {
             Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
         }
@@ -90,17 +129,28 @@ public class MassSpawner : MonoBehaviour
     public void RemoveMass(GameObject m)
     {
         if (CreatedMasses.Contains(m) == true)
+=======
+>>>>>>> abbd2da (added food eating functionality)
         {
-            CreatedMasses.Remove(m);
-
-
-            for (int i = 0; i < Players.Count; i++)
-            {
-                PlayerEatMass pp = Players[i].GetComponent<PlayerEatMass>();
-                pp.RemoveMass(m);
-            }
+            Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
         }
     }
+
+
+    // public void RemoveMass(GameObject m)
+    // {
+    //     if(CreatedMasses.Contains(m) == true)
+    //     {
+    //         CreatedMasses.Remove(m);
+
+
+    //         for (int i = 0; i < Players.Count; i++)
+    //         {
+    //             PlayerEatMass pp = Players[i].GetComponent<PlayerEatMass>();
+    //             pp.RemoveMass(m);
+    //         }
+    //     }
+    // }
 
     public void AddPlayer(GameObject b)
     {
