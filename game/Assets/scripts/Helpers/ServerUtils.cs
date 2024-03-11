@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 public class ServerUtils
 {
     public static void HandlePlayerJoined(PlayersManager pmInst, object msgData) {
-        Debug.Log("Handling player joined: " + msgData);
         var player = JsonConvert.DeserializeObject<Player>(msgData.ToString());
 
         pmInst.AddPlayer(player);
@@ -23,12 +22,18 @@ public class ServerUtils
         var data = JsonConvert.DeserializeObject<Dictionary<string, object>[]>(msgData.ToString());
         foreach (var player in data)
         {
-            if ((string)player["socketId"] == pmInst.selfSocketId) continue;
+            string otherPlayerId = (string)player["socketId"];
+            
+            // If just eaten player, skip
+            if (!pmInst.PlayersDict.ContainsKey(otherPlayerId)) continue;
+
+            
+            if (otherPlayerId== pmInst.selfSocketId) continue;
             
             
             Position pos = JsonConvert.DeserializeObject<Position>(player["position"].ToString());
             pmInst.UpdatePlayerPosition(
-                (string)player["socketId"],
+                otherPlayerId,
                 pos.x,
                 pos.y
             );
@@ -56,8 +61,23 @@ public class ServerUtils
             int newSize = pmInst.PlayersDict[playerId].blob.size + Blob.DefaultFoodSize;
             pmInst.UpdatePlayerSize(playerId, newSize);
             msInst.RemoveFoodBlobById(foodBlobId);
-            Debug.Log("Other player ate food");
         }
 
+    }
+
+    // TODO ADD COMMENT
+    public static void HandlePlayerAteEnemy(PlayersManager pmInst, object msgData)
+    {
+        var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
+        
+        string playerWhoAteId = data["playerWhoAte"].ToString();
+        int newSize = JsonConvert.DeserializeObject<int>(data["newSize"].ToString());
+        string playerEatenId = data["playerEaten"].ToString();
+
+        if (pmInst.selfSocketId != playerWhoAteId)
+        {
+            pmInst.UpdatePlayerSize(playerWhoAteId, newSize);
+            pmInst.RemovePlayerById(playerEatenId);
+        }
     }
 }

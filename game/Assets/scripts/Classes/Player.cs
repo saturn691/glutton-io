@@ -32,15 +32,13 @@ public class Position
 public class Player
 {
     public string socketId;
-    public Position position;
     public Blob blob;
     public int color;
 
     // public GameObject gameObject;
-    public Player(string socketId, Position position, Blob blob)
+    public Player(string socketId, Blob blob)
     {
         this.socketId = socketId;
-        this.position = position;
         this.blob = blob;
     }
 }

@@ -45,10 +45,9 @@ public class PlayerMovements : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        blob = new Blob("0", StartingSize, new Position(0, 0), null);
+        blob = new Blob("0", StartingSize, new Position(0, 0), gameObject);
         float r = Blob.GetRadius(StartingSize);
         transform.localScale = new Vector3(r, r, r);
-
 
         map = Map.ins;
         server = ServerConnect.instance;
@@ -64,7 +63,13 @@ public class PlayerMovements : MonoBehaviour
 
         Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
         Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
+
+
+        // Update blob's position
         transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
+        blob.position.x = transform.position.x;
+        blob.position.y = transform.position.y;
+        
 
         // Send message to server
         if (msgCount % MsgInterval == 0)
@@ -132,12 +137,12 @@ public class PlayerMovements : MonoBehaviour
 
     public void OnDisable()
     {
-        MassSpawner.ins.RemovePlayer(gameObject);
+        // MassSpawner.ins.RemovePlayer(gameObject);
     }
 
     void OnDestroy()
     {
-        Camera.main.GetComponent<CamerFollow>().RemovePlayerFromTrack(transform);
+        // Camera.main.GetComponent<CamerFollow>().RemovePlayerFromTrack(transform);
     }
 }
 

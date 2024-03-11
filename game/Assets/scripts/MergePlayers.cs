@@ -58,7 +58,7 @@ public class MergePlayers : MonoBehaviour
         player1.transform.localScale = new Vector3(newScale, newScale, newScale);
 
         Camera.main.GetComponent<CamerFollow>().RemovePlayerFromTrack(transform);
-        MassSpawner.ins.GetComponent<MassSpawner>().RemovePlayer(player2);
+        // MassSpawner.ins.GetComponent<MassSpawner>().RemovePlayer(player2);
 
         // Destroy the remaining player
         Destroy(player2);

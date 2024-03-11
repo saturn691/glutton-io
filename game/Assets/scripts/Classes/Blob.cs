@@ -51,23 +51,21 @@ public class Blob
     {
         return (float)Math.Sqrt(size / Math.PI);
     }
+
+    /// <summary>
+    ///  Check if this blob meets with other blob
+    /// </summary>
+    public bool Encountered(Blob blob)
+    {  
+        return Vector2.Distance(this.gameObject.transform.position, blob.gameObject.transform.position) 
+            <= this.gameObject.transform.localScale.x / 2;
+    }
+    
+    /// <summary>
+    ///  Check if this blob is larger than other blob
+    /// </summary>
+    public bool LargerThan(Blob blob)
+    {
+        return this.size > blob.size;
+    }
 }
-
-// [Serializable]
-// public class Blob
-// {  
-//     public string id;
-//     public Position position;
-//     public float size;
-
-//     public GameObject gameObject;
-
-
-//     public Blob(string id, float size, Position position, GameObject gameObject)
-//     {
-//         this.id = id;
-//         this.size = size;
-//         this.position = position;
-//         this.gameObject = gameObject;
-//     }
-// }
