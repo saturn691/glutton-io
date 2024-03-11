@@ -30,8 +30,8 @@ export class Player {
     return {
       color: this.color,
       socketId: this.socketId,
-      blob: this.blob.ToJson()
-    }
+      blob: this.blob.ToJson(),
+    };
   }
 
   UpdatePosition(position: Position) {
@@ -41,5 +41,9 @@ export class Player {
 
   BlobEatsEnemy(appendedSize: number) {
     this.blob.EatEnemy(appendedSize);
+  }
+
+  EatenByEnemy() {
+    this.gameOver = true;
   }
 }

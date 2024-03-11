@@ -1,11 +1,11 @@
 import { Position } from "./Blob.js";
 import { Player } from "./Player.js";
-import { Blob } from "./Blob.js";
 import { Bot } from "./Bot.js";
-import { Food, FoodManager } from "./Food.js";
+import { FoodManager } from "./Food.js";
 import { JoinMessageData, ServerMsgType } from "./MessageType.js";
 import { WebSocketServer, WebSocket } from "ws";
 import * as uuid from "uuid";
+import { PlayerUtils } from "../utils/PlayerUtils.js";
 
 export class GameState {
   id: number;
@@ -44,12 +44,11 @@ export class GameState {
    */
 
   InitPlayerJoined(socket: WebSocket, socketId: string) {
-    console.log("Adding player with socket id: ", socketId);
-    let playersWithoutSocket = {}
+    console.log("New connection, socket id: ", socketId);
+    let playersWithoutSocket = {};
     for (const socketId in this.players) {
-      playersWithoutSocket[socketId] = this.players[socketId].ToJson()
+      playersWithoutSocket[socketId] = this.players[socketId].ToJson();
     }
-
 
     socket.send(
       JSON.stringify({
@@ -72,7 +71,7 @@ export class GameState {
    * @param msgData contains the playerId of the player used for display
    */
   AddPlayer(socket: WebSocket, socketId: string, msgData: JoinMessageData) {
-    console.log("Adding player with blob: ", msgData);
+    console.log("Adding player: ", msgData);
     let playerId = "dummy_player_id"; // To change to input from user
 
     let newPlayer = new Player(
@@ -86,11 +85,9 @@ export class GameState {
       playerId // TODO: Change to BlobId
     );
 
-    console.log("New player: ", newPlayer.ToJson())
-
-    this.players[socketId] = newPlayer
+    this.players[socketId] = newPlayer;
     this.numPlayers++;
-    
+
     this.Broadcast(
       {
         type: ServerMsgType.PlayerJoined,
@@ -127,7 +124,7 @@ export class GameState {
    */
   AddBot() {
     const BOT_NAME = "bot";
-    const STARTING_SIZE = 50;
+    const STARTING_SIZE = 20;
     const SIMULATE_INTERVAL_MS = 100;
     const BOT_SPEED = 0.05;
 
@@ -139,7 +136,7 @@ export class GameState {
       parseInt("00FF00", 16),
       null,
       socketId,
-      { x: 0, y: 0 }, // TODO: Initialize from game
+      { x: 5, y: 5 }, // TODO: Initialize from game
       STARTING_SIZE, // TODO: Initialize from game
       BOT_NAME // TODO: Change to BlobId
     );
@@ -159,7 +156,9 @@ export class GameState {
     setInterval(() => {
       bot.Update(BOT_SPEED);
 
-      this.UpdatePlayerPosition(socketId, {
+      if (this.players[socketId] == null) return;
+
+      PlayerUtils.HandleUpdatePlayerPosition(this, socketId, {
         x: bot.blob.position.x,
         y: bot.blob.position.y,
       });
@@ -167,42 +166,10 @@ export class GameState {
   }
 
   /**
-   * Called when ClientMsgType.UpdatePosition is received. Updates new position
-   * for client in players state. Once it has received an update from all
-   * different players, it will broadcast ServerMsgType.UpdatePlayersPosition
-   * so that clients can update their local state.
-   *
-   * @param socketId the socketId of the player to update
-   * @param data the new position of the player
-   */
-  UpdatePlayerPosition(socketId: string, data: Position) {
-    this.players[socketId].UpdatePosition(data);
-
-    // Update only once every player's position is updated
-    this.updatedPositions.set(socketId, data);
-
-    let updateList = [];
-    for (const [key, value] of this.updatedPositions) {
-      updateList.push({ socketId: key, position: value });
-    }
-
-    this.Broadcast({
-      type: ServerMsgType.UpdatePlayersPosition,
-      data: updateList,
-    });
-    this.updatedPositions = new Map<string, Position>();
-  }
-
-  /**
    * Starts the asynchronous functions
    */
   Init() {
-    // Starts food generation
     this.GenerateFood();
-
-    // setInterval(() => {
-    //   this.Update();
-    // }, 60);
   }
 
   private GenerateFood() {
@@ -216,46 +183,6 @@ export class GameState {
   }
 
   /**
-   * Main game loop. Must be called every frame to update the game state.
-   * Detects collisions and updates foods, viruses.
-   */
-  private Update() {
-    // TODO - Add viruses (random in time and position)
-    this.CheckCollision();
-    return;
-  }
-
-  // TODO very inefficient
-  private CheckCollision() {
-    for (const socketId in this.players) {
-      if (this.players[socketId] != null) {
-        let player = this.players[socketId];
-        let playerBlob: Blob = player.blob;
-
-        for (const enemySocketId in this.players) {
-          if (
-            this.players[enemySocketId] != null &&
-            enemySocketId != socketId
-          ) {
-            let enemy = this.players[enemySocketId];
-            let enemyBlob: Blob = enemy.blob;
-            let response = Blob.WhoAteWho(playerBlob, enemyBlob);
-            if (response == 1) {
-              console.log(`${socketId} ate ${enemySocketId}`);
-              playerBlob.EatEnemy(enemyBlob.size);
-              this.RemovePlayer(enemySocketId);
-            } else if (response == 2) {
-              console.log(`${enemySocketId} ate ${socketId}`);
-              enemyBlob.EatEnemy(playerBlob.size);
-              this.RemovePlayer(socketId);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /**
    * Helper function to send a message to all players in game. Allows for
    * exclusion of message to 1 player which is useful when an update is
    * triggered by a particular client. For instance, if client C joins the game,
@@ -265,12 +192,11 @@ export class GameState {
    * @param excludePlayerId the player to exclude from the broadcast
    */
   public Broadcast(message: any, excludePlayerId?: string) {
-
     let jsonMsg = JSON.stringify(message);
-    
+
     for (const socketId in this.players) {
       if (socketId != excludePlayerId && this.players[socketId] != null) {
-        // if (this.players[socketId].socket === null) continue;
+        if (this.players[socketId].socket === null) continue;
         this.players[socketId].socket.send(jsonMsg);
       }
     }
