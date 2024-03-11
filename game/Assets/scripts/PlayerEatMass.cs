@@ -13,6 +13,7 @@ public class PlayerEatMass : MonoBehaviour
 
     public GameObject[] Mass;
     MassSpawner massSpawner;
+    PlayersManager playersManager;
     ServerConnect server;
 
     PlayerMovements playerMovements;
@@ -48,7 +49,10 @@ public class PlayerEatMass : MonoBehaviour
     }
 
 
-    // TO UPDATE: Player's size updates based on mass it eats
+    /// <summary>
+    /// Method to be called when the player has eaten a food object.
+    /// Update new player's blob object size and rendered size
+    /// </summary>
     private void PlayerEatFood()
     {
 
@@ -61,14 +65,65 @@ public class PlayerEatMass : MonoBehaviour
         // GetComponent<Collider2D>().isTrigger = true;
     }
 
+    /// <summary>
+    /// Method to be called when the player has eaten a food object.
+    /// Update new player's blob object size and rendered size
+    /// </summary>
+    private void PlayerEatEnemy(Blob otherBlob)
+    {
+
+        // Calculate new radius of the player.
+        playerMovements.blob.size += otherBlob.size;
+        float newRadius = Blob.GetRadius(playerMovements.blob.size);
+        transform.localScale = new Vector3(newRadius, newRadius, newRadius);
+
+        // MergePlayers.canMerge = true;
+        // GetComponent<Collider2D>().isTrigger = true;
+    }
 
     /// <summary>
     /// Method to be called every (few) frame(s) to check if the player has
     /// eaten a mass object.
     /// </summary>
-    private void Check()
+    private async void Check()
     {
+        // 1. Check if player has eaten an enemy player
+        var playersDictCopy = new Dictionary<string, Player>(playersManager.PlayersDict);
+        foreach (KeyValuePair<string, Player> kvp in playersDictCopy)
+        {
+            string otherPlayerId = kvp.Key;
+            Player otherPlayer = kvp.Value;
+            if (otherPlayerId == playersManager.selfSocketId) continue;
+            
+            Blob thisBlob = playerMovements.blob;
+            Blob otherBlob = otherPlayer.blob;
 
+            // If ate other blob
+            if (thisBlob.LargerThan(otherBlob) && thisBlob.Encountered(otherBlob)) {
+                PlayerEatEnemy(otherBlob);
+
+                Debug.Log("Sending ws message: PlayerEatenEnemy");
+
+                playersManager.RemovePlayerById(otherPlayerId);
+
+                Player otherPlayerWithoutGameObject = new Player(
+                    otherPlayer.socketId,
+                    new Blob(otherPlayer.blob.id, otherPlayer.blob.size, otherPlayer.blob.position, null)
+                );
+                server.SendWsMessage(new ClientMessage(
+                    ClientMsgType.PlayerEatenEnemy, 
+                    otherPlayerWithoutGameObject  
+                ));
+                
+            } 
+            
+            else if (otherBlob.LargerThan(thisBlob) && otherBlob.Encountered(thisBlob)) {
+                Debug.Log("Died");
+            }
+        }
+        
+
+        // 2. Check if player has eaten a food object
         var foodDictCopy = new Dictionary<string, Blob>(massSpawner.FoodDict);
         foreach (KeyValuePair<string, Blob> kvp in foodDictCopy)
         {
@@ -103,6 +158,7 @@ public class PlayerEatMass : MonoBehaviour
         playerMovements = PlayerMovements.instance;
         server = ServerConnect.instance;
         massSpawner = MassSpawner.ins;
+        playersManager = PlayersManager.instance;
         InvokeRepeating("Check", 0, 0.1f);
         
     }

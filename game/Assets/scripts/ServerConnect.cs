@@ -53,8 +53,8 @@ public class ServerConnect : MonoBehaviour
 
     async Task InitWsConnection()
     {  
-        string url = "ws://3.10.169.198:8080";
-        // string url = "ws://localhost:8080";
+        // string url = "ws://3.10.169.198:8080";
+        string url = "ws://localhost:8080";
         var serverUri = new Uri(url);
         Debug.Log("Connecting to " + serverUri + "...");
         using (client = new ClientWebSocket())
@@ -66,11 +66,12 @@ public class ServerConnect : MonoBehaviour
                 Debug.Log("Connected!");
 
                 // Create JSON formatted data
+                Blob playerBlob = playerMovements.blob;
+                Blob blobWithoutGameObject = new Blob(playerBlob.id, playerBlob.size, playerBlob.position, null);
                 await SendWsMessage(new ClientMessage(
-                    ClientMsgType.Join, playerMovements.blob
+                    ClientMsgType.Join,
+                    blobWithoutGameObject 
                 ));
-
-                // new JoinMsgData("player1") // TODO: Change to unique blobId
 
                 await ReceiveMessages();
             }
@@ -99,10 +100,8 @@ public class ServerConnect : MonoBehaviour
                 ServerUtils.HandlePlayerJoined(playersManager, msg.data);
                 break;
             case ServerMsgType.PlayerLeft:
-                // Debug.Log("Player left: " + msg.data);
                 break;
             case ServerMsgType.UpdatePlayersPosition:
-                // Debug.Log("Update players position: " + msg.data);
                 ServerUtils.HandleUpdatePlayersPosition(playersManager, msg.data);
                 break;
             case ServerMsgType.FoodAdded:
@@ -111,6 +110,11 @@ public class ServerConnect : MonoBehaviour
             case ServerMsgType.PlayerAteFood:
                 ServerUtils.HandlePlayerAteFood(playersManager, massSpawner, msg.data);
                 break;
+
+            case ServerMsgType.PlayerAteEnemy:
+                ServerUtils.HandlePlayerAteEnemy(playersManager, msg.data);
+                break;
+
             default:
                 Debug.LogWarning("Unknown message type received: " + msg.type);
                 break;
@@ -121,27 +125,19 @@ public class ServerConnect : MonoBehaviour
     {
         var buffer = new byte[1024 * 4];
         
-        while (client.State == WebSocketState.Open)
+        while (client != null && client.State == WebSocketState.Open)
         {
+            if (client == null) break;
             var result = await client.ReceiveAsync(
                 new ArraySegment<byte>(buffer), 
                 CancellationToken.None
             );
 
+            // TODO: Handle close properly. What does a close message look like...?
             if (client.State == WebSocketState.CloseReceived)
             {
-                // If the server has initiated a close, respond with a close as well
-                await client.CloseAsync(
-                    WebSocketCloseStatus.NormalClosure, 
-                    string.Empty, 
-                    CancellationToken.None
-                );
-            }
-            else if (result != null && 
-                    result.MessageType == WebSocketMessageType.Close
-            ) {
-                // If a close message is received, initiate the close 
-                // handshake if it hasn't been done yet
+                Debug.Log("Close received");
+
                 await client.CloseAsync(
                     WebSocketCloseStatus.NormalClosure, 
                     string.Empty, 
@@ -154,9 +150,9 @@ public class ServerConnect : MonoBehaviour
                 var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 ServerMessage msg = JsonConvert.DeserializeObject<ServerMessage>(message);
                 // Debug.Log("Received: " + message);
+
                 if (msg != null)
                 {
-                    // Debug.Log("Handling message...");
                     await HandleServerMessage(msg);
                 }
             }
@@ -190,6 +186,7 @@ public class ServerConnect : MonoBehaviour
             try
             {
                 await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
+                client = null;
             }
             catch (Exception e)
             {

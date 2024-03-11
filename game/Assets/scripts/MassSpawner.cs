@@ -152,11 +152,11 @@ public class MassSpawner : MonoBehaviour
         }
     }
 
-    public void RemovePlayer(GameObject b)
-    {
-        Debug.Log("RemovePlayer" + b.name);
+    // public void RemovePlayer(GameObject b)
+    // {
+    //     Debug.Log("RemovePlayer" + b.name);
 
-        bool removed = Players.Remove(b);
-    }
+    //     bool removed = Players.Remove(b);
+    // }
 
 }

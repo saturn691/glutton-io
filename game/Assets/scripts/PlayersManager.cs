@@ -20,14 +20,11 @@ public class PlayersManager : MonoBehaviour
     public GameObject PlayerMass;
 
     public Dictionary<string, Player> PlayersDict = new Dictionary<string, Player>();
-    public int MaxPlayers = 10;
-
-    private Vector2 oldPosition; // Store the old position
-
     public string selfSocketId;
 
     private void Start()
     {
+
     }
 
 
@@ -39,7 +36,7 @@ public class PlayersManager : MonoBehaviour
     /// <param name="msgData">The JSON data from the server</param>
     public void Init(object msgData)
     {
-        Debug.Log("Initializing players manager!");
+
         var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
 
         selfSocketId = (string)data["socketId"];    // handle self-identification
@@ -51,11 +48,10 @@ public class PlayersManager : MonoBehaviour
             // Player deserialised, ensure class matches the server
             
             Player player = JsonConvert.DeserializeObject<Player>(kvp.Value.ToString());
-            Debug.Log("Existing player: " + player.socketId + " Position: " + player.blob.position.x + " " + player.blob.position.y);
             AddPlayer(player);  
         }
 
-        Debug.Log($"Player {selfSocketId} initialized!");
+        Debug.Log($"Initialised PlayersManager!");
 
         return;
     }
@@ -93,13 +89,6 @@ public class PlayersManager : MonoBehaviour
         PlayersDict.Add(
             player.socketId, 
             player
-            // new Player(
-            //     player.socketId, 
-            //     player.color, 
-            //     false, 
-            //     new Blob(player.socketId, player.blob.position, player.blob.size), 
-            //     p
-            // )
         );
     }
 
@@ -124,12 +113,13 @@ public class PlayersManager : MonoBehaviour
         PlayersDict[socketId].blob.gameObject.transform.localScale = new Vector3(r, r, r);
     }
 
-    public void Update()
+    /// <summary>
+    /// TODO_COMMENT
+    /// </summary>
+    public void RemovePlayerById (string socketId)
     {
-        // Get old position
-        // oldPosition = PlayersDict["player1"].transform.position;
-        // // Update the position
-        // PlayersDict["player1"].transform.position = new Vector2(oldPosition.x + 0.001f, oldPosition.y);
+        Destroy(PlayersDict[socketId].blob.gameObject);
+        PlayersDict.Remove(socketId);
     }
 
 }

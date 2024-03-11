@@ -57,10 +57,9 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        blob = new Blob("0", StartingSize, new Position(0, 0), null);
+        blob = new Blob("0", StartingSize, new Position(0, 0), gameObject);
         float r = Blob.GetRadius(StartingSize);
         transform.localScale = new Vector3(r, r, r);
-
 
         map = Map.ins;
         server = ServerConnect.instance;
@@ -171,12 +170,12 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnDisable()
     {
-        MassSpawner.ins.RemovePlayer(gameObject);
+        // MassSpawner.ins.RemovePlayer(gameObject);
     }
 
     void OnDestroy()
     {
-        Camera.main.GetComponent<CamerFollow>().RemovePlayerFromTrack(transform);
+        // Camera.main.GetComponent<CamerFollow>().RemovePlayerFromTrack(transform);
     }
 }
 
