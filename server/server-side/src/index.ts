@@ -16,17 +16,29 @@ const handleWsMessage = (
 ) => {
   try {
     const msgJson = JSON.parse(msg.toString("utf8"));
-    switch (msgJson.type) {
-      case ClientMsgType.Join:
-        game.AddPlayer(socket, socketId, msgJson.data);
-        break;
 
+    if (msgJson.type == ClientMsgType.Join) {
+      game.AddPlayer(socket, socketId, msgJson.data);
+      return;
+    }
+
+    if (!game.players[socketId]) {
+      return;
+    }
+
+    switch (msgJson.type) {
       case ClientMsgType.UpdatePosition:
-        game.UpdatePlayerPosition(socketId, msgJson.data);
+        // game.UpdatePlayerPosition(socketId, msgJson.data);
+        PlayerUtils.HandleUpdatePlayerPosition(game, socketId, msgJson.data);
         break;
 
       case ClientMsgType.PlayerEatenFood:
         PlayerUtils.HandlePlayerEatenFood(game, socketId, msgJson.data);
+        break;
+
+      case ClientMsgType.PlayerEatenEnemy:
+        console.log("Player ate enemy");
+        PlayerUtils.HandlePlayerEatenEnemy(game, socketId, msgJson.data);
         break;
 
       default:
@@ -40,7 +52,7 @@ const handleWsMessage = (
 
 const simulate = (game: GameState, interval: number) => {
   // Add bots every interval
-  // game.AddBot();
+  game.AddBot();
   // setInterval(() => {
   // }, interval);
 
@@ -64,6 +76,10 @@ const main = async () => {
   ws.on("connection", async (socket) => {
     const socketId = uuid.v4();
     game.InitPlayerJoined(socket, socketId);
+
+    // setTimeout(() => {
+    //   socket.close();
+    // }, 2000);
 
     socket.on("message", (msg) => handleWsMessage(game, socket, socketId, msg));
 
