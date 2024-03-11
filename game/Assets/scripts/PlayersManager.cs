@@ -84,6 +84,11 @@ public class PlayersManager : MonoBehaviour
         }
 
         player.blob.gameObject = p;
+
+        // Set size of gameObject
+        float r = Blob.GetRadius(player.blob.size);
+        p.transform.localScale = new Vector3(r, r, r);
+
         // Add the player to the dictionary
         PlayersDict.Add(
             player.socketId, 

@@ -45,9 +45,9 @@ public class Blob
     ///  Must agree with the server's mass object radius.
     ///  Otherwise, the rendering of the mass object will be incorrect.
     /// </summary>
-    public static double GetRadius(int size)
+    public static float GetRadius(int size)
     {
-        return Math.Sqrt(size / Math.PI);
+        return (float)Math.Sqrt(size / Math.PI);
     }
 }
 
