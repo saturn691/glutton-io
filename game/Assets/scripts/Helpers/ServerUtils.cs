@@ -12,10 +12,14 @@ using System.Threading.Tasks;
 public class ServerUtils
 {
     public static void HandlePlayerJoined(PlayersManager pmInst, object msgData) {
-        Debug.Log("Player joined!");
+        Debug.Log("Handling player joined: " + msgData);
         var player = JsonConvert.DeserializeObject<Player>(msgData.ToString());
+<<<<<<< HEAD
 
         pmInst.AddPlayer(player);
+=======
+        pmInst.AddPlayer(player.socketId, player);
+>>>>>>> 4a40e04 (saving before rebasing server-game)
     }
 
     public static void HandleUpdatePlayersPosition(PlayersManager pmInst, object msgData)
@@ -49,7 +53,6 @@ public class ServerUtils
 
     public static void HandlePlayerAteFood(PlayersManager pmInst, MassSpawner msInst, object msgData)
     {        
-        Debug.Log("Handling player ate food server msg");
         var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(msgData.ToString());
         
         string foodBlobId = (string)data["foodId"];
