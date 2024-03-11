@@ -18,6 +18,8 @@ public class ServerConnect : MonoBehaviour
     private ClientWebSocket client; // Keep the client accessible
     public PlayersManager playersManager;
     public MassSpawner massSpawner;
+
+    public PlayerMovements playerMovements;
     
     public async Task SendWsMessage(ClientMessage msg)
     {
@@ -65,8 +67,10 @@ public class ServerConnect : MonoBehaviour
 
                 // Create JSON formatted data
                 await SendWsMessage(new ClientMessage(
-                    ClientMsgType.Join, new JoinMsgData("player1") // TODO: Change to unique blobId
+                    ClientMsgType.Join, playerMovements.blob
                 ));
+
+                // new JoinMsgData("player1") // TODO: Change to unique blobId
 
                 await ReceiveMessages();
             }
@@ -91,7 +95,7 @@ public class ServerConnect : MonoBehaviour
                 // Init blobs too
                 break;
             case ServerMsgType.PlayerJoined:
-                // Debug.Log("Player joined: " + (string)msg.data);
+                Debug.Log("Received player joined msg");
                 ServerUtils.HandlePlayerJoined(playersManager, msg.data);
                 break;
             case ServerMsgType.PlayerLeft:
@@ -169,6 +173,7 @@ public class ServerConnect : MonoBehaviour
     {
         playersManager = PlayersManager.instance;
         massSpawner = MassSpawner.ins;
+        playerMovements = PlayerMovements.instance;
         InitWsConnection();
         // ReceiveMessages();
     }
