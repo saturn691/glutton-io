@@ -126,6 +126,8 @@ public class PlayerEatMass : MonoBehaviour
             } 
             
             else if (otherBlob.LargerThan(thisBlob) && otherBlob.Encountered(thisBlob)) {
+                Destroy(playerMovement.gameObject);
+                playerMovement.Died = true;
                 Debug.Log("Died");
             }
         }

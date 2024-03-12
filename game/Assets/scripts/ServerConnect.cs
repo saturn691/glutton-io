@@ -56,14 +56,13 @@ public class ServerConnect : MonoBehaviour
         // string url = "ws://3.10.169.198:8080";
         string url = "ws://localhost:8080";
         var serverUri = new Uri(url);
-        Debug.Log("Connecting to " + serverUri + "...");
         using (client = new ClientWebSocket())
         {
             try
             {
                 // Connect to the WebSocket server
                 await client.ConnectAsync(serverUri, CancellationToken.None);
-                Debug.Log("Connected!");
+                Debug.Log("Connected to " + serverUri + "!");
 
                 // Create JSON formatted data
                 Blob playerBlob = playerMovement.blob;

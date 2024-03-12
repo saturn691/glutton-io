@@ -74,9 +74,9 @@ public class ServerUtils
         int newSize = JsonConvert.DeserializeObject<int>(data["newSize"].ToString());
         string playerEatenId = data["playerEaten"].ToString();
 
-        Debug.Log(data.ToString());
+        // Debug.Log(data.ToString());
 
-        if (pmInst.selfSocketId != playerWhoAteId)
+        if (pmInst.selfSocketId != playerWhoAteId && pmInst.selfSocketId != playerEatenId)
         {
             pmInst.UpdatePlayerSize(playerWhoAteId, newSize);
             pmInst.RemovePlayerById(playerEatenId);
