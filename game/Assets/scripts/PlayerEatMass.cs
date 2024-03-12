@@ -16,6 +16,7 @@ public class PlayerEatMass : MonoBehaviour
     PlayersManager playersManager;
     ServerConnect server;
     PlayerMovement playerMovement;
+    SoundEffectsPlayer soundEffectsPlayer;
 
 
     //=========================================================================
@@ -45,6 +46,7 @@ public class PlayerEatMass : MonoBehaviour
         playersManager = PlayersManager.instance;
         server = ServerConnect.instance;
         playerMovement = PlayerMovement.instance;
+        soundEffectsPlayer = SoundEffectsPlayer.instance;
     }
 
     private void UpdateMass()
@@ -63,6 +65,9 @@ public class PlayerEatMass : MonoBehaviour
         playerMovement.blob.size += Blob.DefaultFoodSize;
         float newRadius = Blob.GetRadius(playerMovement.blob.size);
         transform.localScale = new Vector3(newRadius, newRadius, newRadius);
+
+        // Play sound effect
+        soundEffectsPlayer.PlayFood();
 
         // MergePlayers.canMerge = true;
         // GetComponent<Collider2D>().isTrigger = true;
