@@ -75,7 +75,7 @@ public class Actions : MonoBehaviour
         // Apply any additional setup for the new player object
         newPlayer.GetComponent<Collider2D>().isTrigger = false;
         newPlayer.GetComponent<SplitForce>().enabled = true;
-        newPlayer.GetComponent<SplitForce>().SplitForceMethod(direction);
+        //newPlayer.GetComponent<SplitForce>().SplitForceMethod(direction);
     }
 
 
