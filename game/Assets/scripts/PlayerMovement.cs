@@ -131,6 +131,27 @@ public class PlayerMovement : MonoBehaviour
 
         msgCount++;
 
+
+        if (LockActions)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            // actions.ThrowMass(Direction);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // split
+            if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
+            {
+                return;
+            }
+            // actions.Split(Direction);
+        }
+    
         // serverconnec
         // serverconnect.Instance.SendMessage(yourMessage).ContinueWith(task => 
         // {
