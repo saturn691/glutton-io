@@ -25,8 +25,8 @@ public class CamerFollow : MonoBehaviour
 
     void Update()
     {
-        // Move();
-        // Zoom();
+        Move();
+        Zoom();
     }
 
     void Zoom()
@@ -70,10 +70,10 @@ public class CamerFollow : MonoBehaviour
 
     void AddPlayersToTrack()
     {
-        // if (playerMovement == null) {
-        //     playerMovement = PlayerMovement.instance;
-        //     trackedPlayers.Add(playerMovement.transform);
-        // }
+        if (playerMovement == null) {
+            playerMovement = PlayerMovement.instance;
+            trackedPlayers.Add(playerMovement.transform);
+        }
         
         // MassSpawner ms = MassSpawner.ins;
         // foreach (var player in ms.Players)

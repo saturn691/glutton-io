@@ -35,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Awake()
     {
-        fpgaController = new FpgaController();
+        // fpgaController = new FpgaController();
         if (instance == null)
         {
             instance = this;
@@ -57,9 +57,80 @@ public class PlayerMovement : MonoBehaviour
         massSpawner = MassSpawner.ins;
     }
 
+    void UpdateMac()
+    {
+        float Speed_ = (float) blob.GetSpeed();
+        Vector2 Direction = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
+        Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
+
+
+        // Update blob's position
+        transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
+        blob.position.x = transform.position.x;
+        blob.position.y = transform.position.y;
+        
+
+        // Send message to server
+        if (msgCount % MsgInterval == 0)
+        {
+            Dictionary<string, object> updatePlayerPosMsg = new Dictionary<string, object> {
+                {"x", transform.position.x},
+                {"y", transform.position.y}
+            };
+
+            var UpdatePosMsg = new ClientMessage(
+                ClientMsgType.UpdatePosition, 
+                updatePlayerPosMsg
+            );
+
+            server.SendWsMessage(UpdatePosMsg).ContinueWith(task =>
+            {
+                if (task.Exception != null)
+                {
+                    Debug.LogError($"Error sending message: {task.Exception}");
+                }
+            });
+        }
+
+        msgCount++;
+
+        // serverconnec
+        // serverconnect.Instance.SendMessage(yourMessage).ContinueWith(task => 
+        // {
+        //     if (task.Exception != null)
+        //     {
+        //         Debug.LogError($"Error sending message: {task.Exception}");
+        //     }
+        // });
+
+        if (LockActions)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            actions.ThrowMass(Direction);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // split
+            if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
+            {
+                return;
+            }
+            actions.Split(Direction);
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
+        UpdateMac();
+        return;
     //     fpgaController.UpdateData();
 
     //     float accel_x = fpgaController.GetReadingX();
