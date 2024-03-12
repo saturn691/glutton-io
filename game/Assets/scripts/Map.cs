@@ -17,7 +17,11 @@ public class Map : MonoBehaviour
     }
     #endregion
 
+    // The limits of the map
+    // e.g. (100, 200) creates a map of -50 to 50 on the x axis and -100 to 100 
+    // on the y axis
     public Vector2 MapLimits;
+    
     public Color MapLimits_Color;
 
     private void OnDrawGizmos()

@@ -206,7 +206,7 @@ class Controller():
         PROBABLITY = 0.01
 
         # Generate the random number
-        rng = random.randint(1, 1/PROBABLITY)
+        rng = random.randint(1, int(1/PROBABLITY))
 
         return (rng == 1)
 
