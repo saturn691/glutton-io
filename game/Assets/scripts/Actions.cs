@@ -6,10 +6,7 @@ public class Actions : MonoBehaviour
 {
     public GameObject Mass;
     public Transform MassPosition;
-
     public float Percentage = 0.01f;
-
-    private FpgaController fpgaController;
 
 
     // Start is called before the first frame update
@@ -20,8 +17,6 @@ public class Actions : MonoBehaviour
     {
         mass_script = GetComponent<PlayerEatMass>();
         ms = MassSpawner.ins;
-        fpgaController = GetComponent<FpgaController>();
-
     }
 
     // Update is called once per frame
@@ -40,6 +35,7 @@ public class Actions : MonoBehaviour
         {
             return;
         }
+
         // rotate 
         Vector2 Direction = direction;
         float Z_Rotation = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg + 90f;
@@ -52,10 +48,8 @@ public class Actions : MonoBehaviour
         b.GetComponent<MassForce>().ApplyForce = true;
         b.GetComponent<MassForce>().Direction = -direction;
 
-
         // add mass to the player
         ms.AddMass(b);
-
 
         // lose mass
         transform.localScale -= new Vector3(0.1f, 0.1f, 0.1f);
@@ -78,17 +72,10 @@ public class Actions : MonoBehaviour
         GameObject newPlayer = Instantiate(gameObject, transform.position, Quaternion.identity);
         transform.localScale = newMass;
 
-        // Retrieve the FPGA controller associated with the original player object
-        FpgaController originalFpgaController = GetComponent<FpgaController>();
-
         // Apply any additional setup for the new player object
         newPlayer.GetComponent<Collider2D>().isTrigger = false;
         newPlayer.GetComponent<SplitForce>().enabled = true;
-        newPlayer.GetComponent<SplitForce>().SplitForceMethod(direction);
-
-        // Copy the FPGA controller reference from the original player object to the new player object
-        FpgaController newPlayerFpgaController = newPlayer.GetComponent<FpgaController>();
-        newPlayerFpgaController = originalFpgaController;
+        //newPlayer.GetComponent<SplitForce>().SplitForceMethod(direction);
     }
 
 

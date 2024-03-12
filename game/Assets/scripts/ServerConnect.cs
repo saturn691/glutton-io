@@ -19,7 +19,7 @@ public class ServerConnect : MonoBehaviour
     public PlayersManager playersManager;
     public MassSpawner massSpawner;
 
-    public PlayerMovements playerMovements;
+    public PlayerMovement playerMovement;
     
     public async Task SendWsMessage(ClientMessage msg)
     {
@@ -53,20 +53,19 @@ public class ServerConnect : MonoBehaviour
 
     async Task InitWsConnection()
     {  
-        // string url = "ws://3.10.169.198:8080";
-        string url = "ws://localhost:8080";
+        string url = "ws://3.10.169.198:8080";
+        // string url = "ws://localhost:8080";
         var serverUri = new Uri(url);
-        Debug.Log("Connecting to " + serverUri + "...");
         using (client = new ClientWebSocket())
         {
             try
             {
                 // Connect to the WebSocket server
                 await client.ConnectAsync(serverUri, CancellationToken.None);
-                Debug.Log("Connected!");
+                Debug.Log("Connected to " + serverUri + "!");
 
                 // Create JSON formatted data
-                Blob playerBlob = playerMovements.blob;
+                Blob playerBlob = playerMovement.blob;
                 Blob blobWithoutGameObject = new Blob(playerBlob.id, playerBlob.size, playerBlob.position, null);
                 await SendWsMessage(new ClientMessage(
                     ClientMsgType.Join,
@@ -112,7 +111,10 @@ public class ServerConnect : MonoBehaviour
                 break;
 
             case ServerMsgType.PlayerAteEnemy:
-                ServerUtils.HandlePlayerAteEnemy(playersManager, msg.data);
+                Debug.Log("Handling player ate enemy");
+
+                ServerUtils.HandlePlayerAteEnemy(playersManager, msg.data, playerMovement);
+            
                 break;
 
             default:
@@ -158,7 +160,8 @@ public class ServerConnect : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError("Error receiving message: " + e.Message);
+                // Log, but don't close the script by logging an error
+                Debug.Log("Error receiving message: " + e.Message);
             }
         }
     }
@@ -169,15 +172,11 @@ public class ServerConnect : MonoBehaviour
     {
         playersManager = PlayersManager.instance;
         massSpawner = MassSpawner.ins;
-        playerMovements = PlayerMovements.instance;
+        playerMovement = PlayerMovement.instance;
         InitWsConnection();
         // ReceiveMessages();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-    }
 
     private async Task CloseWebSocketAsync()
     {
@@ -185,6 +184,7 @@ public class ServerConnect : MonoBehaviour
         {
             try
             {
+                Debug.Log("Closing WebSocket...");
                 await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
                 client = null;
             }
@@ -198,7 +198,9 @@ public class ServerConnect : MonoBehaviour
     void OnDestroy()
     {
         // Because OnDestroy cannot be async, we start the close operation without awaiting it.
-        var _ = CloseWebSocketAsync(); // Fire-and-forget (not ideal, but necessary under these circumstances)
+        // Fire-and-forget (not ideal, but necessary under these circumstances)
+        Debug.Log("OnDestroy");
+        var _ = CloseWebSocketAsync(); 
     }
 
     void OnApplicationQuit()

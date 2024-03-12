@@ -15,14 +15,12 @@ public class PlayerEatMass : MonoBehaviour
     MassSpawner massSpawner;
     PlayersManager playersManager;
     ServerConnect server;
+    PlayerMovement playerMovement;
 
-    PlayerMovements playerMovements;
 
     //=========================================================================
     // Public methods
     //=========================================================================
-
-
 
     public void AddMass(GameObject MassObject)
     {
@@ -35,13 +33,19 @@ public class PlayerEatMass : MonoBehaviour
         MassList.Add(MassObject);
 
         Mass = MassList.ToArray();
-
-        
     }
 
     //=========================================================================
     // Private methods
     //=========================================================================
+
+    private void Awake()
+    {
+        massSpawner = MassSpawner.ins;
+        playersManager = PlayersManager.instance;
+        server = ServerConnect.instance;
+        playerMovement = PlayerMovement.instance;
+    }
 
     private void UpdateMass()
     {
@@ -55,10 +59,9 @@ public class PlayerEatMass : MonoBehaviour
     /// </summary>
     private void PlayerEatFood()
     {
-
         // Calculate new radius of the player.
-        playerMovements.blob.size += Blob.DefaultFoodSize;
-        float newRadius = Blob.GetRadius(playerMovements.blob.size);
+        playerMovement.blob.size += Blob.DefaultFoodSize;
+        float newRadius = Blob.GetRadius(playerMovement.blob.size);
         transform.localScale = new Vector3(newRadius, newRadius, newRadius);
 
         // MergePlayers.canMerge = true;
@@ -71,15 +74,15 @@ public class PlayerEatMass : MonoBehaviour
     /// </summary>
     private void PlayerEatEnemy(Blob otherBlob)
     {
-
         // Calculate new radius of the player.
-        playerMovements.blob.size += otherBlob.size;
-        float newRadius = Blob.GetRadius(playerMovements.blob.size);
+        playerMovement.blob.size += otherBlob.size;
+        float newRadius = Blob.GetRadius(playerMovement.blob.size);
         transform.localScale = new Vector3(newRadius, newRadius, newRadius);
 
         // MergePlayers.canMerge = true;
         // GetComponent<Collider2D>().isTrigger = true;
     }
+
 
     /// <summary>
     /// Method to be called every (few) frame(s) to check if the player has
@@ -87,7 +90,6 @@ public class PlayerEatMass : MonoBehaviour
     /// </summary>
     private async void Check()
     {
-        // 1. Check if player has eaten an enemy player
         var playersDictCopy = new Dictionary<string, Player>(playersManager.PlayersDict);
         foreach (KeyValuePair<string, Player> kvp in playersDictCopy)
         {
@@ -95,7 +97,7 @@ public class PlayerEatMass : MonoBehaviour
             Player otherPlayer = kvp.Value;
             if (otherPlayerId == playersManager.selfSocketId) continue;
             
-            Blob thisBlob = playerMovements.blob;
+            Blob thisBlob = playerMovement.blob;
             Blob otherBlob = otherPlayer.blob;
 
             // If ate other blob
@@ -108,8 +110,14 @@ public class PlayerEatMass : MonoBehaviour
 
                 Player otherPlayerWithoutGameObject = new Player(
                     otherPlayer.socketId,
-                    new Blob(otherPlayer.blob.id, otherPlayer.blob.size, otherPlayer.blob.position, null)
+                    new Blob(
+                        otherPlayer.blob.id, 
+                        otherPlayer.blob.size, 
+                        otherPlayer.blob.position, 
+                        null
+                    )
                 );
+
                 server.SendWsMessage(new ClientMessage(
                     ClientMsgType.PlayerEatenEnemy, 
                     otherPlayerWithoutGameObject  
@@ -118,10 +126,11 @@ public class PlayerEatMass : MonoBehaviour
             } 
             
             else if (otherBlob.LargerThan(thisBlob) && otherBlob.Encountered(thisBlob)) {
+                Destroy(playerMovement.gameObject);
+                playerMovement.Died = true;
                 Debug.Log("Died");
             }
         }
-        
 
         // 2. Check if player has eaten a food object
         var foodDictCopy = new Dictionary<string, Blob>(massSpawner.FoodDict);
@@ -146,20 +155,22 @@ public class PlayerEatMass : MonoBehaviour
                 server.SendWsMessage(new ClientMessage(ClientMsgType.PlayerEatenFood, foodBlob.id));
             }
         }
-    
 
         return;
+    }
+
+    void Update()
+    {
+        Check();
     }
 
 
     // Start is called before the first frame update
     void Start()
     {
-        playerMovements = PlayerMovements.instance;
+        playerMovement = PlayerMovement.instance;
         server = ServerConnect.instance;
         massSpawner = MassSpawner.ins;
         playersManager = PlayersManager.instance;
-        InvokeRepeating("Check", 0, 0.1f);
-        
     }
 }

@@ -69,14 +69,19 @@ public class PlayersManager : MonoBehaviour
         
         // Set the color of the player
         SpriteRenderer sr = p.GetComponent<SpriteRenderer>();
+
         if (sr != null)
         {
             // Color is a 24-bit integer
-            sr.color = new Color(
-                (player.color >> 16) & 0xFF, 
-                (player.color >> 8) & 0xFF, 
-                player.color & 0xFF
+            Color playerColor = new Color(
+                (float)((player.color >> 16) & 0xFF) / (float) 255, 
+                (float)((player.color >> 8) & 0xFF) / (float) 255, 
+                (float)((player.color) & 0xFF) / (float) 255
             );
+
+            Debug.Log("Player color:" + playerColor);
+
+            sr.color = playerColor;
         }
 
         player.blob.gameObject = p;

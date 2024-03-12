@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 
 public class MassSpawner : MonoBehaviour
 {
-
     #region instance 
     public static MassSpawner ins;
 

@@ -50,11 +50,26 @@ const handleWsMessage = (
   }
 };
 
-const simulate = (game: GameState, interval: number) => {
-  // Add bots every interval
-  game.AddBot();
-  // setInterval(() => {
-  // }, interval);
+
+/**
+ * Function for testing purposes. Simulates a game state. Change this function
+ * to simulate different game states.
+ * @param game the game state to modify
+ */
+const simulate = (game: GameState) => {
+  // // Add a small bot to the left
+  // game.AddBot(
+  //   "smallBot",
+  //   10,
+  //   {x : -10 , y : 0}
+  // );
+
+  // Add a big bot to the right
+  // game.AddBot(
+  //   "bigBot",
+  //   100,
+  //   {x : 10 , y : 0}
+  // );
 
   game.Init();
 };
@@ -67,7 +82,7 @@ const main = async () => {
   const ws = new WebSocketServer({ port: PORT });
   const game = new GameState(1, ws);
 
-  simulate(game, 5000);
+  simulate(game);
 
   ws.on("listening", () => {
     console.log(`listening to ws connections on port ${PORT}`);
@@ -84,10 +99,12 @@ const main = async () => {
     socket.on("message", (msg) => handleWsMessage(game, socket, socketId, msg));
 
     socket.on("close", () => {
+      console.log("Socket closed");
       game.RemovePlayer(socketId);
     });
 
     socket.on("error", (err) => {
+      console.error("Socket error:", err);
       game.RemovePlayer(socketId);
     });
   });

@@ -8,18 +8,6 @@ public class PlayerMovement : MonoBehaviour
     // Fields
     //==========================================================================
     
-    #region Instance
-    public static PlayerMovements instance { get; private set; } // Singleton instance
-
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-    }
-
-    #endregion
     const int MsgInterval = 20;
     const int StartingSize = 30;
 
@@ -29,7 +17,7 @@ public class PlayerMovement : MonoBehaviour
     private ServerConnect server;
     private MassSpawner massSpawner;
     private GameObject[] Mass;
-
+    private FpgaController fpgaController;
     private PlayersManager playersManager;
     private int msgCount = 0;
 
@@ -37,22 +25,34 @@ public class PlayerMovement : MonoBehaviour
     public float Speed = 10f;
     public Vector3 Direction;
 
-    Map map;
-    
-    ServerConnect server;
+    public bool Died = false;
 
-    private FpgaController fpgaController;
+    #region Instance
+    public static PlayerMovement instance { get; private set; } // Singleton instance
 
-    int msgCount = 0;
 
-    MassSpawner massSpawner;
+    //==========================================================================
+    // Methods
+    //==========================================================================
 
-    PlayersManager playersManager;
-
+    public bool isMac = false;
     void Awake()
     {
-        fpgaController = new FpgaController();
+        try {
+            fpgaController = new FpgaController();
+            Debug.Log("Using Windows with FPGA");
+        } catch {
+            Debug.Log("Using Mac without FPGA");
+            isMac = true;
+        }
+
+        if (instance == null)
+        {
+            instance = this;
+        }
     }
+
+    #endregion
 
     // Start is called before the first frame update
     void Start()
@@ -67,9 +67,80 @@ public class PlayerMovement : MonoBehaviour
         massSpawner = MassSpawner.ins;
     }
 
+    public void DestroySelf() {
+        Destroy(gameObject);
+    }
+
+    void UpdateMac()
+    {
+        float Speed_ = (float) blob.GetSpeed() * 2;
+        Vector2 Direction = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
+        Direction.y = Mathf.Clamp(Direction.y, map.MapLimits.y * -1 / 2, map.MapLimits.y / 2);
+
+
+        // Update blob's position
+        transform.position = Vector2.MoveTowards(transform.position, Direction, Speed_ * Time.deltaTime);
+        blob.position.x = transform.position.x;
+        blob.position.y = transform.position.y;
+        
+
+        // Send message to server
+        if (msgCount % MsgInterval == 0)
+        {
+            Dictionary<string, object> updatePlayerPosMsg = new Dictionary<string, object> {
+                {"x", transform.position.x},
+                {"y", transform.position.y}
+            };
+
+            var UpdatePosMsg = new ClientMessage(
+                ClientMsgType.UpdatePosition, 
+                updatePlayerPosMsg
+            );
+
+            server.SendWsMessage(UpdatePosMsg).ContinueWith(task =>
+            {
+                if (task.Exception != null)
+                {
+                    Debug.LogError($"Error sending message: {task.Exception}");
+                }
+            });
+        }
+
+        msgCount++;
+
+
+        if (LockActions)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            actions.ThrowMass(Direction);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // split
+            if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
+            {
+                return;
+            }
+            actions.Split(Direction);
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
+        if (isMac)
+        {
+            UpdateMac();
+            return;
+        }
+
         fpgaController.UpdateData();
 
         float accel_x = fpgaController.GetReadingX();
@@ -80,7 +151,7 @@ public class PlayerMovement : MonoBehaviour
 
        // Debug.Log("Input " + accel_x + " " + accel_y + " " + switches + " " + throwMass + " " + split);
     
-        Direction = new Vector3(accel_x, accel_y, 0);
+        Direction = new Vector3(accel_x*1.5f, accel_y*1.5f, 0);
 
         // The magnitude of the direction vector does not affect the speed in
         // the MoveTowards function, so we have to calculate the speed manually
@@ -104,9 +175,8 @@ public class PlayerMovement : MonoBehaviour
             transform.position.z
         );
 
-
         // Send message to the server
-        if (msgCount % 2000 == 0)
+        if (msgCount % MsgInterval == 0)
         {
             Dictionary<string, object> updatePlayerPosMsg = new Dictionary<string, object> {
                 {"x", transform.position.x},
@@ -129,14 +199,27 @@ public class PlayerMovement : MonoBehaviour
 
         msgCount++;
 
-        // serverconnec
-        // serverconnect.Instance.SendMessage(yourMessage).ContinueWith(task => 
-        // {
-        //     if (task.Exception != null)
-        //     {
-        //         Debug.LogError($"Error sending message: {task.Exception}");
-        //     }
-        // });
+
+        if (LockActions)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            actions.ThrowMass(Direction);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // split
+            if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
+            {
+                return;
+            }
+            actions.Split(Direction);
+        }
+
 
         if (LockActions)
         {

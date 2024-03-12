@@ -18,7 +18,7 @@ public enum ServerMsgType {
     UpdatePlayersPosition, // 3
     FoodAdded, // 4
     PlayerAteFood, // 5
-    PlayerAteEnemy
+    PlayerAteEnemy // 6
 }
 
 // Join message data

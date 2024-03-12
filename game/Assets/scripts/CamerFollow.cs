@@ -14,17 +14,22 @@ public class CamerFollow : MonoBehaviour
     public float ZoomController = 1f;
 
     List<Transform> trackedPlayers = new List<Transform>();
+    PlayerMovement playerMovement;
 
     void Start()
     {
+        playerMovement = PlayerMovement.instance;
         cam = Camera.main;
         AddPlayersToTrack();
     }
 
     void Update()
     {
-        Move();
-        Zoom();
+        // Debug.Log("playerMovement.Died: " + playerMovement.Died);
+        if (!playerMovement.Died) {
+            Move();
+            Zoom();
+        }
     }
 
     void Zoom()
@@ -51,16 +56,25 @@ public class CamerFollow : MonoBehaviour
 
     Vector3 GetCenter()
     {
+        // if (playerMovement == null) return Vector3.zero;
         Bounds bounds = new Bounds(trackedPlayers[0].position, Vector3.zero);
+        return bounds.center;
         foreach (var player in trackedPlayers)
         {
             bounds.Encapsulate(player.position);
         }
         return bounds.center;
+
+        
     }
 
     void AddPlayersToTrack()
     {
+        // if (playerMovement == null) {
+        //     playerMovement = PlayerMovement.instance;
+        //     trackedPlayers.Add(playerMovement.transform);
+        // }
+        
         MassSpawner ms = MassSpawner.ins;
         foreach (var player in ms.Players)
         {
