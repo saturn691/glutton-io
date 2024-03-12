@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement; 
+
 // using ServerConnect;
 
 public class PlayerMovement : MonoBehaviour
@@ -219,6 +220,11 @@ public class PlayerMovement : MonoBehaviour
                 return;
             }
             actions.Split(Direction);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("WaitingForPlayers");
         }
 
 
