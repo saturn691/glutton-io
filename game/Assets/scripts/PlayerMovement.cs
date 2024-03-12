@@ -73,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
 
     void UpdateMac()
     {
-        float Speed_ = (float) blob.GetSpeed();
+        float Speed_ = (float) blob.GetSpeed() * 2;
         Vector2 Direction = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         Direction.x = Mathf.Clamp(Direction.x, map.MapLimits.x * -1 / 2, map.MapLimits.x / 2);
