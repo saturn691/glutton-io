@@ -20,6 +20,10 @@ public class Blob
 
     public static int DefaultFoodSize = 1;
 
+    public static double MassMultiplier = 1.1;
+
+    public static double DistanceMultiplier = 1.75;
+
     
     //==========================================================================
     // Methods
@@ -52,25 +56,35 @@ public class Blob
         return (float)Math.Sqrt(size / Math.PI);
     }
 
+
     /// <summary>
     ///  Check if this blob meets with other blob
     /// </summary>
-    public bool Encountered(Blob blob)
+    public bool Encountered(Blob other)
     {  
-        // distance between the two blobs
-        float blobDistance = Vector2.Distance(
-            this.gameObject.transform.position, 
-            blob.gameObject.transform.position
-        );
 
-        return blobDistance <= this.gameObject.transform.localScale.x / 2;
+
+        var deltaX = this.gameObject.transform.position.x - other.gameObject.transform.position.x;
+        var deltaY = this.gameObject.transform.position.y - other.gameObject.transform.position.y;
+
+        var distBetweenCenters = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+        var thisRadius = Math.Sqrt(this.size / Math.PI);
+        return thisRadius > distBetweenCenters * DistanceMultiplier;
+
+        // // distance between the two blobs
+        // float blobDistance = Vector2.Distance(
+        //     this.gameObject.transform.position, 
+        //     blob.gameObject.transform.position
+        // );
+
+        // return blobDistance <= this.gameObject.transform.localScale.x / 2;
     }
     
     /// <summary>
     ///  Check if this blob is larger than other blob
     /// </summary>
-    public bool LargerThan(Blob blob)
+    public bool LargerThan(Blob other)
     {
-        return this.size > blob.size;
+        return this.size > other.size * MassMultiplier;
     }
 }
