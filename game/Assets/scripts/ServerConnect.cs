@@ -17,6 +17,9 @@ public class ServerConnect : MonoBehaviour
     public static ServerConnect instance { get; private set; } // Singleton instance
     private ClientWebSocket client; // Keep the client accessible
     public PlayersManager playersManager;
+    public MassSpawner massSpawner;
+
+    public PlayerMovements playerMovements;
     
     public async Task SendWsMessage(ClientMessage msg)
     {
@@ -29,7 +32,12 @@ public class ServerConnect : MonoBehaviour
             var bytesToSend = new ArraySegment<byte>(Encoding.UTF8.GetBytes(jsonData));
 
             // Send the message to the server
-            await client.SendAsync(bytesToSend, WebSocketMessageType.Text, true, CancellationToken.None);
+            await client.SendAsync(
+                bytesToSend, 
+                WebSocketMessageType.Text, 
+                true, 
+                CancellationToken.None
+            );
         }
     }
 
@@ -44,8 +52,10 @@ public class ServerConnect : MonoBehaviour
     #endregion
 
     async Task InitWsConnection()
-    {
-        var serverUri = new Uri("ws://localhost:8080");
+    {  
+        // string url = "ws://3.10.169.198:8080";
+        string url = "ws://localhost:8080";
+        var serverUri = new Uri(url);
         Debug.Log("Connecting to " + serverUri + "...");
         using (client = new ClientWebSocket())
         {
@@ -56,8 +66,11 @@ public class ServerConnect : MonoBehaviour
                 Debug.Log("Connected!");
 
                 // Create JSON formatted data
+                Blob playerBlob = playerMovements.blob;
+                Blob blobWithoutGameObject = new Blob(playerBlob.id, playerBlob.size, playerBlob.position, null);
                 await SendWsMessage(new ClientMessage(
-                    ClientMsgType.Join, new JoinMsgData("player1")
+                    ClientMsgType.Join,
+                    blobWithoutGameObject 
                 ));
 
                 await ReceiveMessages();
@@ -71,22 +84,37 @@ public class ServerConnect : MonoBehaviour
 
     async Task HandleServerMessage(ServerMessage msg)
     {
-        
         switch (msg.type)
         {
             case ServerMsgType.InitSocketId:
-                playersManager.Init(msg.data); // Here
+                if (playersManager == null)
+                {
+                    playersManager = PlayersManager.instance;
+                    Debug.Log("Players manager is null");
+                }
+                playersManager.Init(msg.data);
+                // Init blobs too
                 break;
             case ServerMsgType.PlayerJoined:
+                Debug.Log("Received player joined msg");
                 ServerUtils.HandlePlayerJoined(playersManager, msg.data);
-                // Debug.Log("Player joined: " + (string)msg.data);
                 break;
             case ServerMsgType.PlayerLeft:
-                // Debug.Log("Player left: " + (string)msg.data);
                 break;
             case ServerMsgType.UpdatePlayersPosition:
                 ServerUtils.HandleUpdatePlayersPosition(playersManager, msg.data);
                 break;
+            case ServerMsgType.FoodAdded:
+                ServerUtils.HandleFoodAdded(massSpawner, msg.data);
+                break;
+            case ServerMsgType.PlayerAteFood:
+                ServerUtils.HandlePlayerAteFood(playersManager, massSpawner, msg.data);
+                break;
+
+            case ServerMsgType.PlayerAteEnemy:
+                ServerUtils.HandlePlayerAteEnemy(playersManager, msg.data);
+                break;
+
             default:
                 Debug.LogWarning("Unknown message type received: " + msg.type);
                 break;
@@ -96,40 +124,52 @@ public class ServerConnect : MonoBehaviour
     async Task ReceiveMessages()
     {
         var buffer = new byte[1024 * 4];
-        try
+        
+        while (client != null && client.State == WebSocketState.Open)
         {
-            while (client.State == WebSocketState.Open)
+            if (client == null) break;
+            var result = await client.ReceiveAsync(
+                new ArraySegment<byte>(buffer), 
+                CancellationToken.None
+            );
+
+            // TODO: Handle close properly. What does a close message look like...?
+            if (client.State == WebSocketState.CloseReceived)
             {
-                var result = await client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                Debug.Log("Close received");
 
-                // if (client.State == WebSocketState.CloseReceived)
-                // {
-                //     // If the server has initiated a close, respond with a close as well
-                //     await client.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-                // }
-                // else if (result.MessageType == WebSocketMessageType.Close)
-                // {
-                //     // If a close message is received, initiate the close handshake if it hasn't been done yet
-                //     await client.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-                // }
+                await client.CloseAsync(
+                    WebSocketCloseStatus.NormalClosure, 
+                    string.Empty, 
+                    CancellationToken.None
+                );
+            }
 
+            try 
+            {
                 var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 ServerMessage msg = JsonConvert.DeserializeObject<ServerMessage>(message);
-                // Debug.Log("Received: " + data);
-                await HandleServerMessage(msg);
+                // Debug.Log("Received: " + message);
+
+                if (msg != null)
+                {
+                    await HandleServerMessage(msg);
+                }
             }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error receiving: " + e.Message);
+            catch (Exception e)
+            {
+                Debug.LogError("Error receiving message: " + e.Message);
+            }
         }
     }
 
+
     // Start is called before the first frame update
-    async void Start()
+    public async void Start()
     {
         playersManager = PlayersManager.instance;
-
+        massSpawner = MassSpawner.ins;
+        playerMovements = PlayerMovements.instance;
         InitWsConnection();
         // ReceiveMessages();
     }
@@ -137,15 +177,16 @@ public class ServerConnect : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
     }
 
     private async Task CloseWebSocketAsync()
     {
         if (client != null && (client.State == WebSocketState.Open || client.State == WebSocketState.Connecting))
         {
-            try {
+            try
+            {
                 await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
+                client = null;
             }
             catch (Exception e)
             {

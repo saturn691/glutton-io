@@ -1,32 +1,29 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Allows the player to eat mass objects by checking for collisions with them.
+/// </summary>
 public class PlayerEatMass : MonoBehaviour
 {
+    //=========================================================================
+    // Fields
+    //=========================================================================
 
     public GameObject[] Mass;
-    MassSpawner ms;
+    MassSpawner massSpawner;
+    PlayersManager playersManager;
+    ServerConnect server;
+
+    PlayerMovements playerMovements;
+
+    //=========================================================================
+    // Public methods
+    //=========================================================================
 
 
 
-    public void UpdateMass()
-    {
-        Mass = GameObject.FindGameObjectsWithTag("Mass");
-    }
-
-    public void RemoveMass(GameObject MassObject)
-    {
-        List<GameObject> MassList = new List<GameObject>();
-
-        for (int i = 0; i < Mass.Length; i++)
-        {
-            MassList.Add(Mass[i]);
-        }
-        MassList.Remove(MassObject);
-
-        Mass = MassList.ToArray();
-    }
     public void AddMass(GameObject MassObject)
     {
         List<GameObject> MassList = new List<GameObject>();
@@ -38,49 +35,131 @@ public class PlayerEatMass : MonoBehaviour
         MassList.Add(MassObject);
 
         Mass = MassList.ToArray();
+
+        
+    }
+
+    //=========================================================================
+    // Private methods
+    //=========================================================================
+
+    private void UpdateMass()
+    {
+        Mass = GameObject.FindGameObjectsWithTag("Mass");
     }
 
 
-    public void Check()
+    /// <summary>
+    /// Method to be called when the player has eaten a food object.
+    /// Update new player's blob object size and rendered size
+    /// </summary>
+    private void PlayerEatFood()
     {
 
+        // Calculate new radius of the player.
+        playerMovements.blob.size += Blob.DefaultFoodSize;
+        float newRadius = Blob.GetRadius(playerMovements.blob.size);
+        transform.localScale = new Vector3(newRadius, newRadius, newRadius);
 
-        for (int i = 0; i < Mass.Length; i++)
-        {
-            if(Mass[i] == null)
-            {
-                UpdateMass();
-                return;
-            }
-
-
-            Transform m = Mass[i].transform;
-
-            if (Vector2.Distance(transform.position, m.position) <= transform.localScale.x / 2)
-            {
-                RemoveMass(m.gameObject);
-                // eat 
-                PlayerEat();
-
-                // destroy
-                ms.RemoveMass(m.gameObject);
-                Destroy(m.gameObject);
-            }
-        }
+        // MergePlayers.canMerge = true;
+        // GetComponent<Collider2D>().isTrigger = true;
     }
 
+    /// <summary>
+    /// Method to be called when the player has eaten a food object.
+    /// Update new player's blob object size and rendered size
+    /// </summary>
+    private void PlayerEatEnemy(Blob otherBlob)
+    {
+
+        // Calculate new radius of the player.
+        playerMovements.blob.size += otherBlob.size;
+        float newRadius = Blob.GetRadius(playerMovements.blob.size);
+        transform.localScale = new Vector3(newRadius, newRadius, newRadius);
+
+        // MergePlayers.canMerge = true;
+        // GetComponent<Collider2D>().isTrigger = true;
+    }
+
+    /// <summary>
+    /// Method to be called every (few) frame(s) to check if the player has
+    /// eaten a mass object.
+    /// </summary>
+    private async void Check()
+    {
+        // 1. Check if player has eaten an enemy player
+        var playersDictCopy = new Dictionary<string, Player>(playersManager.PlayersDict);
+        foreach (KeyValuePair<string, Player> kvp in playersDictCopy)
+        {
+            string otherPlayerId = kvp.Key;
+            Player otherPlayer = kvp.Value;
+            if (otherPlayerId == playersManager.selfSocketId) continue;
+            
+            Blob thisBlob = playerMovements.blob;
+            Blob otherBlob = otherPlayer.blob;
+
+            // If ate other blob
+            if (thisBlob.LargerThan(otherBlob) && thisBlob.Encountered(otherBlob)) {
+                PlayerEatEnemy(otherBlob);
+
+                Debug.Log("Sending ws message: PlayerEatenEnemy");
+
+                playersManager.RemovePlayerById(otherPlayerId);
+
+                Player otherPlayerWithoutGameObject = new Player(
+                    otherPlayer.socketId,
+                    new Blob(otherPlayer.blob.id, otherPlayer.blob.size, otherPlayer.blob.position, null)
+                );
+                server.SendWsMessage(new ClientMessage(
+                    ClientMsgType.PlayerEatenEnemy, 
+                    otherPlayerWithoutGameObject  
+                ));
+                
+            } 
+            
+            else if (otherBlob.LargerThan(thisBlob) && otherBlob.Encountered(thisBlob)) {
+                Debug.Log("Died");
+            }
+        }
+        
+
+        // 2. Check if player has eaten a food object
+        var foodDictCopy = new Dictionary<string, Blob>(massSpawner.FoodDict);
+        foreach (KeyValuePair<string, Blob> kvp in foodDictCopy)
+        {
+            string blobId = kvp.Key;
+            Blob foodBlob = kvp.Value;
+
+            GameObject foodGameObject = foodBlob.gameObject;
+
+            if (Vector2.Distance(transform.position, foodGameObject.transform.position) 
+                <= transform.localScale.x / 2
+            ) {
+
+                massSpawner.RemoveFoodBlobById(foodBlob.id);
+
+                // Pre render here, but if not verified by server, then render again
+                // Maybe set timeout of 10s for server to verify
+                PlayerEatFood();
+
+                // Send server PlayerEatenFoodMsg
+                server.SendWsMessage(new ClientMessage(ClientMsgType.PlayerEatenFood, foodBlob.id));
+            }
+        }
     
+
+        return;
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
-        UpdateMass();
+        playerMovements = PlayerMovements.instance;
+        server = ServerConnect.instance;
+        massSpawner = MassSpawner.ins;
+        playersManager = PlayersManager.instance;
         InvokeRepeating("Check", 0, 0.1f);
-        ms = MassSpawner.ins;
+        
     }
-
-    void PlayerEat()
-    {
-        transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
-    }
-
 }
