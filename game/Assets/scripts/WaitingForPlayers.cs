@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class WaitingForPlayers : MonoBehaviour
 {
-    public void OnPlayButton ()
+    public void OnJoinButton ()
     {
         SceneManager.LoadScene("SampleScene");
     }

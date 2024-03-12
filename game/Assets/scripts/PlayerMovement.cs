@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement; 
 // using ServerConnect;
 
 public class PlayerMovements : MonoBehaviour
@@ -92,6 +93,11 @@ public class PlayerMovements : MonoBehaviour
                 return;
             }
             actions.Split();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("GameOver");
         }
     }
 
