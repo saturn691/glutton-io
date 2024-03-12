@@ -1,4 +1,6 @@
-import sat from "sat";
+// Official numbers used by the real game
+const MassMultiplier = 1.1;
+const DistanceMultiplier = 1.75;
 
 export type Position = {
   x: number;
@@ -36,35 +38,46 @@ export class Blob {
   }
 
   /**
-   * Radius must agree with the client-side implementation
-   * @returns the blob as a circle
-   */
-  private ToCircle() {
-    let radius = Math.sqrt(this.size / Math.PI);
-
-    return new sat.Circle(
-      new sat.Vector(this.position.x, this.position.y),
-      radius
-    );
-  }
-
-  /**
    * Tests if two blobs are colliding
    * @returns 0, 1 (blob1 ate blob2), 2 (blob2 ate blob1)
    */
   static WhoAteWho(blob1: Blob, blob2: Blob) {
     if (!blob1 || !blob2) return 0;
 
-    let a = blob1.ToCircle();
-    let b = blob2.ToCircle();
-
-    let response = new sat.Response();
-    let collided = sat.testCircleCircle(a, b, response);
-
-    if (!collided) return 0;
-    else if (response.bInA) return 1;
-    else if (response.aInB) return 2;
-
+    if (blob1.BiggerThan(blob2) && blob1.Intersects(blob2))
+    {
+      return 1;
+    }
+    else if (blob2.BiggerThan(blob1) && blob2.Intersects(blob1))
+    {
+      return 2;
+    }
+    
     return 0;
   }
+
+  /**
+   * Checks if this blob is sufficiently bigger than the given blob. 
+   * Must agree with the client's calculation.
+   */
+  private BiggerThan(blob: Blob)
+  {
+    return this.size > blob.size * MassMultiplier;
+  }
+
+  /**
+   * Check if this blob is sufficiently close to the given blob.
+   * Must agree with the client's calculation.
+   */
+  private Intersects(blob: Blob)
+  {
+    let deltaX = this.position.x - blob.position.x;
+    let deltaY = this.position.y - blob.position.y;
+
+    let distanceBetweenCentres = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    let thisRadius = Math.sqrt(this.size / Math.PI);
+
+    return thisRadius > distanceBetweenCentres * DistanceMultiplier;
+  }
+  
 }

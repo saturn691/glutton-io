@@ -57,8 +57,13 @@ public class Blob
     /// </summary>
     public bool Encountered(Blob blob)
     {  
-        return Vector2.Distance(this.gameObject.transform.position, blob.gameObject.transform.position) 
-            <= this.gameObject.transform.localScale.x / 2;
+        // distance between the two blobs
+        float blobDistance = Vector2.Distance(
+            this.gameObject.transform.position, 
+            blob.gameObject.transform.position
+        );
+
+        return blobDistance <= this.gameObject.transform.localScale.x / 2;
     }
     
     /// <summary>

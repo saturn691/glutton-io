@@ -110,8 +110,14 @@ public class PlayerEatMass : MonoBehaviour
 
                 Player otherPlayerWithoutGameObject = new Player(
                     otherPlayer.socketId,
-                    new Blob(otherPlayer.blob.id, otherPlayer.blob.size, otherPlayer.blob.position, null)
+                    new Blob(
+                        otherPlayer.blob.id, 
+                        otherPlayer.blob.size, 
+                        otherPlayer.blob.position, 
+                        null
+                    )
                 );
+
                 server.SendWsMessage(new ClientMessage(
                     ClientMsgType.PlayerEatenEnemy, 
                     otherPlayerWithoutGameObject  
@@ -150,7 +156,6 @@ public class PlayerEatMass : MonoBehaviour
 
         return;
     }
-
 
     void Update()
     {

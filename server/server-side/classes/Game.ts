@@ -6,6 +6,7 @@ import { JoinMessageData, ServerMsgType } from "./MessageType.js";
 import { WebSocketServer, WebSocket } from "ws";
 import * as uuid from "uuid";
 import { PlayerUtils } from "../utils/PlayerUtils.js";
+import { getRandomValues } from "crypto";
 
 export class GameState {
   id: number;
@@ -42,7 +43,6 @@ export class GameState {
    * @param socket the player's socket
    * @param socketId the socketId of the player
    */
-
   InitPlayerJoined(socket: WebSocket, socketId: string) {
     console.log("New connection, socket id: ", socketId);
     let playersWithoutSocket = {};
@@ -122,23 +122,23 @@ export class GameState {
    * Similar to AddPlayer, but for bots. Adds a bot to the players state and
    * broadcasts ServerMsgType.PlayerJoined
    */
-  AddBot() {
-    const BOT_NAME = "bot";
-    const STARTING_SIZE = 20;
-    const SIMULATE_INTERVAL_MS = 100;
-    const BOT_SPEED = 0.05;
+  AddBot(name: string, size: number, position: Position) {
+    const SIMULATE_INTERVAL_MS = 1/60;
 
     // Generate a unique socket id for the bot
     let socketId = uuid.v4();
+    
+    // Generate a random color
+    let color = Math.floor(Math.random() * 0xFFFFFF); 
 
     // A null socket allows the game to not send messages to the bot
     let bot = new Bot(
-      parseInt("00FF00", 16),
+      color,
       null,
       socketId,
-      { x: 5, y: 5 }, // TODO: Initialize from game
-      STARTING_SIZE, // TODO: Initialize from game
-      BOT_NAME // TODO: Change to BlobId
+      position,
+      size,
+      name
     );
 
     this.players[socketId] = bot;
@@ -154,7 +154,8 @@ export class GameState {
 
     // Simulate bot movement
     setInterval(() => {
-      bot.Update(BOT_SPEED);
+      // bot.Update(SIMULATE_INTERVAL_MS);
+      bot.CheckCollisions(this);
 
       if (this.players[socketId] == null) return;
 

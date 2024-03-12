@@ -77,14 +77,8 @@ export class PlayerUtils {
     // Update player's size
     game.players[socketId].blob.AddSize(otherPlayer.blob.size);
 
-    // Remove eaten player from game
-    game.players[otherSocketId].EatenByEnemy();
-    let otherPlayerSocket: WebSocket = game.players[otherSocketId].socket;
-    if (otherPlayerSocket && otherPlayerSocket.readyState === 1)
-      game.players[otherSocketId].socket.close();
-    delete game.players[otherSocketId];
-    game.numPlayers--;
-
+    // Send message to all players, even the eaten player
+    // This is because the close signal wates for the readyState to be 1
     game.Broadcast({
       type: ServerMsgType.PlayerAteEnemy,
       data: {
@@ -93,6 +87,15 @@ export class PlayerUtils {
         playerEaten: otherSocketId,
       },
     });
+
+    // Remove eaten player from game
+    game.players[otherSocketId].EatenByEnemy();
+    let otherPlayerSocket: WebSocket = game.players[otherSocketId].socket;
+    if (otherPlayerSocket && otherPlayerSocket.readyState === 1)
+      game.players[otherSocketId].socket.close();
+
+    delete game.players[otherSocketId];
+    game.numPlayers--;
 
     console.log("Sending player ate enemy message!");
   }

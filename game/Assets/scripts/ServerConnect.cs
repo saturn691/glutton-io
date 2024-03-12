@@ -158,7 +158,8 @@ public class ServerConnect : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError("Error receiving message: " + e.Message);
+                // Log, but don't close the script by logging an error
+                Debug.Log("Error receiving message: " + e.Message);
             }
         }
     }
@@ -174,10 +175,6 @@ public class ServerConnect : MonoBehaviour
         // ReceiveMessages();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-    }
 
     private async Task CloseWebSocketAsync()
     {
@@ -185,6 +182,7 @@ public class ServerConnect : MonoBehaviour
         {
             try
             {
+                Debug.Log("Closing WebSocket...");
                 await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
                 client = null;
             }
@@ -198,7 +196,9 @@ public class ServerConnect : MonoBehaviour
     void OnDestroy()
     {
         // Because OnDestroy cannot be async, we start the close operation without awaiting it.
-        var _ = CloseWebSocketAsync(); // Fire-and-forget (not ideal, but necessary under these circumstances)
+        // Fire-and-forget (not ideal, but necessary under these circumstances)
+        Debug.Log("OnDestroy");
+        var _ = CloseWebSocketAsync(); 
     }
 
     void OnApplicationQuit()

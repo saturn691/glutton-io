@@ -8,6 +8,7 @@ export class Player {
   gameOver: boolean;
   socket: WebSocket;
   socketId: string; // SocketID uniquely identifies a player
+  size: number; // Size of the player
   blob: Blob; // TODO: Define Player as group of Blobs (maybe through Dictionary?)
 
   constructor(
@@ -23,6 +24,7 @@ export class Player {
     this.gameOver = false;
     this.socket = socket;
     this.socketId = socketId;
+    this.size = size;
     this.blob = new Blob(blobId, position, size);
   }
 
