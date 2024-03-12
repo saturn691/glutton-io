@@ -66,7 +66,7 @@ public class ServerUtils
     }
 
     // TODO ADD COMMENT
-    public static void HandlePlayerAteEnemy(PlayersManager pmInst, object msgData)
+    public static void HandlePlayerAteEnemy(PlayersManager pmInst, object msgData, PlayerMovement playerMovement)
     {
         var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
         
@@ -74,16 +74,20 @@ public class ServerUtils
         int newSize = JsonConvert.DeserializeObject<int>(data["newSize"].ToString());
         string playerEatenId = data["playerEaten"].ToString();
 
-        // Debug.Log(data.ToString());
+        // Debug.Log("PlayerAteEnemy: " + data.ToString());
+
+        if (pmInst.selfSocketId == playerEatenId) {
+            Debug.Log("You were eaten! Game over!");
+            playerMovement.Died = true;
+            playerMovement.DestroySelf();
+            return;
+        }
 
         if (pmInst.selfSocketId != playerWhoAteId && pmInst.selfSocketId != playerEatenId)
         {
             pmInst.UpdatePlayerSize(playerWhoAteId, newSize);
             pmInst.RemovePlayerById(playerEatenId);
         }
-        else
-        {
-            Debug.Log("You were eaten! Game over!");
-        }
+
     }
 }

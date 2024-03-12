@@ -111,7 +111,10 @@ public class ServerConnect : MonoBehaviour
                 break;
 
             case ServerMsgType.PlayerAteEnemy:
-                ServerUtils.HandlePlayerAteEnemy(playersManager, msg.data);
+                Debug.Log("Handling player ate enemy");
+
+                ServerUtils.HandlePlayerAteEnemy(playersManager, msg.data, playerMovement);
+            
                 break;
 
             default:

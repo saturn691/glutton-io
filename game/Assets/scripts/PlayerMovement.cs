@@ -67,6 +67,10 @@ public class PlayerMovement : MonoBehaviour
         massSpawner = MassSpawner.ins;
     }
 
+    public void DestroySelf() {
+        Destroy(gameObject);
+    }
+
     void UpdateMac()
     {
         float Speed_ = (float) blob.GetSpeed();
