@@ -52,6 +52,7 @@ export class PlayerUtils {
     let foodManager: FoodManager = gameState.foodManager;
     let foodBlob = foodManager.GetFoodBlobById(blobId);
 
+    if (!foodBlob) return;
     // 4. Update player's blob size
     gameState.players[socketId].blob.AddSize(foodBlob.size);
     foodManager.RemoveFoodBlobById(blobId);
@@ -72,13 +73,15 @@ export class PlayerUtils {
     socketId: string,
     otherPlayer: Player
   ) {
+    
     const otherSocketId = otherPlayer.socketId;
 
     // Update player's size
     game.players[socketId].blob.AddSize(otherPlayer.blob.size);
 
     // Send message to all players, even the eaten player
-    // This is because the close signal wates for the readyState to be 1
+    // This is because the close signal waits for the readyState to be 1
+    console.log("Handling player ate enemy");
     game.Broadcast({
       type: ServerMsgType.PlayerAteEnemy,
       data: {

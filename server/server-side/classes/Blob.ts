@@ -1,6 +1,7 @@
 // Official numbers used by the real game
 const MassMultiplier = 1.1;
-const DistanceMultiplier = 1.75;
+const DistanceMultiplier = 1.6;
+// const DistanceMultiplier = 1;
 
 export type Position = {
   x: number;

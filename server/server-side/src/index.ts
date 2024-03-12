@@ -57,19 +57,19 @@ const handleWsMessage = (
  * @param game the game state to modify
  */
 const simulate = (game: GameState) => {
-  // Add a small bot to the left
-  game.AddBot(
-    "smallBot",
-    10,
-    {x : -10 , y : 0}
-  );
+  // // Add a small bot to the left
+  // game.AddBot(
+  //   "smallBot",
+  //   10,
+  //   {x : -10 , y : 0}
+  // );
 
   // Add a big bot to the right
-  game.AddBot(
-    "bigBot",
-    100,
-    {x : 10 , y : 0}
-  );
+  // game.AddBot(
+  //   "bigBot",
+  //   100,
+  //   {x : 10 , y : 0}
+  // );
 
   game.Init();
 };

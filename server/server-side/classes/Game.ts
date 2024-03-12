@@ -74,8 +74,11 @@ export class GameState {
     console.log("Adding player: ", msgData);
     let playerId = "dummy_player_id"; // To change to input from user
 
+    let randomColor = Math.floor(Math.random() * (0xffffff - 0xaaaaaa) + 0xaaaaaa);
+    console.log(randomColor);
+
     let newPlayer = new Player(
-      parseInt("FF0000", 16),
+      randomColor,
       socket,
       socketId,
 
