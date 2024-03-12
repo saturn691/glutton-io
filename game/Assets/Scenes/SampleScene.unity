@@ -458,6 +458,8 @@ MonoBehaviour:
   LockActions: 0
   Speed: 5
   Direction: {x: 0, y: 0, z: 0}
+  Died: 0
+  isMac: 0
 --- !u!114 &834052396
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -653,6 +655,22 @@ PrefabInstance:
     - target: {fileID: 2571599829861149455, guid: f96c70927e590244488b589f6d5a0f8c, type: 3}
       propertyPath: m_Name
       value: server connection
+      objectReference: {fileID: 0}
+    - target: {fileID: 5615604868197180478, guid: f96c70927e590244488b589f6d5a0f8c, type: 3}
+      propertyPath: m_Color.a
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5615604868197180478, guid: f96c70927e590244488b589f6d5a0f8c, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5615604868197180478, guid: f96c70927e590244488b589f6d5a0f8c, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5615604868197180478, guid: f96c70927e590244488b589f6d5a0f8c, type: 3}
+      propertyPath: m_Color.r
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7704472634209020979, guid: f96c70927e590244488b589f6d5a0f8c, type: 3}
       propertyPath: m_LocalPosition.x
