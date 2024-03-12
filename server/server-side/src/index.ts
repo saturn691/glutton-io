@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import { WebSocketServer, WebSocket, RawData } from "ws";
 import { GameState } from "../classes/Game.js";
 import { ClientMsgType, ServerMsgType } from "../classes/MessageType.js";
+import { DeletePlayersByGameId, connectToDB } from "../utils/db.js";
 
 import * as uuid from "uuid";
 
@@ -12,7 +13,7 @@ const handleWsMessage = (
   game: GameState,
   socket: WebSocket,
   socketId: string,
-  msg: RawData
+  msg: RawData,
 ) => {
   try {
     const msgJson = JSON.parse(msg.toString("utf8"));
@@ -50,7 +51,6 @@ const handleWsMessage = (
   }
 };
 
-
 /**
  * Function for testing purposes. Simulates a game state. Change this function
  * to simulate different game states.
@@ -78,9 +78,13 @@ const simulate = (game: GameState) => {
 const main = async () => {
   const PORT = 8080;
   config();
+  await connectToDB();
 
   const ws = new WebSocketServer({ port: PORT });
-  const game = new GameState(1, ws);
+
+  let gameId = 1;
+  await DeletePlayersByGameId(gameId);
+  const game = new GameState(gameId, ws);
 
   simulate(game);
 

@@ -4,6 +4,7 @@ import { GameState } from "../classes/Game.js";
 import { ServerMsgType } from "../classes/MessageType.js";
 import { Player } from "../classes/Player.js";
 import { WebSocket } from "ws";
+import { UpdatePlayerSize } from "./db.js";
 
 export class PlayerUtils {
   /**
@@ -18,7 +19,7 @@ export class PlayerUtils {
   public static HandleUpdatePlayerPosition(
     game: GameState,
     socketId: string,
-    data: Position
+    data: Position,
   ) {
     game.players[socketId].UpdatePosition(data);
 
@@ -41,7 +42,7 @@ export class PlayerUtils {
   public static HandlePlayerEatenFood(
     gameState: GameState,
     socketId: string,
-    msgData: string
+    msgData: string,
   ): void {
     // 1. Parse msg data
     let blobId = msgData;
@@ -55,6 +56,12 @@ export class PlayerUtils {
     if (!foodBlob) return;
     // 4. Update player's blob size
     gameState.players[socketId].blob.AddSize(foodBlob.size);
+    UpdatePlayerSize(
+      gameState.id,
+      socketId,
+      gameState.players[socketId].blob.size.toString(),
+    );
+
     foodManager.RemoveFoodBlobById(blobId);
 
     // 5. Broadcast PlayerAteFood to all players
@@ -71,9 +78,8 @@ export class PlayerUtils {
   public static HandlePlayerEatenEnemy(
     game: GameState,
     socketId: string,
-    otherPlayer: Player
+    otherPlayer: Player,
   ) {
-    
     const otherSocketId = otherPlayer.socketId;
 
     // Update player's size
