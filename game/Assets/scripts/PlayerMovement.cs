@@ -70,7 +70,7 @@ public class PlayerMovement : MonoBehaviour
 
        // Debug.Log("Input " + accel_x + " " + accel_y + " " + switches + " " + throwMass + " " + split);
     
-        Direction = new Vector3(accel_x, accel_y, 0);
+        Direction = new Vector3(accel_x*1.5f, accel_y*1.5f, 0);
 
         // The magnitude of the direction vector does not affect the speed in
         // the MoveTowards function, so we have to calculate the speed manually
