@@ -182,7 +182,7 @@ export class GameState {
 
   private GenerateFood() {
     setInterval(() => {
-      const foodBlob = this.foodManager.AddFoodBlob();
+      const foodBlob = this.foodManager.InitFoodBlob();
       this.Broadcast({
         type: ServerMsgType.FoodAdded,
         data: foodBlob,

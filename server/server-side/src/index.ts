@@ -9,7 +9,10 @@ import * as uuid from "uuid";
 
 import { PlayerUtils } from "../utils/PlayerUtils.js";
 
-const handleWsMessage = (
+const timeout = async (ms: number) => {
+  return new Promise((res, rej) => setTimeout(() => res(true), ms));
+};
+const handleWsMessage = async (
   game: GameState,
   socket: WebSocket,
   socketId: string,
@@ -34,12 +37,16 @@ const handleWsMessage = (
         break;
 
       case ClientMsgType.PlayerEatenFood:
-        PlayerUtils.HandlePlayerEatenFood(game, socketId, msgJson.data);
+        // PlayerUtils.HandlePlayerEatenFood(game, socketId, msgJson.data);
         break;
 
       case ClientMsgType.PlayerEatenEnemy:
         console.log("Player ate enemy");
         PlayerUtils.HandlePlayerEatenEnemy(game, socketId, msgJson.data);
+        break;
+      case ClientMsgType.PlayerThrewMass:
+        // await timeout(1000);
+        PlayerUtils.HandlePlayerThrewMass(game, socketId, msgJson.data);
         break;
 
       default:
@@ -63,15 +70,13 @@ const simulate = (game: GameState) => {
   //   10,
   //   {x : -10 , y : 0}
   // );
-
   // Add a big bot to the right
   // game.AddBot(
   //   "bigBot",
   //   100,
   //   {x : 10 , y : 0}
   // );
-
-  game.Init();
+  // game.Init();
 };
 
 // Initialize DB connection

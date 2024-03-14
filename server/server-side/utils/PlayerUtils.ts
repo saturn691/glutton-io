@@ -1,4 +1,4 @@
-import { Position } from "../classes/Blob.js";
+import { Blob, Position } from "../classes/Blob.js";
 import { FoodManager } from "../classes/Food.js";
 import { GameState } from "../classes/Game.js";
 import { ServerMsgType } from "../classes/MessageType.js";
@@ -59,7 +59,7 @@ export class PlayerUtils {
     UpdatePlayerSize(
       gameState.id,
       socketId,
-      gameState.players[socketId].blob.size.toString(),
+      gameState.players[socketId].blob.size,
     );
 
     foodManager.RemoveFoodBlobById(blobId);
@@ -107,5 +107,36 @@ export class PlayerUtils {
     game.numPlayers--;
 
     console.log("Sending player ate enemy message!");
+  }
+
+  public static HandlePlayerThrewMass(
+    game: GameState,
+    socketId: string,
+    msgData: any,
+  ) {
+    // 1. Verify if player has enough mass to throw
+    console.log("Handling player threw mass");
+
+    // 2. Update food manager and players
+    game.foodManager.AddFoodBlob(
+      new Blob(msgData.blobId, msgData.endPos, msgData.size),
+    );
+
+    game.players[socketId].blob.size -= 1; // decrement for mass throw
+
+    // 3. Broadcast to all players
+    let broadcastData = {
+      playerId: socketId,
+      blobId: msgData.blobId,
+      initialSpeed: msgData.initialSpeed,
+      startPos: msgData.startPos,
+      direction: msgData.direction,
+      endPos: msgData.endPos,
+    };
+    console.log("Data: ", broadcastData);
+    game.Broadcast({
+      type: ServerMsgType.PlayerThrewMass,
+      data: broadcastData,
+    });
   }
 }

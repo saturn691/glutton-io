@@ -28,6 +28,13 @@ export class FoodManager {
   }
 
   /**
+   * Adds existing food blob to food dict
+   */
+  AddFoodBlob(newFoodBlob: Blob) {
+    this.foodBlobs.set(newFoodBlob.id, newFoodBlob);
+  }
+
+  /**
    * Gets food blob from foodBlobs dict by id
    */
   GetFoodBlobById(id: string) {
@@ -37,7 +44,7 @@ export class FoodManager {
   /**
    * Spawns a new food blob and adds it to the foodBlobs dict
    */
-  AddFoodBlob() {
+  InitFoodBlob() {
     if (this.foodBlobs.size >= this.maxFood) return;
 
     // Uniform distribution of food across the map
