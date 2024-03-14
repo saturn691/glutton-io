@@ -66,8 +66,8 @@ public class PlayerEatMass : MonoBehaviour
         float newRadius = Blob.GetRadius(playerMovement.blob.size);
         transform.localScale = new Vector3(newRadius, newRadius, newRadius);
 
-        // Play sound effect
-        soundEffectsPlayer.PlayFood();
+        // // Play sound effect
+        // soundEffectsPlayer.PlayFood();
 
         // MergePlayers.canMerge = true;
         // GetComponent<Collider2D>().isTrigger = true;
@@ -123,7 +123,7 @@ public class PlayerEatMass : MonoBehaviour
                     )
                 );
 
-                server.SendWsMessage(new ClientMessage(
+                await server.SendWsMessage(new ClientMessage(
                     ClientMsgType.PlayerEatenEnemy, 
                     otherPlayerWithoutGameObject  
                 ));

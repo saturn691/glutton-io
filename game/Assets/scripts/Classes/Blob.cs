@@ -33,8 +33,8 @@ public class Blob
     public Blob(string id, int size, Position position, GameObject gameObject)
     {
         this.id = id;
-        this.position = position;
         this.size = size;
+        this.position = position;
         this.gameObject = gameObject;
     }
 
@@ -45,6 +45,12 @@ public class Blob
     public double GetSpeed()
     {
         return BaseSpeed / Math.Log(size);
+    }
+
+    public void Resize() {
+        if (gameObject != null) {
+            gameObject.transform.localScale = new Vector3(GetRadius(size), GetRadius(size), GetRadius(size));
+        }
     }
 
     /// <summary>
@@ -70,14 +76,6 @@ public class Blob
         var distBetweenCenters = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
         var thisRadius = Math.Sqrt(this.size / Math.PI);
         return thisRadius > distBetweenCenters * DistanceMultiplier;
-
-        // // distance between the two blobs
-        // float blobDistance = Vector2.Distance(
-        //     this.gameObject.transform.position, 
-        //     blob.gameObject.transform.position
-        // );
-
-        // return blobDistance <= this.gameObject.transform.localScale.x / 2;
     }
     
     /// <summary>
@@ -88,3 +86,4 @@ public class Blob
         return this.size > other.size * MassMultiplier;
     }
 }
+

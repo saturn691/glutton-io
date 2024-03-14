@@ -122,15 +122,15 @@ public class PlayerMovement : MonoBehaviour
             actions.ThrowMass(Direction);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            // split
-            if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
-            {
-                return;
-            }
-            actions.Split(Direction);
-        }
+        // if (Input.GetKeyDown(KeyCode.Space))
+        // {
+        //     // split
+        //     if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
+        //     {
+        //         return;
+        //     }
+        //     actions.Split(Direction);
+        // }
     }
 
     // Update is called once per frame

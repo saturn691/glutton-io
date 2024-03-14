@@ -53,8 +53,8 @@ public class ServerConnect : MonoBehaviour
 
     async Task InitWsConnection()
     {  
-        string url = "ws://3.10.169.198:8080";
-        // string url = "ws://localhost:8080";
+        // string url = "ws://3.10.169.198:8080";
+        string url = "ws://localhost:8080";
         var serverUri = new Uri(url);
         using (client = new ClientWebSocket())
         {
@@ -114,7 +114,11 @@ public class ServerConnect : MonoBehaviour
                 Debug.Log("Handling player ate enemy");
 
                 ServerUtils.HandlePlayerAteEnemy(playersManager, msg.data, playerMovement);
-            
+                break;
+
+            case ServerMsgType.PlayerThrewMass:
+                Debug.Log("Handling player threw mass");
+                ServerUtils.HandlePlayerThrewMass(playersManager, massSpawner, msg.data);
                 break;
 
             default:

@@ -35,6 +35,7 @@ public class MassSpawner : MonoBehaviour
 
     // TODO: rename to MaxSplits
     public int MaxPlayers = 16;
+    public PlayerMovement playerMovement;
 
     public void Init(object msgData) {
         Dictionary <string, object> msgDataDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
@@ -49,8 +50,8 @@ public class MassSpawner : MonoBehaviour
 
     private void Start()
     {
+        playerMovement = PlayerMovement.instance;
         map = Map.ins;
-        // StartCoroutine(CreateMass());
     
     }
 
@@ -69,6 +70,18 @@ public class MassSpawner : MonoBehaviour
             Destroy(FoodDict[foodBlobId].gameObject);
             FoodDict.Remove(foodBlobId);
         }
+    }
+
+    public Transform MassPosition;
+
+    public void AddThrownMass(string blobId, float speed, Vector3 direction, Vector2 startPos, Position endPos) {
+        GameObject b = Instantiate(Mass, startPos, Quaternion.identity);
+        float r = Blob.GetRadius(1);
+        b.transform.localScale = new Vector3(r, r, r);
+        
+        b.GetComponent<MassForce>().ApplyForce = true;
+        b.GetComponent<MassForce>().InitParams(speed, direction, startPos, blobId);
+        FoodDict.Add(blobId, new Blob(blobId, 1, new Position(startPos.x, startPos.y), b));
     }
 
 

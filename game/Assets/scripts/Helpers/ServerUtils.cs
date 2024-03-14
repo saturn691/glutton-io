@@ -90,4 +90,35 @@ public class ServerUtils
         }
 
     }
+
+    // <summary>
+    // Handle player threw mass
+    // 1. Reduce player's size
+    // 2. Handle mass -> instantiate and trigger force, then add to dict
+    // </summary>
+    public static void HandlePlayerThrewMass(PlayersManager pmInst, MassSpawner msInst, object msgData) {
+        var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
+        string playerId = data["playerId"].ToString();
+
+        if (pmInst.selfSocketId == playerId) return;
+
+        // 1. Reduce player's size
+        pmInst.UpdatePlayerSize(playerId, pmInst.PlayersDict[playerId].blob.size - 1);
+
+        // 2. Throw mass
+        string blobId = data["blobId"].ToString();
+        float speed = JsonConvert.DeserializeObject<float>(data["initialSpeed"].ToString());
+        Position startPos = JsonConvert.DeserializeObject<Position>(data["startPos"].ToString());
+        Position endPos = JsonConvert.DeserializeObject<Position>(data["endPos"].ToString());
+        Position dir = JsonConvert.DeserializeObject<Position>(data["direction"].ToString());
+
+        msInst.AddThrownMass(
+            blobId,
+            speed, 
+            new Vector3(dir.x, dir.y, 0), 
+            new Vector2(startPos.x, startPos.y), 
+            endPos
+        );
+
+    }
 }

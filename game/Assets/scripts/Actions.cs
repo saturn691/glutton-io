@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using Newtonsoft.Json;
 
 public class Actions : MonoBehaviour
 {
+
     public GameObject Mass;
     public Transform MassPosition;
     public float Percentage = 0.01f;
@@ -12,11 +15,16 @@ public class Actions : MonoBehaviour
     // Start is called before the first frame update
 
     PlayerEatMass mass_script;
-    MassSpawner ms;
+    MassSpawner massSpawner;
+    PlayerMovement playerMovement;
+    ServerConnect serverConnect;
+
     void Start()
     {
+        serverConnect = ServerConnect.instance;
+        playerMovement = PlayerMovement.instance;
         mass_script = GetComponent<PlayerEatMass>();
-        ms = MassSpawner.ins;
+        massSpawner = MassSpawner.ins;
     }
 
     // Update is called once per frame
@@ -29,7 +37,7 @@ public class Actions : MonoBehaviour
         transform.localScale -= new Vector3(Percentage, Percentage, Percentage) * Time.deltaTime;
     }
 
-    public void ThrowMass(Vector3 direction)
+    public async void ThrowMass(Vector3 direction)
     {
         if(transform.localScale.x < 1f)
         {
@@ -41,22 +49,33 @@ public class Actions : MonoBehaviour
         float Z_Rotation = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg + 90f;
         transform.rotation = Quaternion.Euler(0, 0, Z_Rotation);
 
-        // instantiate mass 
-        GameObject b = Instantiate(Mass, MassPosition.position, Quaternion.identity);
 
-        // apply force
+        GameObject b = Instantiate(Mass, playerMovement.transform.position, Quaternion.identity);
+        float r = Blob.GetRadius(1);
+        b.transform.localScale = new Vector3(r, r, r);
+        
+
+        string blobId = Guid.NewGuid().ToString();
         b.GetComponent<MassForce>().ApplyForce = true;
-        b.GetComponent<MassForce>().Direction = -direction;
+        b.GetComponent<MassForce>().Init(b.transform.position.x, b.transform.position.y, blobId);
+        Dictionary<string, object> res = b.GetComponent<MassForce>().GetFinalPosition();
 
         // add mass to the player
-        ms.AddMass(b);
+        Position finalPos = b.GetComponent<MassForce>().GetFinalPos();
 
-        // lose mass
-        transform.localScale -= new Vector3(0.1f, 0.1f, 0.1f);
+        // New size: 
+        playerMovement.blob.size -= 1;
+        playerMovement.blob.Resize();
+
+        // Send message to the server
+        res["blobId"] = blobId;
+        await serverConnect.SendWsMessage(new ClientMessage(ClientMsgType.PlayerThrewMass, res));
+    
     }
 
     public void Split(Vector3 direction)
     {
+        Debug.Log("Splitting!");
         if(transform.localScale.x <= 2)
         {
             // Return if the player size is low
