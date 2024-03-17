@@ -1,0 +1,7 @@
+- emit:
+          channel: "add user"
+          data: "John Doe"
+      - emit:
+          channel: "new message"
+          data: "Hello! {{ $randomString() }}"
+      - think: 5 # do nothing for 5 seconds, then disconnect

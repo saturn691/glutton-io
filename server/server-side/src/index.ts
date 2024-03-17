@@ -37,7 +37,7 @@ const handleWsMessage = async (
         break;
 
       case ClientMsgType.PlayerEatenFood:
-        // PlayerUtils.HandlePlayerEatenFood(game, socketId, msgJson.data);
+        PlayerUtils.HandlePlayerEatenFood(game, socketId, msgJson.data);
         break;
 
       case ClientMsgType.PlayerEatenEnemy:
