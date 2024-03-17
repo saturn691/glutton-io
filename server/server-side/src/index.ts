@@ -9,17 +9,18 @@ import * as uuid from "uuid";
 
 import { PlayerUtils } from "../utils/PlayerUtils.js";
 
-const timeout = async (ms: number) => {
-  return new Promise((res, rej) => setTimeout(() => res(true), ms));
-};
-const handleWsMessage = async (
+const handleWsMessage = (
   game: GameState,
   socket: WebSocket,
   socketId: string,
-  msg: RawData,
+  msg: RawData
 ) => {
   try {
     const msgJson = JSON.parse(msg.toString("utf8"));
+    if (msgJson.type == "load_test") {
+      console.log("Received load_test msg");
+      return;
+    }
 
     if (msgJson.type == ClientMsgType.Join) {
       game.AddPlayer(socket, socketId, msgJson.data);
@@ -44,13 +45,9 @@ const handleWsMessage = async (
         console.log("Player ate enemy");
         PlayerUtils.HandlePlayerEatenEnemy(game, socketId, msgJson.data);
         break;
-      case ClientMsgType.PlayerThrewMass:
-        // await timeout(1000);
-        PlayerUtils.HandlePlayerThrewMass(game, socketId, msgJson.data);
-        break;
 
       default:
-        console.log("Unknown message type:", msgJson.type);
+        console.log("Unknown message type:", msgJson);
         break;
     }
   } catch (error) {
@@ -70,15 +67,18 @@ const simulate = (game: GameState) => {
   //   10,
   //   {x : -10 , y : 0}
   // );
+
   // Add a big bot to the right
   // game.AddBot(
   //   "bigBot",
   //   100,
   //   {x : 10 , y : 0}
   // );
-  // game.Init();
+
+  game.Init();
 };
 
+let playerCount = 0;
 // Initialize DB connection
 const main = async () => {
   const PORT = 8080;
@@ -99,6 +99,8 @@ const main = async () => {
 
   ws.on("connection", async (socket) => {
     const socketId = uuid.v4();
+    playerCount++;
+    console.log("New connection, count: ", playerCount);
     game.InitPlayerJoined(socket, socketId);
 
     // setTimeout(() => {
@@ -108,12 +110,14 @@ const main = async () => {
     socket.on("message", (msg) => handleWsMessage(game, socket, socketId, msg));
 
     socket.on("close", () => {
-      console.log("Socket closed");
+      // console.log("Socket closed");
+      playerCount--;
       game.RemovePlayer(socketId);
     });
 
     socket.on("error", (err) => {
-      console.error("Socket error:", err);
+      // console.error("Socket error:", err);
+      playerCount--;
       game.RemovePlayer(socketId);
     });
   });
