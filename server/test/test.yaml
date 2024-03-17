@@ -1,0 +1,16 @@
+config:
+  # target: "ws://3.10.169.198:8080"
+  target: "ws://localhost:8080"
+  processor: "./test.js"
+  phases:
+    - duration: 1 # Run scenario for 120 seconds
+      arrivalCount: 500
+      # arrivalRate: 60 # Create 60 virtual user per second
+scenarios:
+  - name: Websocket Test
+    engine: "ws"
+    flow:
+      - function: 'sendJoinMsg'
+      - function: 'simulate'
+      - function: 'receiveMessage'
+      - think: 20
