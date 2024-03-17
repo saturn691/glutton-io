@@ -47,7 +47,7 @@ export class GameState {
    * @param socketId the socketId of the player
    */
   InitPlayerJoined(socket: WebSocket, socketId: string) {
-    console.log("New connection, socket id: ", socketId);
+    // console.log("New connection, socket id: ", socketId);
     let playersWithoutSocket = {};
     for (const socketId in this.players) {
       playersWithoutSocket[socketId] = this.players[socketId].ToJson();

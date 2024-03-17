@@ -9,14 +9,20 @@ import * as uuid from "uuid";
 
 import { PlayerUtils } from "../utils/PlayerUtils.js";
 
+
 const handleWsMessage = (
   game: GameState,
   socket: WebSocket,
   socketId: string,
   msg: RawData,
 ) => {
+
   try {
     const msgJson = JSON.parse(msg.toString("utf8"));
+    if (msgJson.type == 'load_test') {
+      console.log("Received load_test msg")
+      return;
+    }
 
     if (msgJson.type == ClientMsgType.Join) {
       game.AddPlayer(socket, socketId, msgJson.data);
@@ -43,7 +49,7 @@ const handleWsMessage = (
         break;
 
       default:
-        console.log("Unknown message type:", msgJson.type);
+        console.log("Unknown message type:", msgJson);
         break;
     }
   } catch (error) {
@@ -74,6 +80,7 @@ const simulate = (game: GameState) => {
   game.Init();
 };
 
+let playerCount = 0;
 // Initialize DB connection
 const main = async () => {
   const PORT = 8080;
@@ -94,6 +101,8 @@ const main = async () => {
 
   ws.on("connection", async (socket) => {
     const socketId = uuid.v4();
+    playerCount++;
+    console.log("New connection, count: ", playerCount);
     game.InitPlayerJoined(socket, socketId);
 
     // setTimeout(() => {
@@ -103,12 +112,14 @@ const main = async () => {
     socket.on("message", (msg) => handleWsMessage(game, socket, socketId, msg));
 
     socket.on("close", () => {
-      console.log("Socket closed");
+      // console.log("Socket closed");
+      playerCount--;
       game.RemovePlayer(socketId);
     });
 
     socket.on("error", (err) => {
-      console.error("Socket error:", err);
+      // console.error("Socket error:", err);
+      playerCount--;
       game.RemovePlayer(socketId);
     });
   });
