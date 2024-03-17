@@ -9,6 +9,10 @@ import * as uuid from "uuid";
 
 import { PlayerUtils } from "../utils/PlayerUtils.js";
 
+const timeout = async (ms: number) => {
+  return new Promise((res, rej) => setTimeout(() => res(true), ms));
+};
+
 const handleWsMessage = (
   game: GameState,
   socket: WebSocket,
