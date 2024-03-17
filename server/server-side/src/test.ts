@@ -5,9 +5,11 @@ import { ClientMsgType, ServerMsgType } from "../classes/MessageType.js";
 import { DeletePlayersByGameId, connectToDB } from "../utils/db.js";
 
 const testState = {};
+let curPositionsUpdated = new Map();
+let numPlayers = 0;
 const MAX_PLAYERS_IN_ROOM = 250;
 
-const testBroadcast = (msg: any, selfId: string, excludeId?: string) => {
+const testBroadcast = (msg: any, selfId: string) => {
   let count = 0;
 
   testState[selfId].socket.send(JSON.stringify(msg));
@@ -31,11 +33,11 @@ export const handleTestWsMessage = (
   const msgJson = JSON.parse(msg.toString("utf8"));
   switch (msgJson.type) {
     case "join":
-      let id = getNumVUs() + 1;
+      numPlayers++;
+      let id = numPlayers;
       console.log(`VU ${id} joined: `, socketId);
       testState[socketId] = { socket, id };
       socket.send(JSON.stringify({ type: "init", data: { socketId, id: id } }));
-      // testBroadcast({ type: "playerJoined", data: { socketId } }, socketId);
       break;
 
     case "playerEaten":
@@ -44,14 +46,18 @@ export const handleTestWsMessage = (
       break;
 
     case "updatePosition":
-      // console.log(`VU ${testState[socketId].id} updated position`);
-      testBroadcast(
-        {
-          type: "playerUpdatedPosition",
-          data: { socketId, position: msgJson.data },
-        },
-        socketId,
-      );
+      curPositionsUpdated.set(socketId, true);
+      if (curPositionsUpdated.size == numPlayers) {
+        testBroadcast(
+          {
+            type: "playerUpdatedPosition",
+            data: { socketId, position: msgJson.data },
+          },
+          socketId,
+        );
+        curPositionsUpdated = new Map();
+      }
+
       break;
 
     default:
@@ -62,4 +68,8 @@ export const handleTestWsMessage = (
 
 export const handleTestRemovePlayer = (socketId: string) => {
   delete testState[socketId];
+  numPlayers--;
+  if (numPlayers == 0) {
+    curPositionsUpdated = new Map();
+  }
 };
