@@ -6,7 +6,7 @@ module.exports = {
         // Function to send a message
         // Update position: 1
         const sendMessage = () => {
-            context.ws.send(JSON.stringify({ type: 'load_test', message: "Hello!" }));
+            context.ws.send(JSON.stringify({ type: 'lt_', message: "Hello!" }));
         };
         console.log("Sending message from VU");
         sendMessage();
