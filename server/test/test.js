@@ -11,7 +11,9 @@ const updatePosInterval = 10;
 
 const handleUpdatedPosition = (context, msgData, isAteType) => {
     let socketId = msgData.socketId;
-    if (socketId == context.selfSocketId) {
+    let conditionMet = isAteType ? socketId == context.selfSocketId : true;
+    
+    if (conditionMet) {
         const currentTime = new Date().getTime();
         const lastSendTime = isAteType ? context[lastAteSendTime] : context[lastUpdatePosSendTime];
 
@@ -19,6 +21,7 @@ const handleUpdatedPosition = (context, msgData, isAteType) => {
         
         let latencyKey = isAteType ? ateLatencyKey : updatePosLatencyKey;
         if (context[latencyKey] == null) {
+            // console.log(`VU ${context.selfId}, cur time: ${currentTime} lastSendTime: ${lastSendTime} latency: ${latency} ms`)
             context[latencyKey] = {
                 count: 0,
                 total: 0
@@ -28,8 +31,10 @@ const handleUpdatedPosition = (context, msgData, isAteType) => {
         context[latencyKey].count++;
         context[latencyKey].total += latency;
         const averageLatency = context[latencyKey].total / context[latencyKey].count;
-
-        console.log(`VU ${context.selfId}\t Average ${latencyKey}: ${averageLatency.toFixed(3)} ms`);
+        
+        let count = context[latencyKey].count;
+        let total = context[latencyKey].total;
+        console.log(`VU ${context.selfId}\t  ${count} Average ${latencyKey}: ${averageLatency.toFixed(3)} ms`);
         // if (latencyKey == ateLatencyKey) {
         // }
 
@@ -61,6 +66,7 @@ module.exports = {
     simulate: function(context, events, done) {
         const sendUpdatePos = () => {
             context[lastUpdatePosSendTime] = new Date().getTime();
+            // console.log(`Set last update pos time for VU ${context.selfId} to ${context[lastUpdatePosSendTime]} `)
             context.ws.send(JSON.stringify({ type: 'updatePosition', message: "random" }));
         };
 
