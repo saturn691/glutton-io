@@ -47,15 +47,22 @@ export class PlayerUtils {
     // 1. Parse msg data
     let blobId = msgData;
 
-    // 2. Verify if player really ate food (TODO LATER)
-
-    // 3. Update player's score
+    // 2. Update player's score
     let foodManager: FoodManager = gameState.foodManager;
     let foodBlob = foodManager.GetFoodBlobById(blobId);
 
+    // 3. Verify if player really ate food (TODO LATER)
+
+    if (!gameState.players[socketId].AteBlob(foodBlob)) {
+      return;
+    }
+
     if (!foodBlob) return;
+
     // 4. Update player's blob size
     gameState.players[socketId].blob.AddSize(foodBlob.size);
+
+    // 5. DB Update
     UpdatePlayerSize(
       gameState.id,
       socketId,
@@ -85,9 +92,15 @@ export class PlayerUtils {
     // Update player's size
     game.players[socketId].blob.AddSize(otherPlayer.blob.size);
 
-    // Send message to all players, even the eaten player
-    // This is because the close signal waits for the readyState to be 1
-    console.log("Handling player ate enemy");
+    // Verify
+    let eaterBlob = game.players[socketId].blob;
+    let eatenBlob = otherPlayer.blob;
+    if (Blob.WhoAteWho(eaterBlob, eatenBlob) !== 1) return;
+
+    // Update DB
+    UpdatePlayerSize(game.id, socketId, game.players[socketId].blob.size);
+
+    // Broadcast
     game.Broadcast({
       type: ServerMsgType.PlayerAteEnemy,
       data: {
@@ -115,14 +128,14 @@ export class PlayerUtils {
     msgData: any,
   ) {
     // 1. Verify if player has enough mass to throw
-    console.log("Handling player threw mass");
 
     // 2. Update food manager and players
     game.foodManager.AddFoodBlob(
-      new Blob(msgData.blobId, msgData.endPos, msgData.size),
+      new Blob(msgData.blobId, msgData.endPos, Blob.defaultSize),
     );
 
     game.players[socketId].blob.size -= 1; // decrement for mass throw
+    UpdatePlayerSize(game.id, socketId, game.players[socketId].blob.size);
 
     // 3. Broadcast to all players
     let broadcastData = {
@@ -133,7 +146,6 @@ export class PlayerUtils {
       direction: msgData.direction,
       endPos: msgData.endPos,
     };
-    console.log("Data: ", broadcastData);
     game.Broadcast({
       type: ServerMsgType.PlayerThrewMass,
       data: broadcastData,

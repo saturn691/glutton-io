@@ -34,7 +34,6 @@ const handleWsMessage = (
 
     switch (msgJson.type) {
       case ClientMsgType.UpdatePosition:
-        // game.UpdatePlayerPosition(socketId, msgJson.data);
         PlayerUtils.HandleUpdatePlayerPosition(game, socketId, msgJson.data);
         break;
 
@@ -43,10 +42,11 @@ const handleWsMessage = (
         break;
 
       case ClientMsgType.PlayerEatenEnemy:
-        console.log("Player ate enemy");
         PlayerUtils.HandlePlayerEatenEnemy(game, socketId, msgJson.data);
         break;
-
+      case ClientMsgType.PlayerThrewMass:
+        PlayerUtils.HandlePlayerThrewMass(game, socketId, msgJson.data);
+        break;
       default:
         console.log("Unknown message type:", msgJson);
         break;
@@ -62,21 +62,10 @@ const handleWsMessage = (
  * @param game the game state to modify
  */
 const simulate = (game: GameState) => {
-  // // Add a small bot to the left
-  // game.AddBot(
-  //   "smallBot",
-  //   10,
-  //   {x : -10 , y : 0}
-  // );
-
+  // Add a small bot to the left
+  game.AddBot("smallBot", 10, { x: -10, y: 0 });
   // Add a big bot to the right
-  // game.AddBot(
-  //   "bigBot",
-  //   100,
-  //   {x : 10 , y : 0}
-  // );
-
-  game.Init();
+  game.AddBot("bigBot", 100, { x: 10, y: 0 });
 };
 
 // Initialize DB connection
@@ -90,7 +79,7 @@ const main = async () => {
   let gameId = 1;
   await DeletePlayersByGameId(gameId);
   const game = new GameState(gameId, ws);
-
+  game.GenerateFood();
   simulate(game);
 
   ws.on("listening", () => {
@@ -101,20 +90,20 @@ const main = async () => {
     const socketId = uuid.v4();
 
     // For testing
-    socket.on("message", (msg) => handleTestWsMessage(socket, socketId, msg));
+    // socket.on("message", (msg) => handleTestWsMessage(socket, socketId, msg));
 
     // For actual game
-    // game.InitPlayerJoined(socket, socketId);
-    // socket.on("message", (msg) => handleWsMessage(game, socket, socketId, msg));
+    game.InitPlayerJoined(socket, socketId);
+    socket.on("message", (msg) => handleWsMessage(game, socket, socketId, msg));
 
     socket.on("close", () => {
-      handleTestRemovePlayer(socketId);
-      // game.RemovePlayer(socketId);
+      // handleTestRemovePlayer(socketId);
+      game.RemovePlayer(socketId);
     });
 
     socket.on("error", (err) => {
-      handleTestRemovePlayer(socketId);
-      // game.RemovePlayer(socketId);
+      // handleTestRemovePlayer(socketId);
+      game.RemovePlayer(socketId);
     });
   });
 };

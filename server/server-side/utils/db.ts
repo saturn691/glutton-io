@@ -126,5 +126,5 @@ export const UpdatePlayerSize = async (
       },
     })
     .promise();
-  console.log("Updated player in dynamo:", res);
+  // console.log("Updated player in dynamo:", res);
 };

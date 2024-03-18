@@ -59,7 +59,7 @@ export class GameState {
         data: {
           socketId: socketId,
           players: playersWithoutSocket,
-          // foodBlobs: Object.fromEntries(this.foodManager.foodBlobs),
+          foodBlobs: Object.fromEntries(this.foodManager.foodBlobs),
         },
       }),
     );
@@ -151,6 +151,8 @@ export class GameState {
     this.players[socketId] = bot;
     this.numPlayers++;
 
+    insertPlayerIntoDB(1, socketId, "bot", size);
+
     this.Broadcast(
       {
         type: ServerMsgType.PlayerJoined,
@@ -173,14 +175,7 @@ export class GameState {
     }, SIMULATE_INTERVAL_MS);
   }
 
-  /**
-   * Starts the asynchronous functions
-   */
-  Init() {
-    this.GenerateFood();
-  }
-
-  private GenerateFood() {
+  public GenerateFood() {
     setInterval(() => {
       const foodBlob = this.foodManager.InitFoodBlob();
       this.Broadcast({
