@@ -28,7 +28,7 @@ public class CamerFollow : MonoBehaviour
         // Debug.Log("playerMovement.Died: " + playerMovement.Died);
         if (!playerMovement.Died) {
             Move();
-            Zoom();
+            // Zoom();
         }
     }
 
@@ -56,16 +56,16 @@ public class CamerFollow : MonoBehaviour
 
     Vector3 GetCenter()
     {
+        Bounds bounds = new Bounds(playerMovement.transform.position, Vector3.zero);
+        return bounds.center;
         // if (playerMovement == null) return Vector3.zero;
-        Bounds bounds = new Bounds(trackedPlayers[0].position, Vector3.zero);
-        return bounds.center;
-        foreach (var player in trackedPlayers)
-        {
-            bounds.Encapsulate(player.position);
-        }
-        return bounds.center;
-
+        // Bounds bounds = new Bounds(trackedPlayers[0].position, Vector3.zero);
         
+        // foreach (var player in trackedPlayers)
+        // {
+        //     bounds.Encapsulate(player.position);
+        // }
+        return bounds.center;
     }
 
     void AddPlayersToTrack()
@@ -75,12 +75,12 @@ public class CamerFollow : MonoBehaviour
         //     trackedPlayers.Add(playerMovement.transform);
         // }
         
-        MassSpawner ms = MassSpawner.ins;
-        foreach (var player in ms.Players)
-        {
-            if (player != null)
-                trackedPlayers.Add(player.transform);
-        }
+        // MassSpawner ms = MassSpawner.ins;
+        // foreach (var player in ms.Players)
+        // {
+        //     if (player != null)
+        //         trackedPlayers.Add(player.transform);
+        // }
     }
 
     public void RemovePlayerFromTrack(Transform playerTransform)

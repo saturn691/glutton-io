@@ -86,59 +86,59 @@ public class MassSpawner : MonoBehaviour
 
 
     // PREVIOUS STUFF______________________________________________________________
-    public IEnumerator CreateMass()
-    {
-        // wait for seconds
-        yield return new WaitForSecondsRealtime(Time_To_Instantiate);
+    // public IEnumerator CreateMass()
+    // {
+    //     // wait for seconds
+    //     yield return new WaitForSecondsRealtime(Time_To_Instantiate);
 
-        if (CreatedMasses.Count <= MaxMass)
-        {
-            Vector2 Position = new Vector2(Random.Range(-map.MapLimits.x, map.MapLimits.x), Random.Range(-map.MapLimits.y, map.MapLimits.y));
-            Position /= 2;
+    //     if (CreatedMasses.Count <= MaxMass)
+    //     {
+    //         Vector2 Position = new Vector2(Random.Range(-map.MapLimits.x, map.MapLimits.x), Random.Range(-map.MapLimits.y, map.MapLimits.y));
+    //         Position /= 2;
 
-            GameObject m = Instantiate(Mass, Position, Quaternion.identity);
+    //         GameObject m = Instantiate(Mass, Position, Quaternion.identity);
 
-            AddMass(m);
+    //         AddMass(m);
 
-        }
+    //     }
 
-        StartCoroutine(CreateMass());
-
-
-    }
-
-    public void AddMass(GameObject m)
-    {
-        if (m != null && !m.Equals(null))
-        {
-            if (!CreatedMasses.Contains(m))
-            {
-                CreatedMasses.Add(m);
-
-                for (int i = 0; i < Players.Count; i++)
-                {
-                    PlayerEatMass pp = Players[i]?.GetComponent<PlayerEatMass>();
-                    if (pp != null)
-                    {
-                        pp.AddMass(m);
-                    }
-                }
-            }
-        }
-        else
-        {
-            Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
-        }
-    }
+    //     StartCoroutine(CreateMass());
 
 
-    public void RemoveMass(GameObject m)
-    {
-        if (CreatedMasses.Contains(m) == true)
-        {
-            Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
-        }
-    }
+    // }
+
+    // public void AddMass(GameObject m)
+    // {
+    //     if (m != null && !m.Equals(null))
+    //     {
+    //         if (!CreatedMasses.Contains(m))
+    //         {
+    //             CreatedMasses.Add(m);
+
+    //             for (int i = 0; i < Players.Count; i++)
+    //             {
+    //                 PlayerEatMass pp = Players[i]?.GetComponent<PlayerEatMass>();
+    //                 if (pp != null)
+    //                 {
+    //                     pp.AddMass(m);
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {
+    //         Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
+    //     }
+    // }
+
+
+    // public void RemoveMass(GameObject m)
+    // {
+    //     if (CreatedMasses.Contains(m) == true)
+    //     {
+    //         Debug.LogWarning("Tried to add null or destroyed GameObject to mass list.");
+    //     }
+    // }
 
 
     // public void RemoveMass(GameObject m)
@@ -156,13 +156,13 @@ public class MassSpawner : MonoBehaviour
     //     }
     // }
 
-    public void AddPlayer(GameObject b)
-    {
-        if (Players.Contains(b) == false)
-        {
-            Players.Add(b);
-        }
-    }
+    // public void AddPlayer(GameObject b)
+    // {
+    //     if (Players.Contains(b) == false)
+    //     {
+    //         Players.Add(b);
+    //     }
+    // }
 
     // public void RemovePlayer(GameObject b)
     // {

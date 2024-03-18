@@ -23,7 +23,7 @@ public class Blob
     public static double MassMultiplier = 1.1;
 
     public static double DistanceMultiplier = 1.75;
-
+    public bool eaten = false;
     
     //==========================================================================
     // Methods
@@ -38,6 +38,10 @@ public class Blob
         this.gameObject = gameObject;
     }
 
+    public void SetEaten(bool eaten) {
+        this.eaten = eaten;
+    }
+
     /// <summary
     /// Must agree with the server's speed calculation.
     /// Otherwise, the movement of the bots will be incorrect.
@@ -47,9 +51,10 @@ public class Blob
         return BaseSpeed / Math.Log(size);
     }
 
-    public void Resize() {
+    public void Resize(int newSize) {
+        this.size = newSize;
         if (gameObject != null) {
-            gameObject.transform.localScale = new Vector3(GetRadius(size), GetRadius(size), GetRadius(size));
+            gameObject.transform.localScale = new Vector3(GetRadius(newSize), GetRadius(newSize), GetRadius(newSize));
         }
     }
 
@@ -84,6 +89,10 @@ public class Blob
     public bool LargerThan(Blob other)
     {
         return this.size > other.size * MassMultiplier;
+    }
+
+    public Blob WithoutGameObject() {
+        return new Blob(this.id, this.size, this.position, null);
     }
 }
 

@@ -23,7 +23,7 @@ public class ServerConnect : MonoBehaviour
     
     public async Task SendWsMessage(ClientMessage msg)
     {
-        // Debug.Log("Sending new ws message!");
+
         if (client != null && client.State == WebSocketState.Open)
         {
             string jsonData = JsonConvert.SerializeObject(msg);
@@ -92,7 +92,7 @@ public class ServerConnect : MonoBehaviour
                     Debug.Log("Players manager is null");
                 }
                 playersManager.Init(msg.data);
-                // Init blobs too
+                massSpawner.Init(msg.data);
                 break;
             case ServerMsgType.PlayerJoined:
                 Debug.Log("Received player joined msg");

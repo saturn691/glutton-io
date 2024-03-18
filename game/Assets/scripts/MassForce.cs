@@ -32,11 +32,6 @@ public class MassForce : MonoBehaviour
         }
     }
 
-    public void SetDirection(Vector3 direction)
-    {
-        // Direction = direction;
-    }
-
     public void Init(float x, float y, string id) {
         // Rotate
         float zr = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg + 90f;
@@ -47,10 +42,7 @@ public class MassForce : MonoBehaviour
         Direction = transform.up;
         blobId = id;
     
-        Debug.Log("Start position 1: " + startPos);
         moveCount = 0;
-        // Debug.Log("Direction 1: " + Direction);
-        // Debug.Log("Speed 1: " + Speed);
     }
 
     public void InitParams(float speed, Vector3 direction, Vector2 start, string id) {
@@ -131,15 +123,3 @@ public class MassForce : MonoBehaviour
 
     }
 }
-
-
-
-
-
-        // Debug.Log("Previous position: " + transform.position);
-        // transform.Translate(Vector2.up * Speed * Time.deltaTime);
-        // transform.Translate(Vector2.up * Speed * multiplier);
-        // transform.Translate(normalised * Speed * multiplier);
-
-        // Vector3 UpDirection = transform.right;
-        // Vector3 normalised = UpDirection.normalized;

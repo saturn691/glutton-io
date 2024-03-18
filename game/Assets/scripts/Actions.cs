@@ -49,53 +49,25 @@ public class Actions : MonoBehaviour
         float Z_Rotation = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg + 90f;
         transform.rotation = Quaternion.Euler(0, 0, Z_Rotation);
 
-
+        // 1. Instantiate food blob
         GameObject b = Instantiate(Mass, playerMovement.transform.position, Quaternion.identity);
         float r = Blob.GetRadius(1);
         b.transform.localScale = new Vector3(r, r, r);
         
 
+        // 2. Simulate food movement
         string blobId = Guid.NewGuid().ToString();
         b.GetComponent<MassForce>().ApplyForce = true;
         b.GetComponent<MassForce>().Init(b.transform.position.x, b.transform.position.y, blobId);
         Dictionary<string, object> res = b.GetComponent<MassForce>().GetFinalPosition();
 
-        // add mass to the player
-        Position finalPos = b.GetComponent<MassForce>().GetFinalPos();
-
         // New size: 
-        playerMovement.blob.size -= 1;
-        playerMovement.blob.Resize();
+        playerMovement.blob.Resize(playerMovement.blob.size - 1);
 
         // Send message to the server
         res["blobId"] = blobId;
         await serverConnect.SendWsMessage(new ClientMessage(ClientMsgType.PlayerThrewMass, res));
     
     }
-
-    public void Split(Vector3 direction)
-    {
-        Debug.Log("Splitting!");
-        if(transform.localScale.x <= 2)
-        {
-            // Return if the player size is low
-            return;
-        }
-
-        // Lose mass
-        transform.localScale /= 4;
-        Vector3 newMass = 3*transform.localScale;
-        gameObject.GetComponent<Collider2D>().isTrigger = false;
-
-        // Instantiate a new player object using the assigned prefab
-        GameObject newPlayer = Instantiate(gameObject, transform.position, Quaternion.identity);
-        transform.localScale = newMass;
-
-        // Apply any additional setup for the new player object
-        newPlayer.GetComponent<Collider2D>().isTrigger = false;
-        newPlayer.GetComponent<SplitForce>().enabled = true;
-        //newPlayer.GetComponent<SplitForce>().SplitForceMethod(direction);
-    }
-
 
 }
