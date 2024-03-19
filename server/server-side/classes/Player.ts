@@ -17,7 +17,7 @@ export class Player {
     socketId: string,
     position: Position,
     size: number,
-    blobId: string
+    blobId: string,
   ) {
     //this.id = id;
     this.color = color;
@@ -39,6 +39,17 @@ export class Player {
   UpdatePosition(position: Position) {
     // TODO: potentially change to UpdateState, and take size as parameter
     this.blob.position = position;
+  }
+
+  AteBlob(food: Blob) {
+    let thisPos = this.blob.position;
+    let foodPos = food.position;
+    let distance = Math.sqrt(
+      Math.pow(thisPos.x - foodPos.x, 2) + Math.pow(thisPos.y - foodPos.y, 2),
+    );
+
+    // Original: 2
+    return distance <= this.blob.size / 2.1;
   }
 
   BlobEatsEnemy(appendedSize: number) {
