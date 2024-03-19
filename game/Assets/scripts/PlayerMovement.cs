@@ -13,8 +13,6 @@ public class PlayerMovement : MonoBehaviour
     const int MsgInterval = 20;
     const int StartingSize = 30;
 
-    public bool ChangesOccurLocally = true;
-
     public Blob blob;
     private Actions actions;
     private Map map;
@@ -30,6 +28,8 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 Direction;
 
     public bool Died = false;
+
+    public bool ChangesOccurLocally;
 
     #region Instance
     public static PlayerMovement instance { get; private set; } // Singleton instance
@@ -69,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
         server = ServerConnect.instance;
         actions = GetComponent<Actions>();
         massSpawner = MassSpawner.ins;
+        ChangesOccurLocally = false;
     }
 
     public void DestroySelf() {

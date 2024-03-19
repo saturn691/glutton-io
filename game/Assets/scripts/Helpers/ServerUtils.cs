@@ -63,7 +63,7 @@ public class ServerUtils
         int newSize = 0;
         if (pmInst.selfSocketId == playerId) {
             if (pmInst.playerMovement.ChangesOccurLocally) return;
-
+            
             newSize = pmInst.playerMovement.blob.size + Blob.DefaultFoodSize;
             pmInst.UpdateSelfSize(newSize);
             msInst.RemoveFoodBlobById(foodBlobId);
@@ -94,17 +94,19 @@ public class ServerUtils
             return;
         }
 
-        playerScore.UpdateLeaderboards(playerWhoAteId, newSize);
         
         if (pmInst.selfSocketId == playerWhoAteId) {
             if (pmInst.playerMovement.ChangesOccurLocally) return; 
-            
+
+
             pmInst.UpdateSelfSize(newSize);
+            playerScore.UpdateLeaderboards(playerWhoAteId, newSize);
             playerScore.RemoveFromLeaderboard(playerEatenId);
             pmInst.RemovePlayerById(playerEatenId);
 
         } else {
             pmInst.UpdatePlayerSize(playerWhoAteId, newSize);
+            playerScore.UpdateLeaderboards(playerWhoAteId, newSize);
             playerScore.RemoveFromLeaderboard(playerEatenId);
             pmInst.RemovePlayerById(playerEatenId);
         }

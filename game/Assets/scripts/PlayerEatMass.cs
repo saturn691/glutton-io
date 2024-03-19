@@ -72,6 +72,7 @@ public class PlayerEatMass : MonoBehaviour
                     int newSize = playerMovement.blob.size + otherBlob.size;
                     playersManager.UpdateSelfSize(newSize);
                     playerScore.UpdateLeaderboards(playersManager.selfSocketId, newSize);
+                    playerScore.RemoveFromLeaderboard(otherPlayerId);
                     playersManager.RemovePlayerById(otherPlayerId);
                 }
 
@@ -79,6 +80,11 @@ public class PlayerEatMass : MonoBehaviour
                     ClientMsgType.PlayerEatenEnemy, 
                     otherPlayer.WithoutGameObject()
                 ));   
+            } else if (otherBlob.LargerThan(thisBlob) && thisBlob.Encountered(otherBlob)) {
+                Debug.Log("You were eaten! Game over!");
+                playerMovement.Died = true;
+                playerMovement.DestroySelf();
+                return;
             }
         }
 
@@ -98,10 +104,12 @@ public class PlayerEatMass : MonoBehaviour
 
                 // For quick local change
                 if (playerMovement.ChangesOccurLocally) {
+
                     int newSize = playerMovement.blob.size + Blob.DefaultFoodSize;
                     playersManager.UpdateSelfSize(newSize);
-                    massSpawner.RemoveFoodBlobById(foodBlob.id);
                     playerScore.UpdateLeaderboards(playersManager.selfSocketId, newSize);
+                    
+                    massSpawner.RemoveFoodBlobById(foodBlob.id);
                 }
                 
                 server.SendWsMessage(new ClientMessage(ClientMsgType.PlayerEatenFood, foodBlob.id));
