@@ -132,6 +132,11 @@ public class PlayerMovement : MonoBehaviour
             }
             actions.Split(Direction);
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("GameOver");
+        }
     }
 
     // Update is called once per frame
