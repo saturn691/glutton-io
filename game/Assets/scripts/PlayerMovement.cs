@@ -69,7 +69,7 @@ public class PlayerMovement : MonoBehaviour
         server = ServerConnect.instance;
         actions = GetComponent<Actions>();
         massSpawner = MassSpawner.ins;
-        ChangesOccurLocally = false;
+        ChangesOccurLocally = true;
     }
 
     public void DestroySelf() {

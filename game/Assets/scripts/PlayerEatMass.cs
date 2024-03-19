@@ -81,6 +81,8 @@ public class PlayerEatMass : MonoBehaviour
                     otherPlayer.WithoutGameObject()
                 ));   
             } else if (otherBlob.LargerThan(thisBlob) && thisBlob.Encountered(otherBlob)) {
+                if (!playerMovement.ChangesOccurLocally) return;
+                
                 Debug.Log("You were eaten! Game over!");
                 playerMovement.Died = true;
                 playerMovement.DestroySelf();
