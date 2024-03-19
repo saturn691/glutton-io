@@ -4,7 +4,7 @@ import { GameState } from "../classes/Game.js";
 import { ServerMsgType } from "../classes/MessageType.js";
 import { Player } from "../classes/Player.js";
 import { WebSocket } from "ws";
-import { UpdatePlayerSize } from "./db.js";
+import { updatePlayerSize } from "./db.js";
 
 export class PlayerUtils {
   /**
@@ -19,7 +19,7 @@ export class PlayerUtils {
   public static HandleUpdatePlayerPosition(
     game: GameState,
     socketId: string,
-    data: Position,
+    data: Position
   ) {
     game.players[socketId].UpdatePosition(data);
 
@@ -42,7 +42,7 @@ export class PlayerUtils {
   public static HandlePlayerEatenFood(
     gameState: GameState,
     socketId: string,
-    msgData: string,
+    msgData: string
   ): void {
     // 1. Parse msg data
     let blobId = msgData;
@@ -63,10 +63,10 @@ export class PlayerUtils {
     gameState.players[socketId].blob.AddSize(foodBlob.size);
 
     // 5. DB Update
-    UpdatePlayerSize(
+    updatePlayerSize(
       gameState.id,
       socketId,
-      gameState.players[socketId].blob.size,
+      gameState.players[socketId].blob.size
     );
 
     foodManager.RemoveFoodBlobById(blobId);
@@ -85,7 +85,7 @@ export class PlayerUtils {
   public static HandlePlayerEatenEnemy(
     game: GameState,
     socketId: string,
-    otherPlayer: Player,
+    otherPlayer: Player
   ) {
     const otherSocketId = otherPlayer.socketId;
 
@@ -98,7 +98,7 @@ export class PlayerUtils {
     if (Blob.WhoAteWho(eaterBlob, eatenBlob) !== 1) return;
 
     // Update DB
-    UpdatePlayerSize(game.id, socketId, game.players[socketId].blob.size);
+    updatePlayerSize(game.id, socketId, game.players[socketId].blob.size);
 
     // Broadcast
     game.Broadcast({
@@ -125,17 +125,17 @@ export class PlayerUtils {
   public static HandlePlayerThrewMass(
     game: GameState,
     socketId: string,
-    msgData: any,
+    msgData: any
   ) {
     // 1. Verify if player has enough mass to throw
 
     // 2. Update food manager and players
     game.foodManager.AddFoodBlob(
-      new Blob(msgData.blobId, msgData.endPos, Blob.defaultSize),
+      new Blob(msgData.blobId, msgData.endPos, Blob.defaultSize)
     );
 
     game.players[socketId].blob.size -= 1; // decrement for mass throw
-    UpdatePlayerSize(game.id, socketId, game.players[socketId].blob.size);
+    updatePlayerSize(game.id, socketId, game.players[socketId].blob.size);
 
     // 3. Broadcast to all players
     let broadcastData = {

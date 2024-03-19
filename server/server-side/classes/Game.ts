@@ -6,8 +6,12 @@ import { JoinMessageData, ServerMsgType } from "./MessageType.js";
 import { WebSocketServer, WebSocket } from "ws";
 import * as uuid from "uuid";
 import { PlayerUtils } from "../utils/PlayerUtils.js";
-import { getRandomValues } from "crypto";
-import { DeletePlayersByGameId, insertPlayerIntoDB } from "../utils/db.js";
+
+import {
+  deletePlayerBySocketId,
+  getTopNPlayersBySize,
+  insertPlayerIntoDB,
+} from "../utils/db.js";
 
 export class GameState {
   id: number;
@@ -46,12 +50,15 @@ export class GameState {
    * @param socket the player's socket
    * @param socketId the socketId of the player
    */
-  InitPlayerJoined(socket: WebSocket, socketId: string) {
+  async InitPlayerJoined(socket: WebSocket, socketId: string) {
     // console.log("New connection, socket id: ", socketId);
     let playersWithoutSocket = {};
     for (const socketId in this.players) {
       playersWithoutSocket[socketId] = this.players[socketId].ToJson();
     }
+
+    let top5Players = await getTopNPlayersBySize(this.id, 5);
+    // console.log("Top 5 players retrieved from MongoDB:", top5Players);
 
     socket.send(
       JSON.stringify({
@@ -60,8 +67,9 @@ export class GameState {
           socketId: socketId,
           players: playersWithoutSocket,
           foodBlobs: Object.fromEntries(this.foodManager.foodBlobs),
+          leaderboards: top5Players,
         },
-      }),
+      })
     );
   }
 
@@ -76,15 +84,15 @@ export class GameState {
   async AddPlayer(
     socket: WebSocket,
     socketId: string,
-    msgData: JoinMessageData,
+    msgData: JoinMessageData
   ) {
-    console.log("Adding player: ", msgData);
-    let playerId = "dummy_player_id"; // To change to input from user
+    // console.log("Adding player: ", msgData);
+    let playerTag = "dummy_player_tag"; // To change to input from user
 
-    await insertPlayerIntoDB(this.id, socketId, playerId, msgData.size);
+    await insertPlayerIntoDB(this.id, socketId, playerTag, msgData.size);
 
     let randomColor = Math.floor(
-      Math.random() * (0xffffff - 0xaaaaaa) + 0xaaaaaa,
+      Math.random() * (0xffffff - 0xaaaaaa) + 0xaaaaaa
     );
     console.log(randomColor);
 
@@ -96,7 +104,7 @@ export class GameState {
       msgData.position, // TODO: assign position in connect
       msgData.size, // TODO: size - Initialize from game
 
-      playerId, // TODO: Change to BlobId
+      playerTag // TODO: Change to BlobId
     );
 
     this.players[socketId] = newPlayer;
@@ -107,7 +115,7 @@ export class GameState {
         type: ServerMsgType.PlayerJoined,
         data: newPlayer.ToJson(),
       },
-      socketId,
+      socketId
     );
   }
 
@@ -118,14 +126,16 @@ export class GameState {
    * @param socketId the socketId of the player to remove
    */
   RemovePlayer(socketId: string) {
-    console.log("Removing player with socket id: ", socketId);
+    // console.log("Removing player with socket id: ", socketId);
+
+    deletePlayerBySocketId(this.id, socketId);
 
     this.Broadcast(
       {
         type: ServerMsgType.PlayerLeft,
         data: socketId,
       },
-      socketId,
+      socketId
     );
 
     delete this.players[socketId];
@@ -158,7 +168,7 @@ export class GameState {
         type: ServerMsgType.PlayerJoined,
         data: this.players[socketId],
       },
-      socketId,
+      socketId
     );
 
     // Simulate bot movement
