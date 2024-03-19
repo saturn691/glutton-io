@@ -1,9 +1,10 @@
-import { Position } from "../classes/Blob.js";
+import { Blob, Position } from "../classes/Blob.js";
 import { FoodManager } from "../classes/Food.js";
 import { GameState } from "../classes/Game.js";
 import { ServerMsgType } from "../classes/MessageType.js";
 import { Player } from "../classes/Player.js";
 import { WebSocket } from "ws";
+import { UpdatePlayerSize } from "./db.js";
 
 export class PlayerUtils {
   /**
@@ -18,7 +19,7 @@ export class PlayerUtils {
   public static HandleUpdatePlayerPosition(
     game: GameState,
     socketId: string,
-    data: Position
+    data: Position,
   ) {
     game.players[socketId].UpdatePosition(data);
 
@@ -41,20 +42,33 @@ export class PlayerUtils {
   public static HandlePlayerEatenFood(
     gameState: GameState,
     socketId: string,
-    msgData: string
+    msgData: string,
   ): void {
     // 1. Parse msg data
     let blobId = msgData;
 
-    // 2. Verify if player really ate food (TODO LATER)
-
-    // 3. Update player's score
+    // 2. Update player's score
     let foodManager: FoodManager = gameState.foodManager;
     let foodBlob = foodManager.GetFoodBlobById(blobId);
 
+    // 3. Verify if player really ate food (TODO LATER)
+
+    if (!gameState.players[socketId].AteBlob(foodBlob)) {
+      return;
+    }
+
     if (!foodBlob) return;
+
     // 4. Update player's blob size
     gameState.players[socketId].blob.AddSize(foodBlob.size);
+
+    // 5. DB Update
+    UpdatePlayerSize(
+      gameState.id,
+      socketId,
+      gameState.players[socketId].blob.size,
+    );
+
     foodManager.RemoveFoodBlobById(blobId);
 
     // 5. Broadcast PlayerAteFood to all players
@@ -71,17 +85,22 @@ export class PlayerUtils {
   public static HandlePlayerEatenEnemy(
     game: GameState,
     socketId: string,
-    otherPlayer: Player
+    otherPlayer: Player,
   ) {
-    
     const otherSocketId = otherPlayer.socketId;
 
     // Update player's size
     game.players[socketId].blob.AddSize(otherPlayer.blob.size);
 
-    // Send message to all players, even the eaten player
-    // This is because the close signal waits for the readyState to be 1
-    console.log("Handling player ate enemy");
+    // Verify
+    let eaterBlob = game.players[socketId].blob;
+    let eatenBlob = otherPlayer.blob;
+    if (Blob.WhoAteWho(eaterBlob, eatenBlob) !== 1) return;
+
+    // Update DB
+    UpdatePlayerSize(game.id, socketId, game.players[socketId].blob.size);
+
+    // Broadcast
     game.Broadcast({
       type: ServerMsgType.PlayerAteEnemy,
       data: {
@@ -101,5 +120,35 @@ export class PlayerUtils {
     game.numPlayers--;
 
     console.log("Sending player ate enemy message!");
+  }
+
+  public static HandlePlayerThrewMass(
+    game: GameState,
+    socketId: string,
+    msgData: any,
+  ) {
+    // 1. Verify if player has enough mass to throw
+
+    // 2. Update food manager and players
+    game.foodManager.AddFoodBlob(
+      new Blob(msgData.blobId, msgData.endPos, Blob.defaultSize),
+    );
+
+    game.players[socketId].blob.size -= 1; // decrement for mass throw
+    UpdatePlayerSize(game.id, socketId, game.players[socketId].blob.size);
+
+    // 3. Broadcast to all players
+    let broadcastData = {
+      playerId: socketId,
+      blobId: msgData.blobId,
+      initialSpeed: msgData.initialSpeed,
+      startPos: msgData.startPos,
+      direction: msgData.direction,
+      endPos: msgData.endPos,
+    };
+    game.Broadcast({
+      type: ServerMsgType.PlayerThrewMass,
+      data: broadcastData,
+    });
   }
 }

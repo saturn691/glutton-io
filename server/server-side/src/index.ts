@@ -3,16 +3,22 @@ import { config } from "dotenv";
 import { WebSocketServer, WebSocket, RawData } from "ws";
 import { GameState } from "../classes/Game.js";
 import { ClientMsgType, ServerMsgType } from "../classes/MessageType.js";
+import { DeletePlayersByGameId, connectToDB } from "../utils/db.js";
 
 import * as uuid from "uuid";
 
 import { PlayerUtils } from "../utils/PlayerUtils.js";
+import { handleTestRemovePlayer, handleTestWsMessage } from "./test.js";
+
+const timeout = async (ms: number) => {
+  return new Promise((res, rej) => setTimeout(() => res(true), ms));
+};
 
 const handleWsMessage = (
   game: GameState,
   socket: WebSocket,
   socketId: string,
-  msg: RawData
+  msg: RawData,
 ) => {
   try {
     const msgJson = JSON.parse(msg.toString("utf8"));
@@ -28,7 +34,6 @@ const handleWsMessage = (
 
     switch (msgJson.type) {
       case ClientMsgType.UpdatePosition:
-        // game.UpdatePlayerPosition(socketId, msgJson.data);
         PlayerUtils.HandleUpdatePlayerPosition(game, socketId, msgJson.data);
         break;
 
@@ -37,12 +42,13 @@ const handleWsMessage = (
         break;
 
       case ClientMsgType.PlayerEatenEnemy:
-        console.log("Player ate enemy");
         PlayerUtils.HandlePlayerEatenEnemy(game, socketId, msgJson.data);
         break;
-
+      case ClientMsgType.PlayerThrewMass:
+        PlayerUtils.HandlePlayerThrewMass(game, socketId, msgJson.data);
+        break;
       default:
-        console.log("Unknown message type:", msgJson.type);
+        console.log("Unknown message type:", msgJson);
         break;
     }
   } catch (error) {
@@ -50,38 +56,30 @@ const handleWsMessage = (
   }
 };
 
-
 /**
  * Function for testing purposes. Simulates a game state. Change this function
  * to simulate different game states.
  * @param game the game state to modify
  */
 const simulate = (game: GameState) => {
-  // // Add a small bot to the left
-  // game.AddBot(
-  //   "smallBot",
-  //   10,
-  //   {x : -10 , y : 0}
-  // );
-
+  // Add a small bot to the left
+  game.AddBot("smallBot", 10, { x: -10, y: 0 });
   // Add a big bot to the right
-  // game.AddBot(
-  //   "bigBot",
-  //   100,
-  //   {x : 10 , y : 0}
-  // );
-
-  game.Init();
+  game.AddBot("bigBot", 100, { x: 10, y: 0 });
 };
 
 // Initialize DB connection
 const main = async () => {
   const PORT = 8080;
   config();
+  await connectToDB();
 
   const ws = new WebSocketServer({ port: PORT });
-  const game = new GameState(1, ws);
 
+  let gameId = 1;
+  await DeletePlayersByGameId(gameId);
+  const game = new GameState(gameId, ws);
+  game.GenerateFood();
   simulate(game);
 
   ws.on("listening", () => {
@@ -90,21 +88,21 @@ const main = async () => {
 
   ws.on("connection", async (socket) => {
     const socketId = uuid.v4();
+
+    // For testing
+    // socket.on("message", (msg) => handleTestWsMessage(socket, socketId, msg));
+
+    // For actual game
     game.InitPlayerJoined(socket, socketId);
-
-    // setTimeout(() => {
-    //   socket.close();
-    // }, 2000);
-
     socket.on("message", (msg) => handleWsMessage(game, socket, socketId, msg));
 
     socket.on("close", () => {
-      console.log("Socket closed");
+      // handleTestRemovePlayer(socketId);
       game.RemovePlayer(socketId);
     });
 
     socket.on("error", (err) => {
-      console.error("Socket error:", err);
+      // handleTestRemovePlayer(socketId);
       game.RemovePlayer(socketId);
     });
   });

@@ -7,6 +7,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import * as uuid from "uuid";
 import { PlayerUtils } from "../utils/PlayerUtils.js";
 import { getRandomValues } from "crypto";
+import { DeletePlayersByGameId, insertPlayerIntoDB } from "../utils/db.js";
 
 export class GameState {
   id: number;
@@ -27,6 +28,8 @@ export class GameState {
 
   // Player Position Update
   constructor(id: number, websocketConn: WebSocketServer) {
+    // Reset game table
+
     this.id = id;
     this.players = {};
     this.mapSize = { x: 7.5, y: 7.5 };
@@ -44,7 +47,7 @@ export class GameState {
    * @param socketId the socketId of the player
    */
   InitPlayerJoined(socket: WebSocket, socketId: string) {
-    console.log("New connection, socket id: ", socketId);
+    // console.log("New connection, socket id: ", socketId);
     let playersWithoutSocket = {};
     for (const socketId in this.players) {
       playersWithoutSocket[socketId] = this.players[socketId].ToJson();
@@ -56,9 +59,9 @@ export class GameState {
         data: {
           socketId: socketId,
           players: playersWithoutSocket,
-          // foodBlobs: Object.fromEntries(this.foodManager.foodBlobs),
+          foodBlobs: Object.fromEntries(this.foodManager.foodBlobs),
         },
-      })
+      }),
     );
   }
 
@@ -70,11 +73,19 @@ export class GameState {
    * @param socketId the socketId of the player
    * @param msgData contains the playerId of the player used for display
    */
-  AddPlayer(socket: WebSocket, socketId: string, msgData: JoinMessageData) {
+  async AddPlayer(
+    socket: WebSocket,
+    socketId: string,
+    msgData: JoinMessageData,
+  ) {
     console.log("Adding player: ", msgData);
     let playerId = "dummy_player_id"; // To change to input from user
 
-    let randomColor = Math.floor(Math.random() * (0xffffff - 0xaaaaaa) + 0xaaaaaa);
+    await insertPlayerIntoDB(this.id, socketId, playerId, msgData.size);
+
+    let randomColor = Math.floor(
+      Math.random() * (0xffffff - 0xaaaaaa) + 0xaaaaaa,
+    );
     console.log(randomColor);
 
     let newPlayer = new Player(
@@ -85,7 +96,7 @@ export class GameState {
       msgData.position, // TODO: assign position in connect
       msgData.size, // TODO: size - Initialize from game
 
-      playerId // TODO: Change to BlobId
+      playerId, // TODO: Change to BlobId
     );
 
     this.players[socketId] = newPlayer;
@@ -96,7 +107,7 @@ export class GameState {
         type: ServerMsgType.PlayerJoined,
         data: newPlayer.ToJson(),
       },
-      socketId
+      socketId,
     );
   }
 
@@ -114,7 +125,7 @@ export class GameState {
         type: ServerMsgType.PlayerLeft,
         data: socketId,
       },
-      socketId
+      socketId,
     );
 
     delete this.players[socketId];
@@ -126,33 +137,28 @@ export class GameState {
    * broadcasts ServerMsgType.PlayerJoined
    */
   AddBot(name: string, size: number, position: Position) {
-    const SIMULATE_INTERVAL_MS = 1/60;
+    const SIMULATE_INTERVAL_MS = 1 / 60;
 
     // Generate a unique socket id for the bot
     let socketId = uuid.v4();
-    
+
     // Generate a random color
-    let color = Math.floor(Math.random() * 0xFFFFFF); 
+    let color = Math.floor(Math.random() * 0xffffff);
 
     // A null socket allows the game to not send messages to the bot
-    let bot = new Bot(
-      color,
-      null,
-      socketId,
-      position,
-      size,
-      name
-    );
+    let bot = new Bot(color, null, socketId, position, size, name);
 
     this.players[socketId] = bot;
     this.numPlayers++;
+
+    insertPlayerIntoDB(1, socketId, "bot", size);
 
     this.Broadcast(
       {
         type: ServerMsgType.PlayerJoined,
         data: this.players[socketId],
       },
-      socketId
+      socketId,
     );
 
     // Simulate bot movement
@@ -169,16 +175,9 @@ export class GameState {
     }, SIMULATE_INTERVAL_MS);
   }
 
-  /**
-   * Starts the asynchronous functions
-   */
-  Init() {
-    this.GenerateFood();
-  }
-
-  private GenerateFood() {
+  public GenerateFood() {
     setInterval(() => {
-      const foodBlob = this.foodManager.AddFoodBlob();
+      const foodBlob = this.foodManager.InitFoodBlob();
       this.Broadcast({
         type: ServerMsgType.FoodAdded,
         data: foodBlob,
