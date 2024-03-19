@@ -17,6 +17,13 @@ public class ServerUtils
         pmInst.AddPlayer(player);
     }
 
+
+    public static void HandleFoodAdded(MassSpawner msInst, object msgData)
+    {        
+        var data = JsonConvert.DeserializeObject<Blob>(msgData.ToString());
+        msInst.AddFood(data);
+    }
+
     public static void HandleUpdatePlayersPosition(PlayersManager pmInst, object msgData)
     {
         var data = JsonConvert.DeserializeObject<Dictionary<string, object>[]>(msgData.ToString());
@@ -40,13 +47,7 @@ public class ServerUtils
         }
     }
 
-    public static void HandleFoodAdded(MassSpawner msInst, object msgData)
-    {        
-        var data = JsonConvert.DeserializeObject<Blob>(msgData.ToString());
-        msInst.AddFood(data);
-    }
-
-
+    // TODO ADD COMMENT
     public static void HandlePlayerAteFood(PlayersManager pmInst, MassSpawner msInst, object msgData)
     {        
         var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(msgData.ToString());
@@ -54,15 +55,15 @@ public class ServerUtils
         string foodBlobId = (string)data["foodId"];
         string playerId = (string)data["playerId"];
         
-
-        if (pmInst.selfSocketId != playerId)
-        {
-            // Update other player's size
+        if (pmInst.selfSocketId == playerId) {
+            int newSize = pmInst.playerMovement.blob.size + Blob.DefaultFoodSize;
+            pmInst.UpdateSelfSize(newSize);
+        } else {
             int newSize = pmInst.PlayersDict[playerId].blob.size + Blob.DefaultFoodSize;
             pmInst.UpdatePlayerSize(playerId, newSize);
-            msInst.RemoveFoodBlobById(foodBlobId);
         }
 
+        msInst.RemoveFoodBlobById(foodBlobId);
     }
 
     // TODO ADD COMMENT
@@ -74,7 +75,6 @@ public class ServerUtils
         int newSize = JsonConvert.DeserializeObject<int>(data["newSize"].ToString());
         string playerEatenId = data["playerEaten"].ToString();
 
-        // Debug.Log("PlayerAteEnemy: " + data.ToString());
 
         if (pmInst.selfSocketId == playerEatenId) {
             Debug.Log("You were eaten! Game over!");
@@ -83,11 +83,44 @@ public class ServerUtils
             return;
         }
 
-        if (pmInst.selfSocketId != playerWhoAteId && pmInst.selfSocketId != playerEatenId)
-        {
+        if (pmInst.selfSocketId == playerWhoAteId) {
+            pmInst.UpdateSelfSize(newSize);
+        } else {
             pmInst.UpdatePlayerSize(playerWhoAteId, newSize);
-            pmInst.RemovePlayerById(playerEatenId);
         }
+        
+        pmInst.RemovePlayerById(playerEatenId);
+
+    }
+
+    // <summary>
+    // Handle player threw mass
+    // 1. Reduce player's size
+    // 2. Handle mass -> instantiate and trigger force, then add to dict
+    // </summary>
+    public static void HandlePlayerThrewMass(PlayersManager pmInst, MassSpawner msInst, object msgData) {
+        var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
+        string playerId = data["playerId"].ToString();
+
+        if (pmInst.selfSocketId == playerId) return;
+
+        // 1. Reduce player's size
+        pmInst.UpdatePlayerSize(playerId, pmInst.PlayersDict[playerId].blob.size - 1);
+
+        // 2. Throw mass
+        string blobId = data["blobId"].ToString();
+        float speed = JsonConvert.DeserializeObject<float>(data["initialSpeed"].ToString());
+        Position startPos = JsonConvert.DeserializeObject<Position>(data["startPos"].ToString());
+        Position endPos = JsonConvert.DeserializeObject<Position>(data["endPos"].ToString());
+        Position dir = JsonConvert.DeserializeObject<Position>(data["direction"].ToString());
+
+        msInst.AddThrownMass(
+            blobId,
+            speed, 
+            new Vector3(dir.x, dir.y, 0), 
+            new Vector2(startPos.x, startPos.y), 
+            endPos
+        );
 
     }
 }

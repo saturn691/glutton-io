@@ -23,7 +23,7 @@ public class Blob
     public static double MassMultiplier = 1.1;
 
     public static double DistanceMultiplier = 1.75;
-
+    public bool eaten = false;
     
     //==========================================================================
     // Methods
@@ -33,9 +33,13 @@ public class Blob
     public Blob(string id, int size, Position position, GameObject gameObject)
     {
         this.id = id;
-        this.position = position;
         this.size = size;
+        this.position = position;
         this.gameObject = gameObject;
+    }
+
+    public void SetEaten(bool eaten) {
+        this.eaten = eaten;
     }
 
     /// <summary
@@ -45,6 +49,13 @@ public class Blob
     public double GetSpeed()
     {
         return BaseSpeed / Math.Log(size);
+    }
+
+    public void Resize(int newSize) {
+        this.size = newSize;
+        if (gameObject != null) {
+            gameObject.transform.localScale = new Vector3(GetRadius(newSize), GetRadius(newSize), GetRadius(newSize));
+        }
     }
 
     /// <summary>
@@ -70,14 +81,6 @@ public class Blob
         var distBetweenCenters = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
         var thisRadius = Math.Sqrt(this.size / Math.PI);
         return thisRadius > distBetweenCenters * DistanceMultiplier;
-
-        // // distance between the two blobs
-        // float blobDistance = Vector2.Distance(
-        //     this.gameObject.transform.position, 
-        //     blob.gameObject.transform.position
-        // );
-
-        // return blobDistance <= this.gameObject.transform.localScale.x / 2;
     }
     
     /// <summary>
@@ -87,4 +90,9 @@ public class Blob
     {
         return this.size > other.size * MassMultiplier;
     }
+
+    public Blob WithoutGameObject() {
+        return new Blob(this.id, this.size, this.position, null);
+    }
 }
+

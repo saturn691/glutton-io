@@ -23,7 +23,7 @@ public class ServerConnect : MonoBehaviour
     
     public async Task SendWsMessage(ClientMessage msg)
     {
-        // Debug.Log("Sending new ws message!");
+
         if (client != null && client.State == WebSocketState.Open)
         {
             string jsonData = JsonConvert.SerializeObject(msg);
@@ -53,8 +53,8 @@ public class ServerConnect : MonoBehaviour
 
     async Task InitWsConnection()
     {  
-        string url = "ws://3.10.169.198:8080";
-        // string url = "ws://localhost:8080";
+        // string url = "ws://3.10.169.198:8080";
+        string url = "ws://localhost:8080";
         var serverUri = new Uri(url);
         using (client = new ClientWebSocket())
         {
@@ -92,7 +92,7 @@ public class ServerConnect : MonoBehaviour
                     Debug.Log("Players manager is null");
                 }
                 playersManager.Init(msg.data);
-                // Init blobs too
+                massSpawner.Init(msg.data);
                 break;
             case ServerMsgType.PlayerJoined:
                 Debug.Log("Received player joined msg");
@@ -114,7 +114,11 @@ public class ServerConnect : MonoBehaviour
                 Debug.Log("Handling player ate enemy");
 
                 ServerUtils.HandlePlayerAteEnemy(playersManager, msg.data, playerMovement);
-            
+                break;
+
+            case ServerMsgType.PlayerThrewMass:
+                Debug.Log("Handling player threw mass");
+                ServerUtils.HandlePlayerThrewMass(playersManager, massSpawner, msg.data);
                 break;
 
             default:

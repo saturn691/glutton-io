@@ -21,10 +21,11 @@ public class PlayersManager : MonoBehaviour
 
     public Dictionary<string, Player> PlayersDict = new Dictionary<string, Player>();
     public string selfSocketId;
+    public PlayerMovement playerMovement;
 
     private void Start()
     {
-
+        playerMovement = PlayerMovement.instance;
     }
 
 
@@ -123,8 +124,22 @@ public class PlayersManager : MonoBehaviour
     /// </summary>
     public void RemovePlayerById (string socketId)
     {
+        Debug.Log("Removing player: " + socketId);
         Destroy(PlayersDict[socketId].blob.gameObject);
         PlayersDict.Remove(socketId);
     }
+    
+    /// <summary>
+    /// TODO COMMENT Method to be called when the player has eaten a food object.
+    /// Update new player's blob object size and rendered size
+    /// </summary>
+    public void UpdateSelfSize(int newSize) {
+        // playerMovement.blob.size = newSize;
+        playerMovement.blob.Resize(newSize);
+        float newRadius = Blob.GetRadius(playerMovement.blob.size);
+        transform.localScale = new Vector3(newRadius, newRadius, newRadius);
 
+        // Play sound effect
+        // soundEffectsPlayer.PlayFood();
+    }
 }

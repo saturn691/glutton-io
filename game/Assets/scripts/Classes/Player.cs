@@ -41,4 +41,16 @@ public class Player
         this.socketId = socketId;
         this.blob = blob;
     }
+
+    public void SetEaten(bool eaten) {
+        this.blob.eaten = eaten;
+    }
+
+    public bool IsEaten() {
+        return this.blob.eaten;
+    }
+
+    public Player WithoutGameObject() {
+        return new Player(this.socketId, this.blob.WithoutGameObject());
+    }
 }

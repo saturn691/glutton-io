@@ -122,21 +122,6 @@ public class PlayerMovement : MonoBehaviour
         {
             actions.ThrowMass(Direction);
         }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            // split
-            if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
-            {
-                return;
-            }
-            actions.Split(Direction);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            SceneManager.LoadScene("GameOver");
-        }
     }
 
     // Update is called once per frame
@@ -217,22 +202,6 @@ public class PlayerMovement : MonoBehaviour
             actions.ThrowMass(Direction);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            // split
-            if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
-            {
-                return;
-            }
-            actions.Split(Direction);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            SceneManager.LoadScene("WaitingForPlayers");
-        }
-
-
         if (LockActions)
         {
             return;
@@ -242,35 +211,11 @@ public class PlayerMovement : MonoBehaviour
         {
             actions.ThrowMass(Direction);
         }
-        if (Input.GetKeyDown(KeyCode.Space) || throwMass == 1)
-        {
-            // split
-            if (MassSpawner.ins.Players.Count >= MassSpawner.ins.MaxPlayers)
-            {
-                return;
-            }
-            actions.Split(Direction);
-        }
-
+        
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             SceneManager.LoadScene("GameOver");
         }
-    }
-
-    public void OnEnable()
-    {
-        if (MassSpawner.ins.Players.Count > MassSpawner.ins.MaxPlayers)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        MassSpawner.ins.AddPlayer(gameObject);
-    }
-
-    public void OnDisable()
-    {
-        // MassSpawner.ins.RemovePlayer(gameObject);
     }
 
     void OnDestroy()
