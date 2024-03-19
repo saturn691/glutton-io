@@ -62,15 +62,19 @@ public class ServerUtils
         
         int newSize = 0;
         if (pmInst.selfSocketId == playerId) {
+            return; // remove in actual game
+
             newSize = pmInst.playerMovement.blob.size + Blob.DefaultFoodSize;
             pmInst.UpdateSelfSize(newSize);
+            msInst.RemoveFoodBlobById(foodBlobId);
+            playerScore.UpdateLeaderboards(playerId, newSize);
         } else {
             newSize = pmInst.PlayersDict[playerId].blob.size + Blob.DefaultFoodSize;
             pmInst.UpdatePlayerSize(playerId, newSize);
+            msInst.RemoveFoodBlobById(foodBlobId);
+            playerScore.UpdateLeaderboards(playerId, newSize);
         }
 
-        playerScore.UpdateLeaderboards(playerId, newSize);
-        msInst.RemoveFoodBlobById(foodBlobId);
     }
 
     // TODO ADD COMMENT
@@ -89,15 +93,22 @@ public class ServerUtils
             playerMovement.DestroySelf();
             return;
         }
+
         playerScore.UpdateLeaderboards(playerWhoAteId, newSize);
+        
         if (pmInst.selfSocketId == playerWhoAteId) {
+            return; // remove in actual game
             pmInst.UpdateSelfSize(newSize);
+            playerScore.RemoveFromLeaderboard(playerEatenId);
+            pmInst.RemovePlayerById(playerEatenId);
+
         } else {
             pmInst.UpdatePlayerSize(playerWhoAteId, newSize);
+            playerScore.RemoveFromLeaderboard(playerEatenId);
+            pmInst.RemovePlayerById(playerEatenId);
         }
         
-        playerScore.RemoveFromLeaderboard(playerEatenId);
-        pmInst.RemovePlayerById(playerEatenId);
+        
 
     }
 

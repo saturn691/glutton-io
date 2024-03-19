@@ -64,11 +64,15 @@ public class PlayerEatMass : MonoBehaviour
             if (!otherPlayer.IsEaten() && thisBlob.LargerThan(otherBlob) && thisBlob.Encountered(otherBlob)) {
                 Debug.Log("Sending ws message: PlayerEatenEnemy");
                 otherPlayer.SetEaten(true);
+
+                int newSize = playerMovement.blob.size + otherBlob.size;
+                playersManager.UpdateSelfSize(newSize);
+                playersManager.RemovePlayerById(otherPlayerId);
+
                 await server.SendWsMessage(new ClientMessage(
                     ClientMsgType.PlayerEatenEnemy, 
                     otherPlayer.WithoutGameObject()
-                ));
-                
+                ));   
             }
         }
 
@@ -85,6 +89,12 @@ public class PlayerEatMass : MonoBehaviour
                 <= transform.localScale.x / 2
             ) {
                 foodBlob.SetEaten(true);
+
+                // For quick local change
+                int newSize = playerMovement.blob.size + Blob.DefaultFoodSize;
+                playersManager.UpdateSelfSize(newSize);
+                massSpawner.RemoveFoodBlobById(foodBlob.id);
+
                 server.SendWsMessage(new ClientMessage(ClientMsgType.PlayerEatenFood, foodBlob.id));
             }
         }
