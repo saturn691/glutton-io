@@ -17,6 +17,7 @@ public class PlayerEatMass : MonoBehaviour
     ServerConnect server;
     PlayerMovement playerMovement;
     SoundEffectsPlayer soundEffectsPlayer;
+    PlayerScore playerScore;
 
 
     //=========================================================================
@@ -36,6 +37,7 @@ public class PlayerEatMass : MonoBehaviour
         server = ServerConnect.instance;
         playerMovement = PlayerMovement.instance;
         soundEffectsPlayer = SoundEffectsPlayer.instance;
+        playerScore = PlayerScore.instance;
     }
 
     private void UpdateMass()
