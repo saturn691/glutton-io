@@ -62,7 +62,7 @@ public class ServerUtils
         
         int newSize = 0;
         if (pmInst.selfSocketId == playerId) {
-            return; // remove in actual game
+            if (pmInst.playerMovement.ChangesOccurLocally) return;
 
             newSize = pmInst.playerMovement.blob.size + Blob.DefaultFoodSize;
             pmInst.UpdateSelfSize(newSize);
@@ -97,7 +97,8 @@ public class ServerUtils
         playerScore.UpdateLeaderboards(playerWhoAteId, newSize);
         
         if (pmInst.selfSocketId == playerWhoAteId) {
-            return; // remove in actual game
+            if (pmInst.playerMovement.ChangesOccurLocally) return; 
+            
             pmInst.UpdateSelfSize(newSize);
             playerScore.RemoveFromLeaderboard(playerEatenId);
             pmInst.RemovePlayerById(playerEatenId);

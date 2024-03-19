@@ -65,9 +65,13 @@ public class PlayerEatMass : MonoBehaviour
                 Debug.Log("Sending ws message: PlayerEatenEnemy");
                 otherPlayer.SetEaten(true);
 
-                int newSize = playerMovement.blob.size + otherBlob.size;
-                playersManager.UpdateSelfSize(newSize);
-                playersManager.RemovePlayerById(otherPlayerId);
+                // For quick local change
+                if (playerMovement.ChangesOccurLocally) {
+                    int newSize = playerMovement.blob.size + otherBlob.size;
+                    playersManager.UpdateSelfSize(newSize);
+                    playerScore.UpdateLeaderboards(playersManager.selfSocketId, newSize);
+                    playersManager.RemovePlayerById(otherPlayerId);
+                }
 
                 await server.SendWsMessage(new ClientMessage(
                     ClientMsgType.PlayerEatenEnemy, 
@@ -91,10 +95,13 @@ public class PlayerEatMass : MonoBehaviour
                 foodBlob.SetEaten(true);
 
                 // For quick local change
-                int newSize = playerMovement.blob.size + Blob.DefaultFoodSize;
-                playersManager.UpdateSelfSize(newSize);
-                massSpawner.RemoveFoodBlobById(foodBlob.id);
-
+                if (playerMovement.ChangesOccurLocally) {
+                    int newSize = playerMovement.blob.size + Blob.DefaultFoodSize;
+                    playersManager.UpdateSelfSize(newSize);
+                    massSpawner.RemoveFoodBlobById(foodBlob.id);
+                    playerScore.UpdateLeaderboards(playersManager.selfSocketId, newSize);
+                }
+                
                 server.SendWsMessage(new ClientMessage(ClientMsgType.PlayerEatenFood, foodBlob.id));
             }
         }

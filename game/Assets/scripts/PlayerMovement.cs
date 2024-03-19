@@ -13,6 +13,8 @@ public class PlayerMovement : MonoBehaviour
     const int MsgInterval = 20;
     const int StartingSize = 30;
 
+    public bool ChangesOccurLocally = true;
+
     public Blob blob;
     private Actions actions;
     private Map map;
