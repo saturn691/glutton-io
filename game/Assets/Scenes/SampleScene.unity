@@ -600,6 +600,7 @@ GameObject:
   - component: {fileID: 834052396}
   - component: {fileID: 834052399}
   - component: {fileID: 834052398}
+  - component: {fileID: 834052400}
   m_Layer: 0
   m_Name: player
   m_TagString: Player
@@ -791,6 +792,22 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
+--- !u!114 &834052400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 834052391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f3d0931d09f49c41a4674b8ba924004, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 1468120721}
+  food: {fileID: 8300000, guid: 312f2d214ebeb074ab9afd104fd485ae, type: 3}
+  lose: {fileID: 8300000, guid: 6442c1a692ed0e14da3b6455845c46eb, type: 3}
+  player: {fileID: 8300000, guid: 5d0ebd4ff3a4c83409676c8dc3c56955, type: 3}
 --- !u!1 &899272384
 GameObject:
   m_ObjectHideFlags: 0
