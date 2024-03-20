@@ -11,12 +11,17 @@ using System.Threading.Tasks;
 [Serializable]
 public class ServerUtils
 {
-    public static void HandlePlayerJoined(PlayersManager pmInst, object msgData) {
+    public static void HandlePlayerJoined(PlayersManager pmInst, PlayerScore psInst, object msgData) {
         var player = JsonConvert.DeserializeObject<Player>(msgData.ToString());
-
+        psInst.UpdateLeaderboards(player.socketId, player.blob.size);
         pmInst.AddPlayer(player);
     }
 
+    public static void HandlePlayerLeft(PlayersManager pmInst, PlayerScore psInst, object msgData) {
+        var playerId = msgData.ToString();
+        psInst.RemoveFromLeaderboard(playerId);
+        pmInst.RemovePlayerById(playerId);
+    }
 
     public static void HandleFoodAdded(MassSpawner msInst, object msgData)
     {        
@@ -48,26 +53,32 @@ public class ServerUtils
     }
 
     // TODO ADD COMMENT
-    public static void HandlePlayerAteFood(PlayersManager pmInst, MassSpawner msInst, object msgData)
+    public static void HandlePlayerAteFood(PlayersManager pmInst, MassSpawner msInst, PlayerScore playerScore, object msgData)
     {        
         var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(msgData.ToString());
         
         string foodBlobId = (string)data["foodId"];
         string playerId = (string)data["playerId"];
         
+        int newSize = 0;
         if (pmInst.selfSocketId == playerId) {
-            int newSize = pmInst.playerMovement.blob.size + Blob.DefaultFoodSize;
+            if (pmInst.playerMovement.ChangesOccurLocally) return;
+            
+            newSize = pmInst.playerMovement.blob.size + Blob.DefaultFoodSize;
             pmInst.UpdateSelfSize(newSize);
+            msInst.RemoveFoodBlobById(foodBlobId);
+            playerScore.UpdateLeaderboards(playerId, newSize);
         } else {
-            int newSize = pmInst.PlayersDict[playerId].blob.size + Blob.DefaultFoodSize;
+            newSize = pmInst.PlayersDict[playerId].blob.size + Blob.DefaultFoodSize;
             pmInst.UpdatePlayerSize(playerId, newSize);
+            msInst.RemoveFoodBlobById(foodBlobId);
+            playerScore.UpdateLeaderboards(playerId, newSize);
         }
 
-        msInst.RemoveFoodBlobById(foodBlobId);
     }
 
     // TODO ADD COMMENT
-    public static void HandlePlayerAteEnemy(PlayersManager pmInst, object msgData, PlayerMovement playerMovement)
+    public static void HandlePlayerAteEnemy(PlayersManager pmInst, PlayerMovement playerMovement, PlayerScore playerScore, object msgData)
     {
         var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
         
@@ -83,13 +94,24 @@ public class ServerUtils
             return;
         }
 
+        
         if (pmInst.selfSocketId == playerWhoAteId) {
+            if (pmInst.playerMovement.ChangesOccurLocally) return; 
+
+
             pmInst.UpdateSelfSize(newSize);
+            playerScore.UpdateLeaderboards(playerWhoAteId, newSize);
+            playerScore.RemoveFromLeaderboard(playerEatenId);
+            pmInst.RemovePlayerById(playerEatenId);
+
         } else {
             pmInst.UpdatePlayerSize(playerWhoAteId, newSize);
+            playerScore.UpdateLeaderboards(playerWhoAteId, newSize);
+            playerScore.RemoveFromLeaderboard(playerEatenId);
+            pmInst.RemovePlayerById(playerEatenId);
         }
         
-        pmInst.RemovePlayerById(playerEatenId);
+        
 
     }
 
@@ -98,14 +120,25 @@ public class ServerUtils
     // 1. Reduce player's size
     // 2. Handle mass -> instantiate and trigger force, then add to dict
     // </summary>
-    public static void HandlePlayerThrewMass(PlayersManager pmInst, MassSpawner msInst, object msgData) {
+    public static void HandlePlayerThrewMass(
+        PlayersManager pmInst, 
+        MassSpawner msInst, 
+        PlayerScore playerScoreInst,
+        PlayerMovement playerMovementInst,
+        object msgData
+    ) {
         var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(msgData.ToString());
         string playerId = data["playerId"].ToString();
-
-        if (pmInst.selfSocketId == playerId) return;
+        
+        
+        if (pmInst.selfSocketId == playerId) {
+            playerScoreInst.UpdateLeaderboards(playerId, playerMovementInst.blob.size - 1);
+            return;
+        };
 
         // 1. Reduce player's size
         pmInst.UpdatePlayerSize(playerId, pmInst.PlayersDict[playerId].blob.size - 1);
+        playerScoreInst.UpdateLeaderboards(playerId, pmInst.PlayersDict[playerId].blob.size - 1);
 
         // 2. Throw mass
         string blobId = data["blobId"].ToString();

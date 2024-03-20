@@ -26,18 +26,18 @@ public class Position
 }
 
 
-
-
 [Serializable]
 public class Player
 {
     public string socketId;
     public Blob blob;
     public int color;
+    public string playerTag;
 
     // public GameObject gameObject;
     public Player(string socketId, Blob blob)
     {
+        this.playerTag = "Player";
         this.socketId = socketId;
         this.blob = blob;
     }
@@ -52,5 +52,17 @@ public class Player
 
     public Player WithoutGameObject() {
         return new Player(this.socketId, this.blob.WithoutGameObject());
+    }
+}
+
+public class LeaderboardItem
+{
+    public string socketId;
+    public int size;
+
+    public LeaderboardItem(string socketId, int size)
+    {
+        this.socketId = socketId;
+        this.size = size;
     }
 }

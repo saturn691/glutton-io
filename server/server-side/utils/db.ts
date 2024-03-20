@@ -1,130 +1,129 @@
-import AWS from "aws-sdk";
-
 export let dynamodb;
-const TABLE_NAME = "GameScores";
-const createTables = () => {};
 
+import { MongoClient } from "mongodb";
+export let mongoCli: MongoClient;
+
+/**
+ * Called at the start of the server to connect to the database.
+ * Initialises mongo client and connects to the database.
+ */
 export const connectToDB = async () => {
-  console.log(
-    "Credentials:",
-    process.env.AWS_ACCESS_KEY_ID,
-    process.env.AWS_SECRET_ACCESS_KEY,
-  );
-  AWS.config.update({
-    region: "eu-west-2",
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  });
-
-  return new Promise((resolve, reject) => {
-    dynamodb = new AWS.DynamoDB();
-
-    dynamodb.listTables({}, (err, data) => {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log("Connected to DynamoDB");
-        console.log("Tables: ", data.TableNames);
-        resolve("Connected to DynamoDB");
-      }
-    });
-  });
+  mongoCli = new MongoClient(process.env.MONGO_URI, {});
+  await mongoCli.connect();
+  console.log("Connected to MongoDB");
 };
 
+/**
+ * Inserts a player into the database.
+ * @param gameId the id of the game
+ * @param socketId the socket id of the player
+ * @param playerTag the tag of the player
+ * @param size the size of the player
+ * @returns a promise that resolves when the player is inserted
+ */
 export const insertPlayerIntoDB = async (
   gameId: number,
-  playerId: string,
+  socketId: string,
   playerTag: string,
-  curSize: number,
+  size: number
 ) => {
-  const params = {
-    TableName: "GameScores",
-    Item: {
-      gameId: { N: gameId.toString() },
-      playerId: { S: playerId },
-      playerTag: { S: playerTag },
-      size: { N: curSize.toString() },
-      alive: { BOOL: true },
-    },
+  const player = {
+    gameId,
+    socketId,
+    playerTag,
+    size,
   };
 
-  let data = await dynamodb.putItem(params).promise();
-  console.log("Inserted new player to dynamoDB: ", data);
-  return;
-};
-
-// export const UpdatePlayersScore;
-
-export const DeletePlayersByGameId = async (gameId: number) => {
-  // Use the query method to retrieve all items with the specified partition key
-
-  let results = await dynamodb
-    .query({
-      TableName: TABLE_NAME,
-      KeyConditionExpression: "#pk = :pk",
-      ExpressionAttributeNames: {
-        "#pk": "gameId",
-      },
-      ExpressionAttributeValues: {
-        ":pk": { N: gameId.toString() },
-      },
-    })
-    .promise();
-
-  let items = results.Items;
-  if (items.length == 0) return;
-  // console.log("Items:", items);
-
-  let deleteRequests = [];
-  for (let i = 0; i < items.length; i++) {
-    // console.log("Game id:", items[i].gameId);
-    // console.log("Player id:", items[i].playerId);
-    let res = await dynamodb
-      .deleteItem({
-        TableName: TABLE_NAME,
-        Key: {
-          gameId: items[i].gameId,
-          playerId: items[i].playerId,
-        },
-      })
-      .promise();
+  try {
+    const db = mongoCli.db("gluttonio");
+    const playersCollection = db.collection("players");
+    await playersCollection.insertOne(player);
+    console.log("Player inserted into MongoDB");
+  } catch (error) {
+    console.error("Error inserting player into MongoDB:", error);
   }
-
-  // deleteRequests.push({
-  //   DeleteRequest: {
-  //     Key: {
-  //       gameId: items[i].gameId,
-  //       playerId: items[i].playerId,
-  //     },
-  //   },
-  // });
-  // await dynamodb.batchWriteItem({
-  //   RequestItems: {
-  //     [TABLE_NAME]: deleteRequests,
-  //   },
-  // });
 };
 
-export const UpdatePlayerSize = async (
+/**
+ * Updates the size of a player in the database.
+ * @param gameId the id of the game
+ * @param socketId the socket id of the player
+ * @param size the new size of the player
+ * @returns a promise that resolves when the update operation is complete
+ */
+export const updatePlayerSize = async (
   gameId: number,
-  playerId: string,
-  size: number,
+  socketId: string,
+  size: number
 ) => {
-  let res = await dynamodb
-    .updateItem({
-      TableName: TABLE_NAME,
-      Key: {
-        gameId: { N: gameId.toString() },
-        playerId: { S: playerId },
-      },
-      UpdateExpression: "set #size = :size",
-      ExpressionAttributeNames: {
-        "#size": "size",
-      },
-      ExpressionAttributeValues: {
-        ":size": { N: size.toString() },
-      },
-    })
-    .promise();
-  // console.log("Updated player in dynamo:", res);
+  try {
+    const db = mongoCli.db("gluttonio");
+    const playersCollection = db.collection("players");
+    await playersCollection.updateOne(
+      { socketId: socketId, gameId: gameId },
+      { $set: { size: size } }
+    );
+    // console.log("Player size updated in MongoDB");
+  } catch (error) {
+    console.error("Error updating player size in MongoDB:", error);
+  }
+};
+
+/**
+ * Gets top N players by size from the database.
+ * @param gameId the id of the game
+ * @param n the number of players to return
+ * @returns a promise that resolves when the read operation is complete
+ */
+export const getTopNPlayersBySize = async (gameId: number, n: number) => {
+  const db = mongoCli.db("gluttonio");
+  const playersCollection = db.collection("players");
+
+  try {
+    const topPlayers = await playersCollection
+      .find({})
+      .sort({ size: -1 })
+      .limit(5)
+      .project({ _id: 0, socketId: 1, size: 1 })
+      .toArray();
+    return topPlayers;
+  } catch (error) {
+    console.error("Error retrieving top 5 players from MongoDB:", error);
+  }
+};
+
+/**
+ * Deletes players from the database by socket id.
+ * @param gameId the id of the game
+ * @param socketId the socket id of the player
+ * @returns a promise that resolves when the delete operation is complete
+ */
+export const deletePlayerBySocketId = async (
+  gameId: number,
+  socketId: string
+) => {
+  const db = mongoCli.db("gluttonio");
+  const playersCollection = db.collection("players");
+  try {
+    await playersCollection.deleteOne({ gameId: gameId, socketId: socketId });
+    console.log("Deleted player from MongoDB");
+  } catch (error) {
+    console.log("Error deleting players from MongoDB:", error);
+  }
+};
+
+/**
+ * Deletes all players from the database by game id.
+ * @param gameId the id of the game
+ * @returns a promise that resolves when the delete operation is complete
+ */
+export const deletePlayersByGameId = async (gameId: number) => {
+  const db = mongoCli.db("gluttonio");
+  const playersCollection = db.collection("players");
+  try {
+    await playersCollection.deleteMany({ gameId: 1 });
+    console.log("Deleted all players from MongoDB");
+  } catch (error) {
+    console.log("Error deleting players from MongoDB:", error);
+  }
 };

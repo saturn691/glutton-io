@@ -20,6 +20,8 @@ public class ServerConnect : MonoBehaviour
     public MassSpawner massSpawner;
 
     public PlayerMovement playerMovement;
+
+    public PlayerScore playerScore;
     
     public async Task SendWsMessage(ClientMessage msg)
     {
@@ -53,8 +55,8 @@ public class ServerConnect : MonoBehaviour
 
     async Task InitWsConnection()
     {  
-        // string url = "ws://3.10.169.198:8080";
-        string url = "ws://localhost:8080";
+        string url = "ws://3.10.169.198:8080";
+        // string url = "ws://localhost:8080";
         var serverUri = new Uri(url);
         using (client = new ClientWebSocket())
         {
@@ -93,12 +95,14 @@ public class ServerConnect : MonoBehaviour
                 }
                 playersManager.Init(msg.data);
                 massSpawner.Init(msg.data);
+                playerScore.Init(msg.data);
                 break;
             case ServerMsgType.PlayerJoined:
                 Debug.Log("Received player joined msg");
-                ServerUtils.HandlePlayerJoined(playersManager, msg.data);
+                ServerUtils.HandlePlayerJoined(playersManager, playerScore, msg.data);
                 break;
             case ServerMsgType.PlayerLeft:
+                ServerUtils.HandlePlayerLeft(playersManager, playerScore, msg.data);
                 break;
             case ServerMsgType.UpdatePlayersPosition:
                 ServerUtils.HandleUpdatePlayersPosition(playersManager, msg.data);
@@ -107,18 +111,18 @@ public class ServerConnect : MonoBehaviour
                 ServerUtils.HandleFoodAdded(massSpawner, msg.data);
                 break;
             case ServerMsgType.PlayerAteFood:
-                ServerUtils.HandlePlayerAteFood(playersManager, massSpawner, msg.data);
+                // Debug.Log("Received player ate food");
+                ServerUtils.HandlePlayerAteFood(playersManager, massSpawner, playerScore, msg.data);
                 break;
 
             case ServerMsgType.PlayerAteEnemy:
-                Debug.Log("Handling player ate enemy");
-
-                ServerUtils.HandlePlayerAteEnemy(playersManager, msg.data, playerMovement);
+                // Debug.Log("Handling player ate enemy");
+                ServerUtils.HandlePlayerAteEnemy(playersManager, playerMovement, playerScore, msg.data);
                 break;
 
             case ServerMsgType.PlayerThrewMass:
-                Debug.Log("Handling player threw mass");
-                ServerUtils.HandlePlayerThrewMass(playersManager, massSpawner, msg.data);
+                // Debug.Log("Handling player threw mass");
+                ServerUtils.HandlePlayerThrewMass(playersManager, massSpawner, playerScore, playerMovement, msg.data);
                 break;
 
             default:
@@ -177,6 +181,8 @@ public class ServerConnect : MonoBehaviour
         playersManager = PlayersManager.instance;
         massSpawner = MassSpawner.ins;
         playerMovement = PlayerMovement.instance;
+        playerScore = PlayerScore.instance;
+        
         InitWsConnection();
         // ReceiveMessages();
     }

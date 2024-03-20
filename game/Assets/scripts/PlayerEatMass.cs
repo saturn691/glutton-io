@@ -17,6 +17,7 @@ public class PlayerEatMass : MonoBehaviour
     ServerConnect server;
     PlayerMovement playerMovement;
     SoundEffectsPlayer soundEffectsPlayer;
+    PlayerScore playerScore;
 
 
     //=========================================================================
@@ -36,6 +37,7 @@ public class PlayerEatMass : MonoBehaviour
         server = ServerConnect.instance;
         playerMovement = PlayerMovement.instance;
         soundEffectsPlayer = SoundEffectsPlayer.instance;
+        playerScore = PlayerScore.instance;
     }
 
     private void UpdateMass()
@@ -64,11 +66,27 @@ public class PlayerEatMass : MonoBehaviour
             if (!otherPlayer.IsEaten() && thisBlob.LargerThan(otherBlob) && thisBlob.Encountered(otherBlob)) {
                 Debug.Log("Sending ws message: PlayerEatenEnemy");
                 otherPlayer.SetEaten(true);
+
+                // For quick local change
+                if (playerMovement.ChangesOccurLocally) {
+                    int newSize = playerMovement.blob.size + otherBlob.size;
+                    playersManager.UpdateSelfSize(newSize);
+                    playerScore.UpdateLeaderboards(playersManager.selfSocketId, newSize);
+                    playerScore.RemoveFromLeaderboard(otherPlayerId);
+                    playersManager.RemovePlayerById(otherPlayerId);
+                }
+
                 await server.SendWsMessage(new ClientMessage(
                     ClientMsgType.PlayerEatenEnemy, 
                     otherPlayer.WithoutGameObject()
-                ));
+                ));   
+            } else if (otherBlob.LargerThan(thisBlob) && thisBlob.Encountered(otherBlob)) {
+                if (!playerMovement.ChangesOccurLocally) return;
                 
+                Debug.Log("You were eaten! Game over!");
+                playerMovement.Died = true;
+                playerMovement.DestroySelf();
+                return;
             }
         }
 
@@ -85,6 +103,20 @@ public class PlayerEatMass : MonoBehaviour
                 <= transform.localScale.x / 2
             ) {
                 foodBlob.SetEaten(true);
+
+                // Trigger sound
+                soundEffectsPlayer.PlayFood();
+
+                // For quick local change
+                if (playerMovement.ChangesOccurLocally) {
+
+                    int newSize = playerMovement.blob.size + Blob.DefaultFoodSize;
+                    playersManager.UpdateSelfSize(newSize);
+                    playerScore.UpdateLeaderboards(playersManager.selfSocketId, newSize);
+                    
+                    massSpawner.RemoveFoodBlobById(foodBlob.id);
+                }
+                
                 server.SendWsMessage(new ClientMessage(ClientMsgType.PlayerEatenFood, foodBlob.id));
             }
         }

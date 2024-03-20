@@ -29,6 +29,8 @@ public class PlayerMovement : MonoBehaviour
 
     public bool Died = false;
 
+    public bool ChangesOccurLocally;
+
     #region Instance
     public static PlayerMovement instance { get; private set; } // Singleton instance
 
@@ -67,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
         server = ServerConnect.instance;
         actions = GetComponent<Actions>();
         massSpawner = MassSpawner.ins;
+        ChangesOccurLocally = true;
     }
 
     public void DestroySelf() {

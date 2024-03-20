@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import { WebSocketServer, WebSocket, RawData } from "ws";
 import { GameState } from "../classes/Game.js";
 import { ClientMsgType, ServerMsgType } from "../classes/MessageType.js";
-import { DeletePlayersByGameId, connectToDB } from "../utils/db.js";
+import { connectToDB, deletePlayersByGameId } from "../utils/db.js";
 
 import * as uuid from "uuid";
 
@@ -18,7 +18,7 @@ const handleWsMessage = (
   game: GameState,
   socket: WebSocket,
   socketId: string,
-  msg: RawData,
+  msg: RawData
 ) => {
   try {
     const msgJson = JSON.parse(msg.toString("utf8"));
@@ -77,10 +77,10 @@ const main = async () => {
   const ws = new WebSocketServer({ port: PORT });
 
   let gameId = 1;
-  await DeletePlayersByGameId(gameId);
+  await deletePlayersByGameId(gameId);
   const game = new GameState(gameId, ws);
   game.GenerateFood();
-  simulate(game);
+  // simulate(game);
 
   ws.on("listening", () => {
     console.log(`listening to ws connections on port ${PORT}`);
