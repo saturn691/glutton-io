@@ -51,8 +51,7 @@ export class PlayerUtils {
     let foodManager: FoodManager = gameState.foodManager;
     let foodBlob = foodManager.GetFoodBlobById(blobId);
 
-    // 3. Verify if player really ate food (TODO LATER)
-
+    // 3. Verify if player really ate food 
     if (!gameState.players[socketId].AteBlob(foodBlob)) {
       return;
     }

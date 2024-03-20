@@ -80,7 +80,7 @@ const main = async () => {
   await deletePlayersByGameId(gameId);
   const game = new GameState(gameId, ws);
   game.GenerateFood();
-  simulate(game);
+  // simulate(game);
 
   ws.on("listening", () => {
     console.log(`listening to ws connections on port ${PORT}`);

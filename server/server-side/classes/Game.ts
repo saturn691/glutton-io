@@ -36,7 +36,7 @@ export class GameState {
 
     this.id = id;
     this.players = {};
-    this.mapSize = { x: 7.5, y: 7.5 };
+    this.mapSize = { x: 30, y: 20 };
     this.foodManager = new FoodManager(1, 100, this.mapSize); // Default mass size
     this.ws = websocketConn;
     this.numPlayers = 0;
@@ -58,7 +58,6 @@ export class GameState {
     }
 
     let top5Players = await getTopNPlayersBySize(this.id, 5);
-    // console.log("Top 5 players retrieved from MongoDB:", top5Players);
 
     socket.send(
       JSON.stringify({
@@ -94,7 +93,6 @@ export class GameState {
     let randomColor = Math.floor(
       Math.random() * (0xffffff - 0xaaaaaa) + 0xaaaaaa
     );
-    console.log(randomColor);
 
     let newPlayer = new Player(
       randomColor,
@@ -192,7 +190,7 @@ export class GameState {
         type: ServerMsgType.FoodAdded,
         data: foodBlob,
       });
-    }, 1000);
+    }, 750);
   }
 
   /**

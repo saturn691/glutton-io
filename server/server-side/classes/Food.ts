@@ -48,8 +48,8 @@ export class FoodManager {
     if (this.foodBlobs.size >= this.maxFood) return;
 
     // Uniform distribution of food across the map
-    let x = Math.floor(Math.random() * this.mapSize.x);
-    let y = Math.floor(Math.random() * this.mapSize.y);
+    let x = Math.floor(Math.random() * this.mapSize.x) - this.mapSize.x / 2;
+    let y = Math.floor(Math.random() * this.mapSize.y) - this.mapSize.y / 2;
 
     let newFoodBlob = new Blob(uuid.v4(), { x, y }, this.defaultMassSize);
     this.foodBlobs.set(newFoodBlob.id, newFoodBlob);
