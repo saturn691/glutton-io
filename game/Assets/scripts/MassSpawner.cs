@@ -63,6 +63,13 @@ public class MassSpawner : MonoBehaviour
         );
         // FoodBlobs.Add(foodBlob);
         FoodDict.Add(foodBlob.id, foodBlob);
+
+        // Randomise the color, but make it bright enough
+        foodBlob.gameObject.GetComponent<SpriteRenderer>().color = new Color(
+            Random.Range(0.5f, 1f), 
+            Random.Range(0.5f, 1f), 
+            Random.Range(0.5f, 1f)
+        );
     }
 
     public void RemoveFoodBlobById(string foodBlobId) {
