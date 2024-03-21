@@ -20,6 +20,8 @@ export PATH=$PATH:$QUARTUS_ROOTDIR/../nios2eds/bin/gnu/H-x86_64-mingw32/bin/
 
 cd fpga/software
 ./generate_app.sh
+
+# You can run this command straight away if you don't need to change main.c
 nios2-download -g app/main.elf
 ```
 

@@ -47,3 +47,5 @@ sysinfo.txt
 *.vscode/
 *.vs/
 .vsconfig
+
+*.rar

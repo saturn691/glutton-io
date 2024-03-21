@@ -105,7 +105,14 @@ public class PlayerEatMass : MonoBehaviour
                 foodBlob.SetEaten(true);
 
                 // Trigger sound
-                soundEffectsPlayer.PlayFood();
+                if (soundEffectsPlayer == null)
+                {
+                    soundEffectsPlayer = SoundEffectsPlayer.instance;
+                }
+                else
+                {
+                    soundEffectsPlayer.PlayFood();
+                }
 
                 // For quick local change
                 if (playerMovement.ChangesOccurLocally) {
