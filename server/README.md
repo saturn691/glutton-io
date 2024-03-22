@@ -5,6 +5,7 @@
 ```bash
 # switch to server directory
 cd server
+cd server-side
 
 # install necessary dependencies
 npm i
